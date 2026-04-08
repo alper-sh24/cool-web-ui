@@ -1,0 +1,398 @@
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">BIO-LINK // NEURAL INTERFACE v4.0.2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700&amp;display=swap" rel="stylesheet" vid="5">
+    <style vid="6">
+        :root {
+            --bg-color: #0a0a08;
+            --text-color: #ff5e00; 
+            --secondary-color: #666660;
+            --accent-glow: #ffd600;
+            --incident-color: #ff003c;
+            --warning-color: #ffd600;
+            --operational-color: #00ff66;
+            --hairline: rgba(255, 94, 0, 0.15);
+            --font-primary: 'Barlow Condensed', sans-serif;
+            --font-mono: 'SF Mono', 'Fira Code', 'Menlo', 'Monaco', 'Courier New', monospace;
+            --pad: 32px;
+            --crt-opacity: 0.12;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: crosshair; 
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-primary);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            position: relative;
+        }
+
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, var(--crt-opacity)), rgba(0, 255, 0, 0), rgba(0, 0, 255, var(--crt-opacity)));
+            z-index: 10000;
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+        }
+
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: radial-gradient(circle, transparent 20%, black 180%);
+            z-index: 10001;
+            pointer-events: none;
+        }
+
+        .corner-index {
+            position: fixed;
+            font-size: 0.75rem;
+            z-index: 1000;
+            padding: 4px 10px;
+            background: rgba(255, 94, 0, 0.05);
+            border: 1px solid var(--hairline);
+            color: var(--secondary-color);
+            font-family: var(--font-mono);
+        }
+
+        .tl { top: var(--pad); left: var(--pad); }
+        .tr { top: var(--pad); right: var(--pad); }
+        .bl { bottom: var(--pad); left: var(--pad); }
+        .br { bottom: var(--pad); right: var(--pad); }
+
+        #main-display {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            grid-template-rows: 1fr 300px;
+            height: 100vh;
+            width: 100vw;
+            border: 1px solid var(--hairline);
+            margin: 0;
+        }
+
+        .waveform-container {
+            border-right: 1px solid var(--hairline);
+            border-bottom: 1px solid var(--hairline);
+            position: relative;
+            padding: var(--pad);
+            overflow: hidden;
+        }
+
+        .hero-text {
+            position: absolute;
+            top: 70px;
+            left: var(--pad);
+            z-index: 5;
+        }
+
+        .hero-headline {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--text-color);
+            text-shadow: 0 0 15px rgba(255, 94, 0, 0.4);
+            margin-bottom: 5px;
+            line-height: 0.9;
+        }
+
+        .hero-subline {
+            color: var(--secondary-color);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        #ascii-canvas {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80%;
+            opacity: 0.9;
+        }
+
+        .status-sidebar {
+            border-bottom: 1px solid var(--hairline);
+            padding: var(--pad);
+            padding-top: 70px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            background: rgba(255, 94, 0, 0.02);
+        }
+
+        .service-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 94, 0, 0.05);
+            padding-bottom: 6px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .badge {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 1px;
+            font-weight: bold;
+        }
+
+        .badge.operational { background: var(--operational-color); color: black; box-shadow: 0 0 10px rgba(0, 255, 102, 0.3); }
+        .badge.degraded { background: var(--warning-color); color: black; }
+        .badge.incident { background: var(--incident-color); color: white; animation: blink 0.8s infinite; }
+
+        @keyframes blink {
+            50% { opacity: 0.3; }
+        }
+
+        .terminal-logs {
+            border-right: 1px solid var(--hairline);
+            padding: var(--pad);
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .log-entry {
+            display: flex;
+            gap: 20px;
+        }
+
+        .timestamp { color: var(--secondary-color); min-width: 90px; }
+
+        .bio-data {
+            padding: var(--pad);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-box {
+            border: 1px solid var(--hairline);
+            padding: 12px;
+            background: rgba(255, 94, 0, 0.03);
+        }
+
+        .stat-label { font-size: 0.7rem; color: var(--secondary-color); font-family: var(--font-mono); }
+        .stat-value { font-size: 1.6rem; margin-top: 4px; font-weight: 700; color: var(--accent-glow); }
+
+        .flicker {
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 1; }
+            50% { opacity: 0.92; }
+            100% { opacity: 0.98; }
+        }
+
+        .scanline-move {
+            width: 100%;
+            height: 3px;
+            background: var(--accent-glow);
+            box-shadow: 0 0 15px var(--accent-glow);
+            position: absolute;
+            z-index: 100;
+            opacity: 0.4;
+            animation: scan 6s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: -5%; }
+            100% { top: 105%; }
+        }
+    </style>
+</head>
+<body vid="7">
+    <div class="scanline-move" vid="8"></div>
+    
+    <div class="corner-index tl" vid="9">LINK_ID: SZ-491</div>
+    <div class="corner-index tr" vid="10">AUTH: LVL_07</div>
+    <div class="corner-index bl" vid="11">LOCAL_HOST: TBILISI_SUB</div>
+    <div class="corner-index br" vid="12">CORE: K01_V4</div>
+
+    <main id="main-display" vid="13">
+        <section class="waveform-container" vid="14">
+            <div class="hero-text" vid="15">
+                <div class="hero-headline flicker" vid="16">BIO-INTERFACE</div>
+                <div class="hero-subline" vid="17">SYNAPTIC DISPLACEMENT: 0.0042ms</div>
+            </div>
+            <canvas id="ascii-canvas" vid="18"></canvas>
+        </section>
+
+        <aside class="status-sidebar" vid="19">
+            <div style="font-size: 1rem; border-left: 3px solid var(--text-color); padding-left: 12px; margin-bottom: 25px; font-weight: 700;" vid="20">SYSTEM_RESOURCES</div>
+            <div class="service-row" vid="21"><span vid="22">Neural Link</span><span class="badge operational" vid="23">OPERATIONAL</span></div>
+            <div class="service-row" vid="24"><span vid="25">Optic Nerve</span><span class="badge operational" vid="26">OPERATIONAL</span></div>
+            <div class="service-row" vid="27"><span vid="28">Motor Cortex</span><span class="badge degraded" vid="29">DEGRADED</span></div>
+            <div class="service-row" vid="30"><span vid="31">Cardiac Sync</span><span class="badge operational" vid="32">OPERATIONAL</span></div>
+            <div class="service-row" vid="33"><span vid="34">Endocrine Loop</span><span class="badge incident" vid="35">INCIDENT</span></div>
+            <div class="service-row" vid="36"><span vid="37">Cognitive Filter</span><span class="badge operational" vid="38">OPERATIONAL</span></div>
+            
+            <div style="margin-top: auto; font-size: 0.7rem; color: var(--secondary-color); font-family: var(--font-mono); line-height: 1.4;" vid="39">
+                [ALERT] RECEPTOR DESENSITIZATION DETECTED IN SECTOR 7G. ADMINISTERING SYNTH-CALM.
+            </div>
+        </aside>
+
+        <section class="terminal-logs" id="terminal-logs" vid="40">
+            <div class="log-entry" vid="41"><span class="timestamp" vid="42">10:33:12</span> <span vid="43">SYSCALL: INITIALIZING NEURAL BUFFER... DONE</span></div>
+            <div class="log-entry" vid="44"><span class="timestamp" vid="45">10:33:14</span> <span vid="46">SYNC: HEARTBEAT STABILIZED @ 72BPM</span></div>
+            <div class="log-entry" vid="47"><span class="timestamp" vid="48">10:34:01</span> <span vid="49">WARN: LIKELIHOOD OF NOISE INTERFERENCE &gt; 12%</span></div>
+            <div class="log-entry" vid="50"><span class="timestamp" vid="51">10:34:45</span> <span vid="52">EVENT: PERCEPTUAL SHIFT DETECTED</span></div>
+            <div class="log-entry" vid="53"><span class="timestamp" vid="54">10:35:02</span> <span vid="55">DEBUG: DUMPING MEMORY ADDR 0x00FF...</span></div>
+        </section>
+
+        <section class="bio-data" vid="56">
+            <div class="stat-grid" vid="57">
+                <div class="stat-box" vid="58">
+                    <div class="stat-label" vid="59">HEART_RATE</div>
+                    <div class="stat-value" id="val-hr" vid="60">72 BPM</div>
+                </div>
+                <div class="stat-box" vid="61">
+                    <div class="stat-label" vid="62">O2_SAT</div>
+                    <div class="stat-value" vid="63">98.2%</div>
+                </div>
+                <div class="stat-box" vid="64">
+                    <div class="stat-label" vid="65">CORE_TEMP</div>
+                    <div class="stat-value" vid="66">36.8°C</div>
+                </div>
+                <div class="stat-box" vid="67">
+                    <div class="stat-label" vid="68">STRESS_IDX</div>
+                    <div class="stat-value" id="val-stress" vid="69">LOW</div>
+                </div>
+            </div>
+
+            <div style="text-align: right; font-size: 0.75rem; color: var(--secondary-color); font-family: var(--font-mono);" vid="70">
+                RENDER_LATENCY: <span id="render-ms" style="color:var(--text-color)" vid="71">0.0</span>ms<br vid="72">
+                CURSOR_TRACK: <span id="mouse-x" style="color:var(--text-color)" vid="73">0</span> / <span id="mouse-y" style="color:var(--text-color)" vid="74">0</span>
+            </div>
+        </section>
+    </main>
+
+    <script vid="75">
+        const canvas = document.getElementById('ascii-canvas');
+        const ctx = canvas.getContext('2d');
+        const renderMsEl = document.getElementById('render-ms');
+        const logContainer = document.getElementById('terminal-logs');
+
+        let width, height;
+        const charSize = 15; 
+        const densityChars = " .:-=+*#%@";
+
+        function resize() {
+            width = canvas.offsetWidth;
+            height = canvas.offsetHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        let time = 0;
+        let mouseX = 0, mouseY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            document.getElementById('mouse-x').textContent = e.clientX;
+            document.getElementById('mouse-y').textContent = e.clientY;
+        });
+
+        function render() {
+            const start = performance.now();
+            ctx.fillStyle = '#0a0a08';
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.font = `${charSize}px monospace`;
+            ctx.fillStyle = '#ffd600'; 
+            
+            const cols = Math.ceil(width / (charSize * 0.8));
+            const rows = Math.ceil(height / charSize);
+
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const posX = x * (charSize * 0.8);
+                    const posY = y * charSize;
+
+                    const baseWave = Math.sin(x * 0.12 + time * 1.5);
+                    const spike = Math.pow(Math.abs(Math.sin(x * 0.04 + time * 0.4)), 15) * 8;
+                    const combined = (baseWave + spike) * 0.25;
+                    
+                    const normalizedY = 1 - (posY / height);
+                    const threshold = 0.4 + combined;
+                    
+                    if (Math.abs(normalizedY - threshold) < 0.06) {
+                        const charIdx = Math.floor(Math.random() * densityChars.length);
+                        ctx.globalAlpha = 0.9;
+                        ctx.fillText(densityChars[charIdx], posX, posY);
+                    } else if (Math.abs(normalizedY - threshold) < 0.18) {
+                        ctx.globalAlpha = 0.2;
+                        ctx.fillText('.', posX, posY);
+                    }
+                }
+            }
+
+            time += 0.04;
+            
+            if (Math.random() > 0.98) {
+                document.getElementById('val-hr').textContent = (70 + Math.floor(Math.random()*10)) + " BPM";
+            }
+
+            const duration = performance.now() - start;
+            renderMsEl.textContent = duration.toFixed(1);
+            requestAnimationFrame(render);
+        }
+
+        setInterval(() => {
+            const log = document.createElement('div');
+            log.className = 'log-entry';
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+            const events = [
+                "DATA PACKET RECEIVED FROM SECTOR B",
+                "SYNAPTIC JITTER DETECTED",
+                "RE-CALIBRATING VISUAL OVERLAY",
+                "BUFFER PURGE: 1024KB CLEARED",
+                "IDLE PROCESS: THOUGHT_STREAM_ALPHA"
+            ];
+            log.innerHTML = `<span class="timestamp">${timeStr}</span> <span>${events[Math.floor(Math.random()*events.length)]}</span>`;
+            logContainer.prepend(log);
+            if(logContainer.children.length > 15) logContainer.lastElementChild.remove();
+        }, 3000);
+
+        render();
+    </script>
+</body></html>

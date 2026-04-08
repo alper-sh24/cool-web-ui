@@ -1,0 +1,790 @@
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">Fastener Search - Redesign</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17" vid="5"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web" vid="6"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" vid="7">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" vid="8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" vid="9">
+    <script vid="10">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'San Francisco', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+                    },
+                    colors: {
+                        apple: {
+                            bg: '#f5f5f7',
+                            surface: '#ffffff',
+                            textPrimary: '#1d1d1f',
+                            textSecondary: '#86868b',
+                            border: '#d2d2d7',
+                            blue: '#0071e3',
+                            blueHover: '#0077ED',
+                        }
+                    },
+                    boxShadow: {
+                        'apple-sm': '0 2px 8px rgba(0, 0, 0, 0.04)',
+                        'apple-md': '0 4px 16px rgba(0, 0, 0, 0.06)',
+                        'apple-lg': '0 8px 32px rgba(0, 0, 0, 0.08)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style vid="11">
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d2d2d7;
+            border-radius: 10px;
+            border: 2px solid #ffffff;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #86868b;
+        }
+        
+        
+        .ios-toggle {
+            appearance: none;
+            width: 44px;
+            height: 24px;
+            background: #e5e5ea;
+            border-radius: 24px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.3s ease;
+        }
+        .ios-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.2, 0.85, 0.32, 1.2);
+        }
+        .ios-toggle:checked {
+            background: #34c759; 
+        }
+        .ios-toggle:checked::after {
+            transform: translateX(20px);
+        }
+
+        
+        .apple-focus:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+        }
+
+        
+        .view-transition {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .view-hidden {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            visibility: hidden;
+            transform: translateY(10px);
+        }
+        .view-visible {
+            opacity: 1;
+            pointer-events: auto;
+            position: relative;
+            visibility: visible;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-apple-bg text-apple-textPrimary h-screen w-full flex flex-col overflow-hidden antialiased selection:bg-apple-blue selection:text-white" vid="12">
+
+    
+    <div id="demo-hint" class="bg-apple-blue text-white text-xs py-2 px-4 text-center font-medium shadow-sm z-50 transition-all duration-500" vid="13">
+        Tip: Type <span class="font-mono bg-white/20 px-1 rounded" vid="14">sdfsdfds</span> in the search bar to see the Empty State design.
+        <button onclick="document.getElementById('demo-hint').style.display='none'" class="ml-4 hover:text-white/80" vid="15"><i class="ph ph-x" vid="16"></i></button>
+    </div>
+
+    
+    <header class="h-16 flex-shrink-0 bg-white/80 backdrop-blur-xl border-b border-apple-border flex items-center px-4 md:px-6 z-40 relative" vid="17">
+        
+        <div class="w-48 flex-shrink-0 flex items-center" vid="18">
+            <div id="stats-display" class="text-[11px] font-medium text-apple-textSecondary tracking-wide" vid="19">
+                1.974 Ergebnisse <span class="text-apple-border mx-1" vid="20">|</span> 15 ms
+            </div>
+        </div>
+
+        
+        <div class="flex-1 max-w-2xl mx-auto flex items-center relative" vid="21">
+            <div class="absolute left-3.5 text-apple-textSecondary flex items-center pointer-events-none" vid="22">
+                <i class="ph ph-magnifying-glass text-lg" vid="23"></i>
+            </div>
+            <input type="text" id="search-input" class="w-full h-10 pl-10 pr-10 bg-apple-bg border border-transparent rounded-full text-[13px] text-apple-textPrimary placeholder:text-apple-textSecondary hover:bg-[#ebebeb] transition-colors apple-focus" placeholder="DIN-Nummer, Artikelname oder Beschreibung eingeben..." autocomplete="off" vid="24">
+            <button id="clear-search" class="absolute right-3.5 text-apple-textSecondary hover:text-apple-textPrimary hidden transition-colors" vid="25">
+                <i class="ph-fill ph-x-circle text-lg" vid="26"></i>
+            </button>
+        </div>
+
+        
+        <div class="w-auto flex-shrink-0 flex items-center justify-end gap-5 ml-4" vid="27">
+            
+            <label class="flex items-center gap-2 cursor-pointer group" vid="28">
+                <input type="checkbox" class="ios-toggle" checked="" vid="29">
+                <div class="flex flex-col" vid="30">
+                    <span class="text-[11px] font-semibold text-apple-textPrimary" vid="31">KI-Suche</span>
+                    <span class="text-[9px] text-apple-textSecondary mt-[-2px]" vid="32">Aktiv</span>
+                </div>
+            </label>
+
+            <div class="w-px h-6 bg-apple-border/60" vid="33"></div>
+
+            
+            <button class="text-apple-textSecondary hover:text-apple-textPrimary transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-apple-bg" vid="34">
+                <i class="ph ph-question text-xl" vid="35"></i>
+            </button>
+
+            
+            <div class="flex bg-apple-bg p-0.5 rounded-lg border border-apple-border/50" vid="36">
+                <button class="w-8 h-7 bg-white rounded-md shadow-[0_1px_3px_rgba(0,0,0,0.1)] text-apple-textPrimary flex items-center justify-center" vid="37">
+                    <i class="ph ph-squares-four text-lg" vid="38"></i>
+                </button>
+                <button class="w-8 h-7 text-apple-textSecondary hover:text-apple-textPrimary flex items-center justify-center rounded-md transition-colors" vid="39">
+                    <i class="ph ph-list text-lg" vid="40"></i>
+                </button>
+            </div>
+
+            <button class="text-apple-textSecondary hover:text-apple-textPrimary hover:bg-red-50 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full ml-1 border border-transparent hover:border-red-100" vid="41">
+                <i class="ph ph-x text-lg" vid="42"></i>
+            </button>
+        </div>
+    </header>
+
+    
+    <div class="flex flex-1 overflow-hidden relative" vid="43">
+        
+        
+        <aside id="sidebar" class="w-[280px] flex-shrink-0 bg-white border-r border-apple-border flex flex-col overflow-y-auto z-30 transition-transform duration-300" vid="44">
+            <div class="p-5 flex flex-col gap-6" vid="45">
+                
+                
+                <label class="flex items-center gap-3 p-3.5 bg-apple-bg/50 rounded-xl border border-apple-border/60 cursor-pointer hover:bg-apple-bg transition-colors group" vid="46">
+                    <div class="relative flex items-center justify-center w-5 h-5" vid="47">
+                        <input type="checkbox" class="peer appearance-none w-5 h-5 border border-apple-border rounded shadow-sm bg-white checked:bg-apple-blue checked:border-apple-blue transition-all cursor-pointer" vid="48">
+                        <i class="ph-bold ph-check absolute text-white opacity-0 peer-checked:opacity-100 pointer-events-none text-xs" vid="49"></i>
+                    </div>
+                    <span class="text-[13px] font-medium text-apple-textPrimary group-hover:text-black" vid="50">Nur lieferbare Artikel</span>
+                </label>
+
+                <div class="w-full h-px bg-apple-border/40" vid="51"></div>
+
+                
+                <div class="space-y-1" vid="52">
+                    
+                    <div class="group" vid="53">
+                        <button class="w-full flex items-center justify-between py-2 text-left" vid="54">
+                            <span class="text-[13px] font-semibold text-apple-textPrimary" vid="55">Kategorien</span>
+                            <i class="ph ph-caret-up text-apple-textSecondary text-xs" vid="56"></i>
+                        </button>
+                        <div class="pt-1 pb-4 space-y-0.5" vid="57">
+                            <a href="#" class="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md hover:bg-apple-bg text-[13px] text-apple-textPrimary transition-colors group/item" vid="58">
+                                <span class="truncate pr-3" vid="59">Halbrundkopf Pin-TX</span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="60">(171)</span>
+                            </a>
+                            <a href="#" class="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md hover:bg-apple-bg text-[13px] text-apple-textPrimary transition-colors group/item" vid="61">
+                                <span class="truncate pr-3" vid="62">Halbrundkopf Pin-Hexagon</span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="63">(156)</span>
+                            </a>
+                            <a href="#" class="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md hover:bg-apple-bg text-[13px] text-apple-textPrimary transition-colors group/item" vid="64">
+                                <span class="truncate pr-3" vid="65">Senkkopf Pin-TX</span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="66">(148)</span>
+                            </a>
+                            <a href="#" class="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md hover:bg-apple-bg text-[13px] text-apple-textPrimary transition-colors group/item" vid="67">
+                                <span class="truncate pr-3" vid="68">Senkkopf Pin-Hexagon</span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="69">(135)</span>
+                            </a>
+                            <a href="#" class="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md hover:bg-apple-bg text-[13px] text-apple-textPrimary transition-colors group/item" vid="70">
+                                <span class="truncate pr-3" vid="71">Senkkopf Zweiloch-Antrieb</span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="72">(129)</span>
+                            </a>
+                            <a href="#" class="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md hover:bg-apple-bg text-[13px] text-apple-textPrimary transition-colors group/item" vid="73">
+                                <span class="truncate pr-3" vid="74">Linsenkopf Zweilochantrieb</span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="75">(99)</span>
+                            </a>
+                            <a href="#" class="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md hover:bg-apple-bg text-[13px] text-apple-textPrimary transition-colors group/item" vid="76">
+                                <span class="truncate pr-3" vid="77">Halbrundkopf One-Way</span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="78">(94)</span>
+                            </a>
+                            <button class="text-[12px] font-medium text-apple-blue hover:text-apple-blueHover pt-2 pl-2 transition-colors" vid="79">Mehr anzeigen</button>
+                        </div>
+                    </div>
+
+                    <div class="w-full h-px bg-apple-border/40 my-2" vid="80"></div>
+
+                    
+                    <div class="group" vid="81">
+                        <button class="w-full flex items-center justify-between py-2 text-left" vid="82">
+                            <span class="text-[13px] font-semibold text-apple-textPrimary" vid="83">DIN/ISO</span>
+                            <i class="ph ph-caret-up text-apple-textSecondary text-xs" vid="84"></i>
+                        </button>
+                        <div class="pt-1 pb-2 space-y-1" vid="85">
+                            <label class="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md hover:bg-apple-bg cursor-pointer transition-colors" vid="86">
+                                <div class="flex items-center gap-2.5" vid="87">
+                                    <div class="relative flex items-center justify-center w-4 h-4" vid="88">
+                                        <input type="checkbox" class="peer appearance-none w-4 h-4 border border-apple-border rounded-sm bg-white checked:bg-apple-blue checked:border-apple-blue transition-all cursor-pointer" vid="89">
+                                        <i class="ph-bold ph-check absolute text-white opacity-0 peer-checked:opacity-100 pointer-events-none text-[10px]" vid="90"></i>
+                                    </div>
+                                    <span class="text-[13px] text-apple-textPrimary" vid="91">ISO 7380</span>
+                                </div>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="92">(156)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="w-full h-px bg-apple-border/40 my-2" vid="93"></div>
+
+                    
+                    <div class="group" vid="94">
+                        <button class="w-full flex items-center justify-between py-2 text-left" vid="95">
+                            <span class="text-[13px] font-semibold text-apple-textPrimary" vid="96">Material</span>
+                            <i class="ph ph-caret-up text-apple-textSecondary text-xs" vid="97"></i>
+                        </button>
+                        <div class="pt-1 pb-2 space-y-1" vid="98">
+                            <label class="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md hover:bg-apple-bg cursor-pointer transition-colors" vid="99">
+                                <div class="flex items-center gap-2.5" vid="100">
+                                    <div class="relative flex items-center justify-center w-4 h-4" vid="101">
+                                        <input type="checkbox" class="peer appearance-none w-4 h-4 border border-apple-border rounded-sm bg-white checked:bg-apple-blue checked:border-apple-blue transition-all cursor-pointer" vid="102">
+                                        <i class="ph-bold ph-check absolute text-white opacity-0 peer-checked:opacity-100 pointer-events-none text-[10px]" vid="103"></i>
+                                    </div>
+                                    <span class="text-[13px] text-apple-textPrimary" vid="104">Edelstahl</span>
+                                </div>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="105">(1734)</span>
+                            </label>
+                            <label class="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md hover:bg-apple-bg cursor-pointer transition-colors" vid="106">
+                                <div class="flex items-center gap-2.5" vid="107">
+                                    <div class="relative flex items-center justify-center w-4 h-4" vid="108">
+                                        <input type="checkbox" class="peer appearance-none w-4 h-4 border border-apple-border rounded-sm bg-white checked:bg-apple-blue checked:border-apple-blue transition-all cursor-pointer" vid="109">
+                                        <i class="ph-bold ph-check absolute text-white opacity-0 peer-checked:opacity-100 pointer-events-none text-[10px]" vid="110"></i>
+                                    </div>
+                                    <span class="text-[13px] text-apple-textPrimary" vid="111">Stahl</span>
+                                </div>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="112">(113)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="w-full h-px bg-apple-border/40 my-2" vid="113"></div>
+
+                    
+                    <button class="w-full flex items-center justify-between py-2.5 text-left hover:bg-apple-bg -mx-2 px-2 rounded-md transition-colors" vid="114">
+                        <span class="text-[13px] font-medium text-apple-textPrimary" vid="115">Oberfläche</span>
+                        <i class="ph ph-caret-down text-apple-textSecondary text-xs" vid="116"></i>
+                    </button>
+                    <button class="w-full flex items-center justify-between py-2.5 text-left hover:bg-apple-bg -mx-2 px-2 rounded-md transition-colors" vid="117">
+                        <span class="text-[13px] font-medium text-apple-textPrimary" vid="118">Güteklasse</span>
+                        <i class="ph ph-caret-down text-apple-textSecondary text-xs" vid="119"></i>
+                    </button>
+                    <button class="w-full flex items-center justify-between py-2.5 text-left hover:bg-apple-bg -mx-2 px-2 rounded-md transition-colors bg-apple-bg/50" vid="120">
+                        <span class="text-[13px] font-medium text-apple-textPrimary" vid="121">Kopfform</span>
+                        <i class="ph ph-caret-down text-apple-textSecondary text-xs" vid="122"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        
+        <main class="flex-1 bg-apple-bg overflow-y-auto relative w-full h-full" vid="123">
+            
+            
+            
+            
+            <div id="view-results" class="view-transition view-visible w-full min-h-full p-8 pb-20" vid="124">
+                
+                
+                <div class="max-w-4xl mx-auto flex flex-col items-center justify-center text-center mb-10 pt-4" vid="125">
+                    <h1 class="text-[22px] font-semibold text-apple-textPrimary flex items-center gap-2 tracking-tight" vid="126">
+                        <i class="ph ph-magnifying-glass text-apple-textSecondary" vid="127"></i> Wonach suchen Sie?
+                    </h1>
+                    <p class="text-[14px] text-apple-textSecondary mt-2" vid="128">
+                        Geben Sie eine DIN/ISO-Nummer, einen Artikelnamen oder eine Beschreibung ein<br vid="129">
+                        <span class="text-[12px] opacity-80 mt-1 inline-block" vid="130">z. B. <span class="font-medium text-apple-textPrimary" vid="131">DIN 7981, Blechschraube</span> oder <span class="font-medium text-apple-textPrimary" vid="132">M8 Edelstahl</span></span>
+                    </p>
+
+                    
+                    <div class="flex items-center gap-3 mt-6" vid="133">
+                        <span class="text-[10px] font-bold text-apple-textSecondary uppercase tracking-widest flex items-center gap-1.5 mr-1" vid="134">
+                            <i class="ph-fill ph-fire text-orange-400 text-sm" vid="135"></i> Beliebte Suchen
+                        </span>
+                        <button class="px-3.5 py-1.5 bg-white border border-apple-border/60 hover:border-apple-border hover:shadow-apple-sm text-apple-textPrimary rounded-full text-[12px] font-medium transition-all flex items-center gap-1.5" vid="136">
+                            <i class="ph ph-magnifying-glass text-apple-textSecondary" vid="137"></i> 1/4 pin hexagon
+                        </button>
+                        <button class="px-3.5 py-1.5 bg-white border border-apple-border/60 hover:border-apple-border hover:shadow-apple-sm text-apple-textPrimary rounded-full text-[12px] font-medium transition-all flex items-center gap-1.5" vid="138">
+                            <i class="ph ph-magnifying-glass text-apple-textSecondary" vid="139"></i> metrische schraube resis-tx
+                        </button>
+                    </div>
+                </div>
+
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5" vid="140">
+                    
+                    
+                    <div class="group bg-white rounded-2xl border border-apple-border/50 overflow-hidden shadow-apple-sm hover:shadow-apple-md hover:border-apple-border transition-all duration-300 flex flex-col cursor-pointer relative top-0 hover:-top-1" vid="141">
+                        
+                        <div class="aspect-square bg-[#fbfbfd] relative flex items-center justify-center p-6 border-b border-apple-border/30" vid="142">
+                            
+                            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-[10px] font-mono font-semibold px-2 py-1 rounded shadow-sm text-apple-textSecondary border border-apple-border/50 z-10" vid="143">
+                                #1 tm: 100 (f:4 t:0)
+                            </div>
+                            
+                            <div class="w-full h-full relative flex flex-col items-center justify-center group-hover:scale-105 transition-transform duration-500" vid="144">
+                                <h4 class="text-lg font-bold text-gray-800 text-center leading-tight" vid="145">5 - Stern<br vid="146">Sicherheitsschraube</h4>
+                                <div class="mt-4 flex gap-2 items-end" vid="147">
+                                    <div class="w-8 h-12 bg-gray-400 rounded-t-full rounded-b-sm bg-gradient-to-b from-gray-300 to-gray-500 shadow-inner" vid="148"></div>
+                                    <div class="w-10 h-16 bg-gray-400 rounded-t-full rounded-b-sm bg-gradient-to-b from-gray-300 to-gray-500 shadow-inner" vid="149"></div>
+                                    <div class="w-8 h-12 bg-gray-400 rounded-t-full rounded-b-sm bg-gradient-to-b from-gray-300 to-gray-500 shadow-inner" vid="150"></div>
+                                </div>
+                                <div class="mt-4 text-center" vid="151">
+                                    <span class="text-xl font-bold block" vid="152">M6</span>
+                                    <span class="text-sm font-medium" vid="153">Edelstahl A2</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 flex flex-col flex-1 bg-white" vid="154">
+                            <h3 class="font-medium text-[13px] leading-snug text-apple-textPrimary mb-1.5 line-clamp-2" vid="155">Sicherheitsschrauben 5-Lobe - M6x16 - Halbrundkopf - 5-Stern - A2 - 100 Stück</h3>
+                            <p class="text-[11px] text-apple-textSecondary font-mono bg-apple-bg px-1.5 py-0.5 rounded self-start mb-2" vid="156">S-RK5L-M-6x16/100</p>
+                            <p class="text-[11px] text-apple-textSecondary italic mb-2" vid="157">Schraubenhandel Machholz</p>
+                            <div class="flex items-center gap-1.5 mt-auto pt-3" vid="158">
+                                <span class="w-2 h-2 rounded-full bg-gray-300 shadow-inner" vid="159"></span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="160">Edelstahl</span>
+                            </div>
+                            <div class="mt-2 font-semibold text-lg tracking-tight text-apple-textPrimary" vid="161">54,88 €</div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="group bg-white rounded-2xl border border-apple-border/50 overflow-hidden shadow-apple-sm hover:shadow-apple-md hover:border-apple-border transition-all duration-300 flex flex-col cursor-pointer relative top-0 hover:-top-1" vid="162">
+                        <div class="aspect-square bg-[#fbfbfd] relative flex items-center justify-center p-6 border-b border-apple-border/30" vid="163">
+                            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-[10px] font-mono font-semibold px-2 py-1 rounded shadow-sm text-apple-textSecondary border border-apple-border/50 z-10" vid="164">
+                                #2 tm: 100 (f:4 t:0)
+                            </div>
+                            <div class="w-full h-full relative flex items-center justify-center group-hover:scale-105 transition-transform duration-500" vid="165">
+                                <div class="flex gap-4 items-center" vid="166">
+                                     <div class="w-20 h-6 bg-gradient-to-r from-gray-600 to-gray-400 rounded-sm transform rotate-12 shadow-md" vid="167"></div>
+                                     <div class="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full shadow-md flex items-center justify-center" vid="168">
+                                         <div class="w-3 h-3 bg-gray-800 rounded-sm transform rotate-45" vid="169"></div>
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1 bg-white" vid="170">
+                            <h3 class="font-medium text-[13px] leading-snug text-apple-textPrimary mb-1.5 line-clamp-2" vid="171">5-Stern Bits ST / Abmessung: 2 // 1 Stück</h3>
+                            <p class="text-[11px] text-apple-textSecondary font-mono bg-apple-bg px-1.5 py-0.5 rounded self-start mb-2" vid="172">S-BIT5L-2/1</p>
+                            <p class="text-[11px] text-apple-textSecondary italic mb-2" vid="173">Schraubenhandel Machholz</p>
+                            <div class="flex items-center gap-1.5 mt-auto pt-3" vid="174">
+                                <span class="w-2 h-2 rounded-full bg-gray-700 shadow-inner" vid="175"></span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="176">Stahl</span>
+                            </div>
+                            <div class="mt-2 font-semibold text-lg tracking-tight text-apple-textPrimary" vid="177">4,30 €</div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="group bg-white rounded-2xl border border-apple-border/50 overflow-hidden shadow-apple-sm hover:shadow-apple-md hover:border-apple-border transition-all duration-300 flex flex-col cursor-pointer relative top-0 hover:-top-1" vid="178">
+                        <div class="aspect-square bg-[#fbfbfd] relative flex items-center justify-center p-6 border-b border-apple-border/30" vid="179">
+                            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-[10px] font-mono font-semibold px-2 py-1 rounded shadow-sm text-apple-textSecondary border border-apple-border/50 z-10" vid="180">
+                                #3 tm: 100 (f:4 t:0)
+                            </div>
+                            <div class="w-full h-full relative flex flex-col items-center justify-center group-hover:scale-105 transition-transform duration-500" vid="181">
+                                <h4 class="text-lg font-bold text-gray-800 text-center leading-tight mb-4" vid="182">Innensechsrund + PIN</h4>
+                                <div class="w-32 h-8 bg-gradient-to-r from-gray-300 to-gray-500 rounded-full transform -rotate-12 shadow-md relative" vid="183">
+                                    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 bg-gradient-to-br from-gray-300 to-gray-500 rounded-full shadow-lg border-2 border-gray-400 flex items-center justify-center" vid="184">
+                                        <div class="w-4 h-4 text-gray-700" vid="185"><i class="ph-fill ph-star" vid="186"></i></div>
+                                    </div>
+                                </div>
+                                <div class="mt-6 text-center" vid="187">
+                                    <span class="text-xl font-bold block" vid="188">M6</span>
+                                    <span class="text-sm font-medium" vid="189">Edelstahl A2</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1 bg-white" vid="190">
+                            <h3 class="font-medium text-[13px] leading-snug text-apple-textPrimary mb-1.5 line-clamp-2" vid="191">Metrische Sicherheitsschraube Pin-Torx - M6x16 - Flachrundkopf - Resis-Tx - A2 - 10 Stück</h3>
+                            <p class="text-[11px] text-apple-textSecondary font-mono bg-apple-bg px-1.5 py-0.5 rounded self-start mb-2" vid="192">S-RKPT-M-6x16/10</p>
+                            <p class="text-[11px] text-apple-textSecondary italic mb-2" vid="193">Schraubenhandel Machholz</p>
+                            <div class="flex items-center gap-1.5 mt-auto pt-3" vid="194">
+                                <span class="w-2 h-2 rounded-full bg-gray-300 shadow-inner" vid="195"></span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="196">Edelstahl</span>
+                            </div>
+                            <div class="mt-2 font-semibold text-lg tracking-tight text-apple-textPrimary" vid="197">1,24 €</div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="group bg-white rounded-2xl border border-apple-border/50 overflow-hidden shadow-apple-sm hover:shadow-apple-md hover:border-apple-border transition-all duration-300 flex flex-col cursor-pointer relative top-0 hover:-top-1" vid="198">
+                        <div class="aspect-square bg-[#fbfbfd] relative flex items-center justify-center p-6 border-b border-apple-border/30" vid="199">
+                            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-[10px] font-mono font-semibold px-2 py-1 rounded shadow-sm text-apple-textSecondary border border-apple-border/50 z-10" vid="200">
+                                #4 tm: 100 (f:4 t:0)
+                            </div>
+                            <div class="w-full h-full relative flex items-center justify-center group-hover:scale-105 transition-transform duration-500" vid="201">
+                                <div class="flex gap-4 items-center" vid="202">
+                                     <div class="w-20 h-6 bg-gradient-to-r from-gray-600 to-gray-400 rounded-sm transform rotate-12 shadow-md" vid="203"></div>
+                                     <div class="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full shadow-md flex items-center justify-center" vid="204">
+                                         <div class="w-3 h-3 bg-gray-800 rounded-sm transform rotate-45" vid="205"></div>
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1 bg-white" vid="206">
+                            <h3 class="font-medium text-[13px] leading-snug text-apple-textPrimary mb-1.5 line-clamp-2" vid="207">5-Stern Bits ST / Abmessung: 1 // 1 Stück</h3>
+                            <p class="text-[11px] text-apple-textSecondary font-mono bg-apple-bg px-1.5 py-0.5 rounded self-start mb-2" vid="208">S-BIT5L-1/1</p>
+                            <p class="text-[11px] text-apple-textSecondary italic mb-2" vid="209">Schraubenhandel Machholz</p>
+                            <div class="flex items-center gap-1.5 mt-auto pt-3" vid="210">
+                                <span class="w-2 h-2 rounded-full bg-gray-700 shadow-inner" vid="211"></span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="212">Stahl</span>
+                            </div>
+                            <div class="mt-2 font-semibold text-lg tracking-tight text-apple-textPrimary" vid="213">4,30 €</div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="group bg-white rounded-2xl border border-apple-border/50 overflow-hidden shadow-apple-sm hover:shadow-apple-md hover:border-apple-border transition-all duration-300 flex flex-col cursor-pointer relative top-0 hover:-top-1" vid="214">
+                        <div class="aspect-square bg-[#fbfbfd] relative flex items-center justify-center p-6 border-b border-apple-border/30" vid="215">
+                            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-[10px] font-mono font-semibold px-2 py-1 rounded shadow-sm text-apple-textSecondary border border-apple-border/50 z-10" vid="216">
+                                #5 tm: 100 (f:4 t:0)
+                            </div>
+                            <div class="w-full h-full relative flex items-center justify-center group-hover:scale-105 transition-transform duration-500 overflow-hidden" vid="217">
+                                <div class="w-40 h-10 bg-gradient-to-r from-gray-700 to-gray-500 rounded-sm transform -rotate-45 shadow-xl relative" vid="218">
+                                    <div class="absolute right-0 top-0 bottom-0 w-8 bg-gray-800 flex items-center justify-center" vid="219">
+                                        <div class="w-full h-4 bg-transparent border-t-2 border-b-2 border-gray-400" vid="220"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1 bg-white" vid="221">
+                            <h3 class="font-medium text-[13px] leading-snug text-apple-textPrimary mb-1.5 line-clamp-2" vid="222">Bit Zweiloch-Antrieb ST / Abmessung: SP10 // 1 Stück</h3>
+                            <p class="text-[11px] text-apple-textSecondary font-mono bg-apple-bg px-1.5 py-0.5 rounded self-start mb-2" vid="223">S-BITSP-10/1</p>
+                            <p class="text-[11px] text-apple-textSecondary italic mb-2" vid="224">Schraubenhandel Machholz</p>
+                            <div class="flex items-center gap-1.5 mt-auto pt-3" vid="225">
+                                <span class="w-2 h-2 rounded-full bg-gray-700 shadow-inner" vid="226"></span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="227">Stahl</span>
+                            </div>
+                            <div class="mt-2 font-semibold text-lg tracking-tight text-apple-textPrimary" vid="228">5,22 €</div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="group bg-white rounded-2xl border border-apple-border/50 overflow-hidden shadow-apple-sm hover:shadow-apple-md hover:border-apple-border transition-all duration-300 flex flex-col cursor-pointer relative top-0 hover:-top-1" vid="229">
+                        <div class="aspect-square bg-[#fbfbfd] relative flex items-center justify-center p-6 border-b border-apple-border/30" vid="230">
+                            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-[10px] font-mono font-semibold px-2 py-1 rounded shadow-sm text-apple-textSecondary border border-apple-border/50 z-10" vid="231">
+                                #6 tm: 100 (f:4 t:0)
+                            </div>
+                            <div class="absolute top-2 left-20 w-12 h-12 text-orange-400 opacity-20 z-0" vid="232">
+                                <i class="ph-fill ph-lock-key text-5xl" vid="233"></i>
+                            </div>
+                            <div class="w-full h-full relative flex items-center justify-center group-hover:scale-105 transition-transform duration-500 z-10" vid="234">
+                                <div class="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-400 rounded-full shadow-2xl border border-gray-300 flex items-center justify-center transform -rotate-12" vid="235">
+                                     <div class="flex gap-3" vid="236">
+                                         <div class="w-4 h-4 bg-gray-800 rounded-full shadow-inner" vid="237"></div>
+                                         <div class="w-4 h-4 bg-gray-800 rounded-full shadow-inner" vid="238"></div>
+                                     </div>
+                                </div>
+                                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 w-8 h-20 bg-gradient-to-b from-gray-300 to-gray-500 rounded-b-full shadow-md -z-10 transform -rotate-12 origin-top" vid="239"></div>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1 bg-white" vid="240">
+                            <h3 class="font-medium text-[13px] leading-snug text-apple-textPrimary mb-1.5 line-clamp-2" vid="241">Sicherheitsschraube Zweiloch M5x20 Edelstahl A2 - 50 Stück</h3>
+                            <p class="text-[11px] text-apple-textSecondary font-mono bg-apple-bg px-1.5 py-0.5 rounded self-start mb-2" vid="242">S-ZL-M5x20/50</p>
+                            <p class="text-[11px] text-apple-textSecondary italic mb-2" vid="243">Schraubenhandel Machholz</p>
+                            <div class="flex items-center gap-1.5 mt-auto pt-3" vid="244">
+                                <span class="w-2 h-2 rounded-full bg-gray-300 shadow-inner" vid="245"></span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="246">Edelstahl</span>
+                            </div>
+                            <div class="mt-2 font-semibold text-lg tracking-tight text-apple-textPrimary" vid="247">32,15 €</div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="group bg-white rounded-2xl border border-apple-border/50 overflow-hidden shadow-apple-sm hover:shadow-apple-md hover:border-apple-border transition-all duration-300 flex flex-col cursor-pointer relative top-0 hover:-top-1" vid="248">
+                        <div class="aspect-square bg-[#fbfbfd] relative flex items-center justify-center p-6 border-b border-apple-border/30" vid="249">
+                            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-[10px] font-mono font-semibold px-2 py-1 rounded shadow-sm text-apple-textSecondary border border-apple-border/50 z-10" vid="250">
+                                #7 tm: 100 (f:4 t:0)
+                            </div>
+                            <div class="w-full h-full relative flex items-center justify-center group-hover:scale-105 transition-transform duration-500 overflow-hidden" vid="251">
+                                <div class="w-40 h-10 bg-gradient-to-r from-gray-700 to-gray-500 rounded-sm transform -rotate-45 shadow-xl relative" vid="252">
+                                    <div class="absolute right-0 top-0 bottom-0 w-8 bg-gray-800 flex items-center justify-center" vid="253">
+                                        <div class="w-full h-4 bg-transparent border-t-2 border-b-2 border-gray-400" vid="254"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1 bg-white" vid="255">
+                            <h3 class="font-medium text-[13px] leading-snug text-apple-textPrimary mb-1.5 line-clamp-2" vid="256">Bit Zweiloch-Antrieb ST / Abmessung: SP8 // 1 Stück</h3>
+                            <p class="text-[11px] text-apple-textSecondary font-mono bg-apple-bg px-1.5 py-0.5 rounded self-start mb-2" vid="257">S-BITSP-8/1</p>
+                            <p class="text-[11px] text-apple-textSecondary italic mb-2" vid="258">Schraubenhandel Machholz</p>
+                            <div class="flex items-center gap-1.5 mt-auto pt-3" vid="259">
+                                <span class="w-2 h-2 rounded-full bg-gray-700 shadow-inner" vid="260"></span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="261">Stahl</span>
+                            </div>
+                            <div class="mt-2 font-semibold text-lg tracking-tight text-apple-textPrimary" vid="262">5,10 €</div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="group bg-white rounded-2xl border border-apple-border/50 overflow-hidden shadow-apple-sm hover:shadow-apple-md hover:border-apple-border transition-all duration-300 flex flex-col cursor-pointer relative top-0 hover:-top-1" vid="263">
+                        <div class="aspect-square bg-[#fbfbfd] relative flex items-center justify-center p-6 border-b border-apple-border/30" vid="264">
+                            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-[10px] font-mono font-semibold px-2 py-1 rounded shadow-sm text-apple-textSecondary border border-apple-border/50 z-10" vid="265">
+                                #8 tm: 100 (f:4 t:0)
+                            </div>
+                            <div class="w-full h-full relative flex items-center justify-center" vid="266">
+                                <i class="ph ph-camera text-6xl text-gray-300" vid="267"></i>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1 bg-white" vid="268">
+                            <h3 class="font-medium text-[13px] leading-snug text-apple-textPrimary mb-1.5 line-clamp-2" vid="269">Blechschraube One-Way M4x12 Edelstahl A2 - 100 Stück</h3>
+                            <p class="text-[11px] text-apple-textSecondary font-mono bg-apple-bg px-1.5 py-0.5 rounded self-start mb-2" vid="270">S-OW-M4x12/100</p>
+                            <p class="text-[11px] text-apple-textSecondary italic mb-2" vid="271">Schraubenhandel Machholz</p>
+                            <div class="flex items-center gap-1.5 mt-auto pt-3" vid="272">
+                                <span class="w-2 h-2 rounded-full bg-gray-300 shadow-inner" vid="273"></span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="274">Edelstahl</span>
+                            </div>
+                            <div class="mt-2 font-semibold text-lg tracking-tight text-apple-textPrimary" vid="275">18,50 €</div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="group bg-white rounded-2xl border border-apple-border/50 overflow-hidden shadow-apple-sm hover:shadow-apple-md hover:border-apple-border transition-all duration-300 flex flex-col cursor-pointer relative top-0 hover:-top-1" vid="276">
+                        <div class="aspect-square bg-[#fbfbfd] relative flex items-center justify-center p-6 border-b border-apple-border/30" vid="277">
+                            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-[10px] font-mono font-semibold px-2 py-1 rounded shadow-sm text-apple-textSecondary border border-apple-border/50 z-10" vid="278">
+                                #9 tm: 100 (f:4 t:0)
+                            </div>
+                            <div class="w-full h-full relative flex flex-col items-center justify-center group-hover:scale-105 transition-transform duration-500" vid="279">
+                                <h4 class="text-lg font-bold text-gray-800 text-center leading-tight mb-2" vid="280">Einweg - One-Way</h4>
+                                <div class="w-32 h-6 bg-gradient-to-r from-gray-200 to-gray-400 rounded-full transform rotate-12 shadow-md relative mt-4" vid="281">
+                                     <div class="absolute -left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-br from-gray-200 to-gray-400 rounded-full shadow-md border border-gray-300 flex items-center justify-center" vid="282">
+                                         <div class="w-6 h-1 bg-gray-500 transform rotate-45 rounded-full" vid="283"></div>
+                                     </div>
+                                     
+                                     <div class="absolute inset-0 flex flex-col justify-evenly pl-6 overflow-hidden opacity-30" vid="284">
+                                         <div class="w-full h-px bg-gray-800 transform -rotate-12" vid="285"></div>
+                                         <div class="w-full h-px bg-gray-800 transform -rotate-12" vid="286"></div>
+                                         <div class="w-full h-px bg-gray-800 transform -rotate-12" vid="287"></div>
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1 bg-white" vid="288">
+                            <h3 class="font-medium text-[13px] leading-snug text-apple-textPrimary mb-1.5 line-clamp-2" vid="289">Einweg - One-Way Schraube Halbrundkopf M5x25 A2 - 200 Stück</h3>
+                            <p class="text-[11px] text-apple-textSecondary font-mono bg-apple-bg px-1.5 py-0.5 rounded self-start mb-2" vid="290">S-OW-M5x25/200</p>
+                            <p class="text-[11px] text-apple-textSecondary italic mb-2" vid="291">Schraubenhandel Machholz</p>
+                            <div class="flex items-center gap-1.5 mt-auto pt-3" vid="292">
+                                <span class="w-2 h-2 rounded-full bg-gray-300 shadow-inner" vid="293"></span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="294">Edelstahl</span>
+                            </div>
+                            <div class="mt-2 font-semibold text-lg tracking-tight text-apple-textPrimary" vid="295">45,90 €</div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="group bg-white rounded-2xl border border-apple-border/50 overflow-hidden shadow-apple-sm hover:shadow-apple-md hover:border-apple-border transition-all duration-300 flex flex-col cursor-pointer relative top-0 hover:-top-1" vid="296">
+                        <div class="aspect-square bg-[#fbfbfd] relative flex items-center justify-center p-6 border-b border-apple-border/30" vid="297">
+                            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-[10px] font-mono font-semibold px-2 py-1 rounded shadow-sm text-apple-textSecondary border border-apple-border/50 z-10" vid="298">
+                                #10 tm: 100 (f:4 t:0)
+                            </div>
+                            <div class="absolute top-2 left-20 w-12 h-12 text-orange-400 opacity-20 z-0" vid="299">
+                                <span class="text-4xl font-bold" vid="300">3</span>
+                            </div>
+                            <div class="w-full h-full relative flex items-center justify-center group-hover:scale-105 transition-transform duration-500 z-10" vid="301">
+                                 <div class="w-32 h-6 bg-gradient-to-r from-gray-500 to-gray-700 rounded-sm transform -rotate-45 shadow-xl relative" vid="302">
+                                    <div class="absolute -right-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-gray-600 rounded-full" vid="303"></div>
+                                    <div class="absolute left-0 top-0 bottom-0 w-8 bg-gray-800 flex items-center justify-center" vid="304">
+                                         <div class="w-4 h-4 bg-transparent border-t-2 border-b-2 border-gray-400" vid="305"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-col flex-1 bg-white" vid="306">
+                            <h3 class="font-medium text-[13px] leading-snug text-apple-textPrimary mb-1.5 line-clamp-2" vid="307">Bit Spezialantrieb Lang ST / Abmessung: 3 // 1 Stück</h3>
+                            <p class="text-[11px] text-apple-textSecondary font-mono bg-apple-bg px-1.5 py-0.5 rounded self-start mb-2" vid="308">S-BIT-SP3L</p>
+                            <p class="text-[11px] text-apple-textSecondary italic mb-2" vid="309">Schraubenhandel Machholz</p>
+                            <div class="flex items-center gap-1.5 mt-auto pt-3" vid="310">
+                                <span class="w-2 h-2 rounded-full bg-gray-700 shadow-inner" vid="311"></span>
+                                <span class="text-[11px] text-apple-textSecondary font-medium" vid="312">Stahl</span>
+                            </div>
+                            <div class="mt-2 font-semibold text-lg tracking-tight text-apple-textPrimary" vid="313">6,80 €</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            
+            
+            
+            <div id="view-no-results" class="view-transition view-hidden w-full h-full flex flex-col items-center justify-center p-8 bg-white absolute inset-0 z-20" vid="314">
+                <div class="max-w-xl w-full flex flex-col items-center animate-fade-in-up" vid="315">
+                    
+                    
+                    <div class="w-24 h-24 bg-apple-bg rounded-full flex items-center justify-center mb-6 shadow-inner relative" vid="316">
+                        <i class="ph ph-magnifying-glass text-4xl text-apple-textSecondary" vid="317"></i>
+                        <div class="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm border border-apple-border/50 text-red-500" vid="318">
+                            <i class="ph-bold ph-x text-sm" vid="319"></i>
+                        </div>
+                    </div>
+
+                    
+                    <h2 class="text-2xl font-semibold text-apple-textPrimary tracking-tight text-center mb-2" vid="320">
+                        Keine Ergebnisse für '<span id="empty-query-display" class="italic" vid="321">sdfsdfds</span>'
+                    </h2>
+                    <p class="text-apple-textSecondary text-center mb-10" vid="322">Wir konnten leider keine passenden Artikel finden.</p>
+
+                    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-6" vid="323">
+                        
+                        
+                        <div class="bg-apple-bg/50 border border-apple-border/60 rounded-2xl p-6" vid="324">
+                            <h3 class="text-[11px] font-bold text-apple-textSecondary uppercase tracking-widest flex items-center gap-2 mb-4" vid="325">
+                                <i class="ph-fill ph-lightbulb text-yellow-500 text-base" vid="326"></i> Tipps für Ihre Suche
+                            </h3>
+                            <ul class="space-y-3 text-[13px] text-apple-textPrimary" vid="327">
+                                <li class="flex items-start gap-2.5" vid="328">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-apple-textSecondary mt-1.5 shrink-0" vid="329"></div>
+                                    <span vid="330">Versuchen Sie weniger Suchbegriffe</span>
+                                </li>
+                                <li class="flex items-start gap-2.5" vid="331">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-apple-textSecondary mt-1.5 shrink-0" vid="332"></div>
+                                    <span vid="333">Versuchen Sie andere Worte oder Synonyme</span>
+                                </li>
+                                <li class="flex items-start gap-2.5" vid="334">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-apple-textSecondary mt-1.5 shrink-0" vid="335"></div>
+                                    <span vid="336">Prüfen Sie die Schreibweise</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="space-y-6" vid="337">
+                            
+                            <div class="bg-white border border-apple-border/60 rounded-2xl p-6 shadow-apple-sm" vid="338">
+                                <h3 class="text-[11px] font-bold text-apple-textSecondary uppercase tracking-widest flex items-center gap-2 mb-4" vid="339">
+                                    <i class="ph-fill ph-fire text-orange-400 text-base" vid="340"></i> Beliebte Suchen
+                                </h3>
+                                <div class="flex flex-wrap gap-2" vid="341">
+                                    <button class="px-3.5 py-1.5 bg-apple-bg hover:bg-[#e8e8ed] text-apple-textPrimary rounded-full text-[12px] font-medium transition-colors flex items-center gap-1.5 w-full justify-start" vid="342">
+                                        <i class="ph ph-magnifying-glass text-apple-textSecondary" vid="343"></i> 1/4 pin hexagon
+                                    </button>
+                                    <button class="px-3.5 py-1.5 bg-apple-bg hover:bg-[#e8e8ed] text-apple-textPrimary rounded-full text-[12px] font-medium transition-colors flex items-center gap-1.5 w-full justify-start" vid="344">
+                                        <i class="ph ph-magnifying-glass text-apple-textSecondary" vid="345"></i> metrische schraube resis-tx
+                                    </button>
+                                </div>
+                            </div>
+
+                            
+                            <div class="bg-[#f2f8ff] border border-[#d6e8ff] rounded-2xl p-5 hover:bg-[#e6f2ff] transition-colors cursor-pointer group flex flex-col items-center justify-center text-center" vid="346">
+                                <p class="text-[13px] font-medium text-apple-textPrimary mb-2" vid="347">Nicht gefunden? Wir helfen gerne!</p>
+                                <div class="flex items-center gap-2 text-apple-blue font-semibold text-lg group-hover:text-apple-blueHover transition-colors" vid="348">
+                                    <i class="ph-fill ph-phone-call" vid="349"></i> 0931 - 47 08 19 30
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    
+    <script vid="350">
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search-input');
+            const clearSearchBtn = document.getElementById('clear-search');
+            
+            const viewResults = document.getElementById('view-results');
+            const viewNoResults = document.getElementById('view-no-results');
+            const sidebar = document.getElementById('sidebar');
+            const statsDisplay = document.getElementById('stats-display');
+            
+            const emptyQueryDisplay = document.getElementById('empty-query-display');
+
+            
+            const showEmptyState = (query) => {
+                
+                emptyQueryDisplay.textContent = query;
+                
+                
+                viewResults.classList.remove('view-visible');
+                viewResults.classList.add('view-hidden');
+                
+                viewNoResults.classList.remove('view-hidden');
+                viewNoResults.classList.add('view-visible');
+                
+                
+                sidebar.style.transform = 'translateX(-100%)';
+                sidebar.style.width = '0';
+                sidebar.style.opacity = '0';
+                
+                statsDisplay.innerHTML = `0 Ergebnisse <span class="text-apple-border mx-1">|</span> 1 ms`;
+            };
+
+            
+            const showResultsState = () => {
+                
+                viewNoResults.classList.remove('view-visible');
+                viewNoResults.classList.add('view-hidden');
+                
+                viewResults.classList.remove('view-hidden');
+                viewResults.classList.add('view-visible');
+                
+                
+                sidebar.style.transform = 'translateX(0)';
+                sidebar.style.width = '280px';
+                sidebar.style.opacity = '1';
+                
+                statsDisplay.innerHTML = `1.974 Ergebnisse <span class="text-apple-border mx-1">|</span> 15 ms`;
+            };
+
+            
+            searchInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                
+                
+                if (val.length > 0) {
+                    clearSearchBtn.classList.remove('hidden');
+                } else {
+                    clearSearchBtn.classList.add('hidden');
+                    showResultsState(); 
+                    return;
+                }
+
+                
+                const lowerVal = val.toLowerCase().trim();
+                if (lowerVal === 'sdfsdfds' || lowerVal === 'empty' || lowerVal === 'none') {
+                    showEmptyState(val);
+                } else {
+                    showResultsState();
+                }
+            });
+
+            
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                clearSearchBtn.classList.add('hidden');
+                searchInput.focus();
+                showResultsState();
+            });
+        });
+    </script>
+
+</body></html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" vid="3">
+    <title vid="4">PLANET SYNTHESIS TERMINAL</title>
+    <style vid="5">
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Syncopate:wght@700&display=swap');
+
+        
+
+        :root {
+            --bg: #7EF07E;
+            --fg: #000000;
+            --border-w: 1px;
+            --grid-line: var(--border-w) solid var(--fg);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            border-left: var(--grid-line);
+            border-right: var(--grid-line);
+        }
+
+        
+        h1, h2, .display-font {
+            font-family: 'Syncopate', sans-serif;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .micro-text {
+            font-size: 0.55rem;
+            letter-spacing: 0.05em;
+            line-height: 1.2;
+        }
+
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: var(--grid-line);
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            letter-spacing: -0.05em;
+        }
+
+        .bracket-btn {
+            position: relative;
+            padding: 0.4rem 1rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: transparent;
+            color: var(--fg);
+            border: none;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        .bracket-btn::before,
+        .bracket-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 8px;
+            height: 100%;
+            border: var(--grid-line);
+        }
+
+        .bracket-btn::before {
+            left: 0;
+            border-right: none;
+        }
+
+        .bracket-btn::after {
+            right: 0;
+            border-left: none;
+        }
+
+        .bracket-btn:active {
+            background: var(--fg);
+            color: var(--bg);
+        }
+
+        
+        .stage-wrapper {
+            position: relative;
+            border-bottom: var(--grid-line);
+            background: var(--bg);
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+
+        .stage-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: var(--grid-line);
+        }
+
+        .stage-title h1 {
+            font-size: 1.8rem;
+            word-spacing: 100vw; 
+        }
+
+        .venn-icon {
+            width: 40px;
+            height: 20px;
+            position: relative;
+        }
+        .venn-circle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: var(--grid-line);
+            border-radius: 50%;
+        }
+        .venn-circle:nth-child(2) { right: 0; }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 45vh;
+            background: var(--fg);
+            overflow: hidden;
+            border-bottom: var(--grid-line);
+            background-image: 
+                linear-gradient(var(--bg) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg) 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: center;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            mix-blend-mode: screen; 
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: var(--bg);
+        }
+
+        .canvas-overlay .row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .crosshair {
+            position: absolute;
+            width: 20px; height: 20px;
+        }
+        .crosshair::before, .crosshair::after {
+            content: ''; position: absolute; background: var(--bg);
+        }
+        .crosshair::before { top: 9px; left: 0; width: 100%; height: 1px; }
+        .crosshair::after { left: 9px; top: 0; height: 100%; width: 1px; }
+
+        
+        .ticker {
+            padding: 0.5rem;
+            border-bottom: var(--grid-line);
+            font-size: 0.65rem;
+            white-space: nowrap;
+            overflow: hidden;
+            display: flex;
+            background: var(--bg);
+        }
+        .ticker-content {
+            animation: scroll 15s linear infinite;
+        }
+        @keyframes scroll {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--bg);
+            flex-grow: 1;
+        }
+
+        .control-panel {
+            position: relative;
+            border-bottom: var(--grid-line);
+            border-right: var(--grid-line);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: background 0s, color 0s;
+        }
+
+        
+        .control-panel:nth-child(even) { border-right: none; }
+        .control-panel:nth-last-child(-n+2):nth-child(odd),
+        .control-panel:nth-last-child(1):nth-child(even) {
+             
+             
+        }
+
+        .control-panel:active {
+            background: var(--fg);
+            color: var(--bg);
+        }
+
+        .control-panel.invert {
+             background: var(--fg);
+             color: var(--bg);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            height: 100%;
+        }
+
+        .panel-num {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.5rem;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            margin-right: 0.5rem;
+            line-height: 0.8;
+            letter-spacing: -0.1em;
+        }
+
+        .panel-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 100%;
+        }
+
+        .arrow-down {
+            width: 16px;
+            height: 24px;
+            margin-bottom: 0.5rem;
+        }
+
+        .arrow-down path {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.5;
+        }
+
+        .element-name {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+            word-wrap: break-word;
+        }
+
+        
+        .starburst {
+            position: absolute;
+            width: 40px; height: 40px;
+            z-index: 10;
+        }
+        .starburst svg { width: 100%; height: 100%; fill: currentColor; }
+        
+        .star-1 { bottom: -20px; left: -20px; color: var(--fg); }
+        .star-2 { top: -20px; right: -20px; color: var(--fg); }
+
+    </style>
+</head>
+<body vid="6">
+
+    <header vid="7">
+        <div class="logo display-font" vid="8">COLLIDER</div>
+        <button class="bracket-btn" id="sync-btn" vid="9">SYNC [0]</button>
+    </header>
+
+    <section class="stage-wrapper" vid="10">
+        <div class="starburst star-1" vid="11">
+            <svg viewBox="0 0 100 100" vid="12"><polygon points="50,0 61,39 100,50 61,61 50,100 39,61 0,50 39,39" vid="13"></polygon></svg>
+        </div>
+        
+        <div class="stage-header" vid="14">
+            <div class="stage-title" vid="15">
+                <h1 vid="16">PLANET SYNTHESIS</h1>
+            </div>
+            <div class="venn-icon" vid="17">
+                <div class="venn-circle" vid="18"></div>
+                <div class="venn-circle" vid="19"></div>
+            </div>
+        </div>
+
+        <div class="canvas-container" vid="20">
+            <canvas id="particle-collider" vid="21" width="398" height="389"></canvas>
+            <div class="canvas-overlay" vid="22">
+                <div class="row micro-text" vid="23">
+                    <span vid="24">SYS.ON</span>
+                    <span id="fps-counter" vid="25">60 FPS</span>
+                </div>
+                <div class="row micro-text" vid="26">
+                    <span vid="27">SECTOR_9</span>
+                    <span vid="28">MASS: <span id="mass-readout" vid="29">0</span>GT</span>
+                </div>
+            </div>
+            <div class="crosshair" style="top: 50%; left: 50%; transform: translate(-50%, -50%);" vid="30"></div>
+        </div>
+
+        <div class="ticker" vid="31">
+            <div class="ticker-content" id="ticker-text" vid="32">
+                &gt; AWAITING INJECTION PROTOCOL... &gt; SYSTEM CALIBRATED... &gt; READY FOR SYNTHESIS... 
+            </div>
+        </div>
+    </section>
+
+    <section class="controls-grid" vid="33">
+        <div class="control-panel" data-element="silica" data-color="#7EF07E" vid="34">
+            <div class="panel-header" vid="35">
+                <div class="panel-num" vid="36">01</div>
+                <div class="panel-info" vid="37">
+                    <svg class="arrow-down" viewBox="0 0 16 24" vid="38">
+                        <path d="M8 0v22M1 15l7 7 7-7" vid="39"></path>
+                    </svg>
+                    <div class="element-name" vid="40">SILICA</div>
+                    <div class="micro-text" vid="41">Crustal base formation. High structural integrity.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel invert" data-element="ferrum" data-color="#FFFFFF" vid="42">
+            <div class="panel-header" vid="43">
+                <div class="panel-num" vid="44">02</div>
+                <div class="panel-info" vid="45">
+                    <svg class="arrow-down" viewBox="0 0 16 24" vid="46">
+                        <path d="M8 0v22M1 15l7 7 7-7" vid="47"></path>
+                    </svg>
+                    <div class="element-name" vid="48">FERRUM</div>
+                    <div class="micro-text" vid="49">Core genesis. Generates magnetosphere.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel" data-element="h2o" data-color="#7EF07E" vid="50">
+            <div class="panel-header" vid="51">
+                <div class="panel-num" vid="52">03</div>
+                <div class="panel-info" vid="53">
+                    <svg class="arrow-down" viewBox="0 0 16 24" vid="54">
+                        <path d="M8 0v22M1 15l7 7 7-7" vid="55"></path>
+                    </svg>
+                    <div class="element-name" vid="56">H2O_ICE</div>
+                    <div class="micro-text" vid="57">Volatile addition. Surface liquid potential.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel" data-element="carbon" data-color="#7EF07E" vid="58">
+             <div class="starburst star-2" vid="59">
+                <svg viewBox="0 0 100 100" vid="60"><polygon points="50,0 61,39 100,50 61,61 50,100 39,61 0,50 39,39" vid="61"></polygon></svg>
+            </div>
+            <div class="panel-header" vid="62">
+                <div class="panel-num" vid="63">04</div>
+                <div class="panel-info" vid="64">
+                    <svg class="arrow-down" viewBox="0 0 16 24" vid="65">
+                        <path d="M8 0v22M1 15l7 7 7-7" vid="66"></path>
+                    </svg>
+                    <div class="element-name" vid="67">CARBON</div>
+                    <div class="micro-text" vid="68">Biological precursor. Atmospheric modifier.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script vid="69">
+        
+        let syncCount = 0;
+        let totalMass = 0;
+        const usernames = ['USER_89X', 'OP_ZETA', 'NULL_PTR', 'SYS_ADMIN', 'GUEST_44'];
+
+        
+        const ticker = document.getElementById('ticker-text');
+        const massReadout = document.getElementById('mass-readout');
+        const syncBtn = document.getElementById('sync-btn');
+        const fpsCounter = document.getElementById('fps-counter');
+
+        
+        document.querySelectorAll('.control-panel').forEach(panel => {
+            
+            
+            
+            panel.addEventListener('touchstart', function(e) {
+                e.preventDefault(); 
+                triggerInjection(this);
+            });
+            panel.addEventListener('mousedown', function() {
+                triggerInjection(this);
+            });
+        });
+
+        function triggerInjection(element) {
+            const elName = element.querySelector('.element-name').innerText;
+            const elColor = element.getAttribute('data-color');
+            
+            
+            element.classList.add('invert');
+            setTimeout(() => {
+                
+                if(element.querySelector('.panel-num').innerText !== '02') {
+                    element.classList.remove('invert');
+                }
+            }, 150);
+
+            
+            totalMass += Math.floor(Math.random() * 50) + 10;
+            massReadout.innerText = totalMass;
+            
+            syncCount++;
+            syncBtn.innerText = `SYNC [${syncCount}]`;
+
+            
+            const user = usernames[Math.floor(Math.random() * usernames.length)];
+            const newMsg = `> ${user} INJECTED ${elName} `;
+            ticker.innerText = newMsg + ticker.innerText;
+
+            
+            injectParticles(elColor);
+        }
+
+        
+        const canvas = document.getElementById('particle-collider');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles = [];
+        const maxParticles = 300;
+
+        function resize() {
+            width = canvas.parentElement.clientWidth;
+            height = canvas.parentElement.clientHeight;
+            
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = (Math.random() - 0.5) * 4;
+                this.color = color;
+                this.size = Math.random() > 0.8 ? 3 : 1.5; 
+                this.mass = this.size;
+            }
+
+            update() {
+                
+                const dx = (width / 2) - this.x;
+                const dy = (height / 2) - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist > 10) {
+                    this.vx += (dx / dist) * 0.05;
+                    this.vy += (dy / dist) * 0.05;
+                }
+
+                
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+
+                
+                this.x += this.vx;
+                this.y += this.vy;
+
+                
+                const margin = 20;
+                if(this.x < margin) this.vx *= -1;
+                if(this.x > width - margin) this.vx *= -1;
+                if(this.y < margin) this.vy *= -1;
+                if(this.y > height - margin) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+        }
+
+        function injectParticles(color) {
+            const injectionCount = 20;
+            
+            const edge = Math.floor(Math.random() * 4);
+            let startX, startY;
+            
+            for(let i=0; i<injectionCount; i++) {
+                if(edge === 0) { startX = Math.random() * width; startY = 0; }
+                else if(edge === 1) { startX = width; startY = Math.random() * height; }
+                else if(edge === 2) { startX = Math.random() * width; startY = height; }
+                else { startX = 0; startY = Math.random() * height; }
+
+                if (particles.length >= maxParticles) {
+                    particles.shift(); 
+                }
+                
+                const p = new Particle(startX, startY, color);
+                
+                p.vx = (width/2 - startX) * 0.01 + (Math.random() - 0.5) * 2;
+                p.vy = (height/2 - startY) * 0.01 + (Math.random() - 0.5) * 2;
+                particles.push(p);
+            }
+        }
+
+        
+        for(let i=0; i<50; i++) {
+            particles.push(new Particle(width/2 + (Math.random()-0.5)*100, height/2 + (Math.random()-0.5)*100, '#7EF07E'));
+        }
+
+        
+        let lastTime = 0;
+        let frames = 0;
+
+        function animate(timestamp) {
+            
+            if(timestamp - lastTime >= 1000) {
+                fpsCounter.innerText = `${frames} FPS`;
+                frames = 0;
+                lastTime = timestamp;
+            }
+            frames++;
+
+            
+            ctx.clearRect(0, 0, width, height);
+
+            
+            ctx.strokeStyle = 'rgba(126, 240, 126, 0.15)'; 
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            for(let i=0; i<particles.length; i++) {
+                for(let j=i+1; j<particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distSq = dx*dx + dy*dy;
+                    
+                    if(distSq < 1500) { 
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                    }
+                }
+            }
+            ctx.stroke();
+
+            
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate(0);
+
+    </script>
+
+</body></html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">Devtool Features</title>
+    <style vid="5">
+        
+
+        :root {
+            --ds-bg-base: #e6e5e0; 
+            --ds-border: #000000;
+            --ds-text: #000000;
+            
+            
+            --ds-accent-green: #7cb342; 
+            --ds-accent-cyan: #4dd0e1;
+            --ds-accent-yellow: #ffee58;
+            --ds-accent-white: #ffffff;
+            
+            
+            --ds-font-primary: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --ds-font-mono: "Courier New", Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #1a1a1a; 
+            color: var(--ds-text);
+            font-family: var(--ds-font-primary);
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        
+        .devtool-module {
+            background-color: var(--ds-bg-base);
+            width: 100%;
+            max-width: 1200px;
+            border: 1px solid var(--ds-border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        
+        .module-header {
+            padding: 40px 30px;
+            border-bottom: 1px solid var(--ds-border);
+        }
+
+        .module-title {
+            font-size: 4rem;
+            font-weight: 400;
+            line-height: 0.95;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            max-width: 800px;
+        }
+
+        
+        .structural-band {
+            display: flex;
+            border-bottom: 1px solid var(--ds-border);
+            background-color: var(--ds-bg-base);
+        }
+
+        .band-item {
+            flex: 1;
+            padding: 10px 30px;
+            font-family: var(--ds-font-mono);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-right: 1px solid var(--ds-border);
+        }
+
+        .band-item:last-child {
+            border-right: none;
+        }
+
+        
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            background-color: var(--ds-border); 
+            gap: 1px; 
+        }
+
+        
+        .feature-card {
+            background-color: var(--ds-bg-base);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .card-label-band {
+            padding: 12px 20px;
+            font-family: var(--ds-font-primary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--ds-border);
+        }
+
+        .card-title-band {
+            padding: 25px 20px;
+            border-bottom: 1px solid var(--ds-border);
+        }
+
+        .card-title-band h3 {
+            font-size: 2.2rem;
+            font-weight: 400;
+            line-height: 1.05;
+            text-transform: uppercase;
+        }
+
+        
+        .card-content-band {
+            padding: 20px;
+            border-bottom: 1px solid var(--ds-border);
+            display: grid;
+            grid-template-columns: 3fr 2fr; 
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        .text-primary {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .text-secondary {
+            font-size: 0.75rem;
+            line-height: 1.3;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .text-secondary ul {
+            list-style: none;
+        }
+
+        .text-secondary li {
+            position: relative;
+            padding-left: 10px;
+            margin-bottom: 4px;
+        }
+
+        .text-secondary li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+        }
+
+        
+        .card-footer-band {
+            display: flex;
+            height: 160px; 
+        }
+
+        
+        .visual-texture {
+            width: 50%;
+            border-right: 1px solid var(--ds-border);
+            background-color: #222;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        
+        .pattern-target {
+            width: 150%;
+            height: 150%;
+            background-image: repeating-radial-gradient(
+                circle at center,
+                transparent 0,
+                transparent 10px,
+                var(--ds-accent-yellow) 10px,
+                var(--ds-accent-yellow) 11px
+            );
+            opacity: 0.8;
+        }
+
+        .visual-texture.cyan-target .pattern-target {
+            background-image: repeating-radial-gradient(
+                circle at center, transparent 0, transparent 15px, var(--ds-accent-cyan) 15px, var(--ds-accent-cyan) 16px
+            );
+        }
+
+        .visual-texture.green-target .pattern-target {
+            background-image: repeating-radial-gradient(
+                circle at center, transparent 0, transparent 8px, var(--ds-accent-green) 8px, var(--ds-accent-green) 9px
+            );
+        }
+        
+        .visual-texture.white-target .pattern-target {
+            background-image: repeating-radial-gradient(
+                circle at center, transparent 0, transparent 12px, var(--ds-accent-white) 12px, var(--ds-accent-white) 13px
+            );
+        }
+
+        
+        .metrics-stack {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-block {
+            height: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .metric-block.top {
+            border-bottom: 1px solid var(--ds-border);
+        }
+
+        
+        .bg-green { background-color: var(--ds-accent-green); }
+        .bg-cyan { background-color: var(--ds-accent-cyan); }
+        .bg-yellow { background-color: var(--ds-accent-yellow); }
+        .bg-white { background-color: var(--ds-accent-white); }
+
+        .metric-value {
+            font-size: 2.8rem;
+            font-weight: 400;
+            line-height: 0.9;
+        }
+
+        .metric-unit {
+            font-size: 1rem;
+            vertical-align: super;
+            margin-left: 2px;
+        }
+
+        .metric-label {
+            font-family: var(--ds-font-primary);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        
+        @media (max-width: 900px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .card-content-band {
+                grid-template-columns: 1fr;
+            }
+            .structural-band {
+                display: none; 
+            }
+        }
+    </style>
+</head>
+<body vid="6">
+
+    <main class="devtool-module" vid="7">
+        
+        <header class="module-header" vid="8">
+            <h2 class="module-title" vid="9">Architecture<br vid="10">Analysis Engine</h2>
+        </header>
+
+        <div class="structural-band" vid="11">
+            <div class="band-item" vid="12">CATEGORY ▼</div>
+            <div class="band-item" vid="13">CAPABILITY ▼</div>
+            <div class="band-item" vid="14">INTEGRATION ▼</div>
+            <div class="band-item" vid="15">OUTPUT ▼</div>
+        </div>
+
+        <section class="features-grid" vid="16">
+            
+            
+            <article class="feature-card" vid="17">
+                <div class="card-label-band" vid="18">MODULE 1</div>
+                <div class="card-title-band" vid="19">
+                    <h3 vid="20">STATE<br vid="21">MUTATION</h3>
+                </div>
+                <div class="card-content-band" vid="22">
+                    <div class="text-primary" vid="23">
+                        Achieve absolute observability over complex state trees. The engine hooks directly into the JavaScript VM, recording every setter and getter invocation without proxy overhead. This allows for deterministic time-travel debugging across asynchronous boundaries.
+                    </div>
+                    <div class="text-secondary" vid="24">
+                        <ul vid="25">
+                            <li vid="26">DIRECT VM HOOKS</li>
+                            <li vid="27">ZERO OVERHEAD</li>
+                            <li vid="28">DETERMINISTIC</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-footer-band" vid="29">
+                    <div class="visual-texture cyan-target" vid="30">
+                        <div class="pattern-target" vid="31"></div>
+                    </div>
+                    <div class="metrics-stack" vid="32">
+                        <div class="metric-block top bg-cyan" vid="33">
+                            <div vid="34"><span class="metric-value" vid="35">0</span><span class="metric-unit" vid="36">MS</span></div>
+                            <span class="metric-label" vid="37">LATENCY</span>
+                        </div>
+                        <div class="metric-block bg-white" vid="38">
+                            <span class="metric-label" style="font-size: 1.2rem; margin-top:0;" vid="39">FULL</span>
+                            <span class="metric-label" vid="40">VISIBILITY</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            
+            <article class="feature-card" vid="41">
+                <div class="card-label-band" vid="42">MODULE 2</div>
+                <div class="card-title-band" vid="43">
+                    <h3 vid="44">NETWORK<br vid="45">TOPOLOGY</h3>
+                </div>
+                <div class="card-content-band" vid="46">
+                    <div class="text-primary" vid="47">
+                        Map microservice interactions in real-time. By intercepting fetch and XHR at the lowest level, the tool generates live dependency graphs. Identify waterfall requests, redundant payloads, and latency bottlenecks visually before they impact production.
+                    </div>
+                    <div class="text-secondary" vid="48">
+                        <ul vid="49">
+                            <li vid="50">LIVE GRAPHING</li>
+                            <li vid="51">PAYLOAD DIFFING</li>
+                            <li vid="52">BOTTLENECK ID</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-footer-band" vid="53">
+                    <div class="visual-texture green-target" vid="54">
+                        <div class="pattern-target" vid="55"></div>
+                    </div>
+                    <div class="metrics-stack" vid="56">
+                        <div class="metric-block top bg-white" vid="57">
+                            <span class="metric-label" style="font-size: 1.2rem; margin-top:0;" vid="58">GRAPH</span>
+                            <span class="metric-label" vid="59">GENERATION</span>
+                        </div>
+                        <div class="metric-block bg-green" vid="60">
+                            <div vid="61"><span class="metric-value" vid="62">100</span><span class="metric-unit" vid="63">%</span></div>
+                            <span class="metric-label" vid="64">MAPPED</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            
+            <article class="feature-card" vid="65">
+                <div class="card-label-band" vid="66">MODULE 3</div>
+                <div class="card-title-band" vid="67">
+                    <h3 vid="68">MEMORY<br vid="69">PROFILING</h3>
+                </div>
+                <div class="card-content-band" vid="70">
+                    <div class="text-primary" vid="71">
+                        Detect detached DOM nodes and closure leaks automatically. The profiling module compares heap snapshots incrementally during component lifecycles, flagging objects that evade garbage collection and referencing their exact allocation stack trace.
+                    </div>
+                    <div class="text-secondary" vid="72">
+                        <ul vid="73">
+                            <li vid="74">HEAP SNAPSHOTS</li>
+                            <li vid="75">LEAK DETECTION</li>
+                            <li vid="76">TRACE ALLOCATION</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-footer-band" vid="77">
+                    <div class="visual-texture" vid="78">
+                        <div class="pattern-target" vid="79"></div>
+                    </div>
+                    <div class="metrics-stack" vid="80">
+                        <div class="metric-block top bg-yellow" vid="81">
+                            <div vid="82"><span class="metric-value" vid="83">60</span><span class="metric-unit" vid="84">FPS</span></div>
+                            <span class="metric-label" vid="85">STABILITY</span>
+                        </div>
+                        <div class="metric-block bg-white" vid="86">
+                            <span class="metric-label" style="font-size: 1.2rem; margin-top:0;" vid="87">DEEP</span>
+                            <span class="metric-label" vid="88">INSPECTION</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            
+            <article class="feature-card" vid="89">
+                <div class="card-label-band" vid="90">MODULE 4</div>
+                <div class="card-title-band" vid="91">
+                    <h3 vid="92">COMPONENT<br vid="93">RENDER</h3>
+                </div>
+                <div class="card-content-band" vid="94">
+                    <div class="text-primary" vid="95">
+                        Analyze reconciliation costs at a granular level. See exactly which components rendered, why they rendered (props vs state changes), and how long the paint phase took. Optimize your application's critical path with hard mathematical data.
+                    </div>
+                    <div class="text-secondary" vid="96">
+                        <ul vid="97">
+                            <li vid="98">PAINT TIMING</li>
+                            <li vid="99">PROP DIFFING</li>
+                            <li vid="100">CRITICAL PATH</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-footer-band" vid="101">
+                    <div class="visual-texture white-target" vid="102">
+                        <div class="pattern-target" vid="103"></div>
+                    </div>
+                    <div class="metrics-stack" vid="104">
+                        <div class="metric-block top bg-white" vid="105">
+                            <span class="metric-label" style="font-size: 1.2rem; margin-top:0;" vid="106">EXACT</span>
+                            <span class="metric-label" vid="107">PRECISION</span>
+                        </div>
+                        <div class="metric-block bg-cyan" vid="108">
+                            <div vid="109"><span class="metric-value" vid="110">1</span><span class="metric-unit" vid="111">MS</span></div>
+                            <span class="metric-label" vid="112">RESOLUTION</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+        </section>
+    </main>
+
+
+</body></html>

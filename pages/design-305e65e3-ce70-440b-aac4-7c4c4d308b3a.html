@@ -1,0 +1,353 @@
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">AI Trace Visualizer - REPLAY MODE</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17" vid="5"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" vid="6">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" vid="7">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet" vid="8">
+    
+    <script vid="9">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brutal: {
+                            bg: '#F2F2EB', 
+                            fg: '#141414', 
+                            gray: '#8D8D85',
+                            lightgray: '#D5D5CF',
+                            accent: '#2563EB', 
+                            accentbg: '#DDE7FC'
+                        }
+                    },
+                    backgroundImage: {
+                        'dot-pattern': 'radial-gradient(#141414 1px, transparent 1px)',
+                    },
+                    backgroundSize: {
+                        'dot-pattern': '24px 24px',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style vid="10">
+        ::-webkit-scrollbar {
+            width: 14px;
+            height: 14px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F2F2EB;
+            border-left: 2px solid #141414;
+            border-top: 2px solid #141414;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #141414;
+            border: 2px solid #F2F2EB;
+        }
+        ::-webkit-scrollbar-corner {
+            background: #F2F2EB;
+            border-left: 2px solid #141414;
+            border-top: 2px solid #141414;
+        }
+
+        .brutal-shadow {
+            box-shadow: 4px 4px 0px 0px #141414;
+        }
+        .brutal-shadow-accent {
+            box-shadow: 4px 4px 0px 0px #2563EB;
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #D5D5CF;
+            height: 8px;
+            border: 2px solid #141414;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 20px;
+            width: 10px;
+            background: #2563EB;
+            border: 2px solid #141414;
+            margin-top: -8px;
+        }
+    </style>
+</head>
+<body class="bg-brutal-bg text-brutal-fg font-sans h-screen w-screen flex flex-col overflow-hidden selection:bg-brutal-fg selection:text-brutal-bg" vid="11">
+
+    <header class="h-14 border-b-2 border-brutal-fg bg-brutal-bg flex items-center justify-between px-4 shrink-0 z-30 relative" vid="12">
+        <div class="flex items-center gap-6" vid="13">
+            <div class="font-bold text-lg tracking-tight uppercase flex items-center gap-2" vid="14">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter" vid="15"><rect x="3" y="3" width="18" height="18" vid="16"></rect><path d="M9 3v18" vid="17"></path><path d="M15 3v18" vid="18"></path><path d="M3 9h18" vid="19"></path><path d="M3 15h18" vid="20"></path></svg>
+                SYS.TRACE // <span class="text-brutal-gray font-mono text-base font-normal" vid="21">EXE-9A8F-22X</span>
+            </div>
+            
+            <div class="flex items-center gap-2 border-2 border-brutal-gray text-brutal-gray px-3 py-1 font-bold text-xs uppercase bg-brutal-lightgray/30" vid="22">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" vid="23"><path d="M2.5 2v6h6M2.5 8a10 10 0 1 1 2.36 10.91" vid="24"></path></svg>
+                REPLAY MODE
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 text-sm font-bold" vid="25">
+            <div class="flex items-center gap-2 font-mono text-xs border-r-2 border-brutal-fg pr-4 mr-2" vid="26">
+                <span class="text-brutal-gray" vid="27">TIMESTAMP:</span> 00:01.450
+                <span class="text-brutal-gray ml-2" vid="28">STEP:</span> 04/06
+            </div>
+            <button class="border-2 border-brutal-fg px-4 py-1.5 hover:bg-brutal-fg hover:text-brutal-bg transition-colors uppercase tracking-wider" vid="29">Export Trace</button>
+            <button class="border-2 border-brutal-fg px-4 py-1.5 bg-brutal-fg text-brutal-bg hover:bg-transparent hover:text-brutal-fg transition-colors uppercase tracking-wider" vid="30">Exit Replay</button>
+        </div>
+    </header>
+
+    <div class="h-16 border-b-2 border-brutal-fg bg-white flex flex-col justify-center px-6 shrink-0 z-30 shadow-sm" vid="31">
+        <div class="flex items-center gap-8" vid="32">
+            <div class="flex items-center border-2 border-brutal-fg bg-brutal-bg brutal-shadow h-10" vid="33">
+                <button class="px-3 border-r-2 border-brutal-fg hover:bg-brutal-lightgray transition-colors" title="First Frame" vid="34">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" vid="35"><polygon points="11 19 2 12 11 5 11 19" vid="36"></polygon><polygon points="22 19 13 12 22 5 22 19" vid="37"></polygon></svg>
+                </button>
+                <button class="px-3 border-r-2 border-brutal-fg hover:bg-brutal-lightgray transition-colors" title="Step Back" vid="38">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" vid="39"><polygon points="19 20 9 12 19 4 19 20" vid="40"></polygon><line x1="5" y1="19" x2="5" y2="5" vid="41"></line></svg>
+                </button>
+                <button class="px-6 border-r-2 border-brutal-fg bg-brutal-fg text-white hover:bg-brutal-accent transition-colors flex items-center gap-2 uppercase text-xs font-bold" title="Play" vid="42">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none" vid="43"><polygon points="5 3 19 12 5 21 5 3" vid="44"></polygon></svg>
+                    Play
+                </button>
+                <button class="px-3 border-r-2 border-brutal-fg hover:bg-brutal-lightgray transition-colors" title="Pause" vid="45">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" vid="46"><rect x="6" y="4" width="4" height="16" vid="47"></rect><rect x="14" y="4" width="4" height="16" vid="48"></rect></svg>
+                </button>
+                <button class="px-3 border-r-2 border-brutal-fg hover:bg-brutal-lightgray transition-colors" title="Step Forward" vid="49">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" vid="50"><polygon points="5 4 15 12 5 20 5 4" vid="51"></polygon><line x1="19" y1="5" x2="19" y2="19" vid="52"></line></svg>
+                </button>
+                <button class="px-3 hover:bg-brutal-lightgray transition-colors" title="Last Frame" vid="53">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" vid="54"><polygon points="13 19 22 12 13 5 13 19" vid="55"></polygon><polygon points="2 19 11 12 2 5 2 19" vid="56"></polygon></svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 flex flex-col gap-1" vid="57">
+                <input type="range" min="0" max="100" value="66" class="w-full" vid="58">
+                <div class="flex justify-between text-[10px] font-mono font-bold uppercase text-brutal-gray px-1" vid="59">
+                    <span class="text-brutal-fg" vid="60">00:00.000</span>
+                    <span vid="61">00:01.000</span>
+                    <span class="text-brutal-accent" vid="62">00:01.450 (Current)</span>
+                    <span vid="63">00:02.000</span>
+                    <span vid="64">00:03.000</span>
+                    <span vid="65">00:04.200</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-1 flex overflow-hidden relative" vid="66">
+        
+        <div class="flex-1 flex flex-col relative overflow-hidden" vid="67">
+            <div class="flex-1 relative overflow-auto bg-dot-pattern bg-brutal-bg p-8 z-10" id="canvas-container" vid="68">
+                <div class="relative w-[1800px] h-[600px]" vid="69"> 
+                    
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 0;" vid="70">
+                        <defs vid="71">
+                            <marker id="arrow-visited" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto" vid="72">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#141414" vid="73"></path>
+                            </marker>
+                            <marker id="arrow-active" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto" vid="74">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563EB" vid="75"></path>
+                            </marker>
+                            <marker id="arrow-unvisited" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto" vid="76">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#8D8D85" vid="77"></path>
+                            </marker>
+                        </defs>
+
+                        <path d="M 290 200 L 315 200 L 315 200 L 340 200" stroke="#141414" stroke-width="2.5" fill="none" marker-end="url(#arrow-visited)" vid="78"></path>
+                        <path d="M 590 200 L 615 200 L 615 200 L 640 200" stroke="#141414" stroke-width="2.5" fill="none" marker-end="url(#arrow-visited)" vid="79"></path>
+                        <path d="M 890 200 L 915 200 L 915 100 L 940 100" stroke="#2563EB" stroke-width="2.5" fill="none" marker-end="url(#arrow-active)" vid="80"></path>
+                        <path d="M 890 200 L 915 200 L 915 300 L 940 300" stroke="#D5D5CF" stroke-width="2" stroke-dasharray="4 4" fill="none" marker-end="url(#arrow-unvisited)" vid="81"></path>
+                        <path d="M 1190 100 L 1215 100 L 1215 200 L 1240 200" stroke="#D5D5CF" stroke-width="2" stroke-dasharray="4 4" fill="none" marker-end="url(#arrow-unvisited)" vid="82"></path>
+                        <path d="M 1190 300 L 1215 300 L 1215 200 L 1240 200" stroke="#D5D5CF" stroke-width="2" stroke-dasharray="4 4" fill="none" marker-end="url(#arrow-unvisited)" vid="83"></path>
+                        <path d="M 1490 200 L 1515 200 L 1515 200 L 1540 200" stroke="#D5D5CF" stroke-width="2" stroke-dasharray="4 4" fill="none" marker-end="url(#arrow-unvisited)" vid="84"></path>
+                    </svg>
+
+                    <div class="absolute w-[250px] border-2 border-brutal-fg bg-white flex flex-col z-10 brutal-shadow opacity-60 grayscale-[0.5]" style="left: 40px; top: 140px;" vid="85">
+                        <div class="border-b-2 border-brutal-fg p-2 bg-brutal-lightgray text-brutal-fg font-bold uppercase tracking-wider text-xs flex justify-between items-center" vid="86">
+                            <span class="flex items-center gap-1" vid="87">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" vid="88"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" vid="89"></path><circle cx="12" cy="7" r="4" vid="90"></circle></svg>
+                                01_User_Input
+                            </span>
+                            <span class="font-mono text-[10px] bg-brutal-fg text-white px-1 border border-brutal-fg" vid="91">PASS</span>
+                        </div>
+                        <div class="p-3 text-xs font-mono bg-[#E8E8E3]" vid="92">
+                            <div class="text-brutal-gray mb-1" vid="93">14:02:00.10</div>
+                            <div class="text-brutal-fg truncate" vid="94">"Find the latest research..."</div>
+                        </div>
+                    </div>
+
+                    <div class="absolute w-[250px] border-2 border-brutal-fg bg-white flex flex-col z-10 brutal-shadow opacity-60 grayscale-[0.5]" style="left: 340px; top: 140px;" vid="95">
+                        <div class="border-b-2 border-brutal-fg p-2 bg-brutal-lightgray text-brutal-fg font-bold uppercase tracking-wider text-xs flex justify-between items-center" vid="96">
+                            <span class="flex items-center gap-1" vid="97">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" vid="98"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" vid="99"></path></svg>
+                                02_Intent_Router
+                            </span>
+                        </div>
+                        <div class="p-3 text-xs font-mono bg-[#E8E8E3]" vid="100">
+                            <div class="text-brutal-fg font-bold border-l-2 border-brutal-fg pl-2" vid="101">require_tools</div>
+                        </div>
+                    </div>
+
+                    <div class="absolute w-[250px] border-2 border-brutal-fg bg-white flex flex-col z-10 brutal-shadow opacity-60 grayscale-[0.5]" style="left: 640px; top: 140px;" vid="102">
+                        <div class="border-b-2 border-brutal-fg p-2 bg-brutal-lightgray text-brutal-fg font-bold uppercase tracking-wider text-xs flex justify-between items-center" vid="103">
+                            <span class="flex items-center gap-1" vid="104">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" vid="105"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" vid="106"></path></svg>
+                                03_Tool_Selector
+                            </span>
+                        </div>
+                        <div class="p-3 text-xs font-mono bg-[#E8E8E3]" vid="107">
+                            <div class="bg-brutal-fg text-brutal-bg px-2 py-0.5 inline-block w-fit" vid="108">['web_search']</div>
+                        </div>
+                    </div>
+
+                    <div class="absolute w-[250px] border-[3px] border-brutal-accent bg-white flex flex-col z-20 brutal-shadow-accent transform scale-105" style="left: 940px; top: 40px;" vid="109">
+                        <div class="border-b-[3px] border-brutal-accent p-2 bg-brutal-accent text-white font-bold uppercase tracking-wider text-xs flex justify-between items-center" vid="110">
+                            <span class="flex items-center gap-2" vid="111">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" vid="112"><circle cx="11" cy="11" r="8" vid="113"></circle><line x1="21" y1="21" x2="16.65" y2="16.65" vid="114"></line></svg>
+                                04_Web_Search
+                            </span>
+                            <span class="font-mono text-[10px] bg-white text-brutal-accent px-1 flex items-center gap-1 border border-white" vid="115">
+                                CURRENT STEP
+                            </span>
+                        </div>
+                        <div class="p-3 text-xs font-mono bg-brutal-accentbg/30" vid="116">
+                            <div class="flex justify-between border-b border-brutal-accent/20 pb-1 mb-2" vid="117">
+                                <span class="text-brutal-accent/70 font-bold" vid="118">API</span>
+                                <span class="text-brutal-fg" vid="119">tavily-search</span>
+                            </div>
+                            <div class="text-brutal-accent/70 font-bold mb-1" vid="120">ARGS</div>
+                            <div class="text-brutal-fg bg-white border border-brutal-accent/50 p-1.5 break-words" vid="121">
+                                {"query": "latest AI agent frameworks Q3 2024"}
+                            </div>
+                        </div>
+                        <div class="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center" vid="122">
+                           <div class="bg-brutal-accent text-white px-2 py-1 text-[10px] font-bold brutal-shadow h-6 flex items-center uppercase" vid="123">REPLAY POSITION</div>
+                           <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-brutal-accent" vid="124"></div>
+                        </div>
+                    </div>
+
+                    <div class="absolute w-[250px] border-2 border-brutal-lightgray border-dashed bg-brutal-bg flex flex-col z-10 opacity-30 grayscale" style="left: 940px; top: 240px;" vid="125">
+                        <div class="border-b-2 border-brutal-lightgray border-dashed p-2 text-brutal-gray font-bold uppercase tracking-wider text-xs flex justify-between items-center" vid="126">
+                            <span class="flex items-center gap-1" vid="127">
+                                04A_Calculator
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="absolute w-[250px] border-2 border-brutal-lightgray bg-brutal-bg flex flex-col z-10 opacity-30 grayscale" style="left: 1240px; top: 140px;" vid="128">
+                        <div class="border-b-2 border-brutal-lightgray p-2 text-brutal-fg font-bold uppercase tracking-wider text-xs flex justify-between items-center" vid="129">
+                            <span class="flex items-center gap-1 text-brutal-gray" vid="130">
+                                05_Synthesizer
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="absolute w-[250px] border-2 border-brutal-lightgray bg-brutal-bg flex flex-col z-10 opacity-30 grayscale" style="left: 1540px; top: 140px;" vid="131">
+                        <div class="border-b-2 border-brutal-lightgray p-2 text-brutal-fg font-bold uppercase tracking-wider text-xs flex justify-between items-center" vid="132">
+                            <span class="flex items-center gap-1 text-brutal-gray" vid="133">
+                                06_Final_Output
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="h-64 border-t-2 border-brutal-fg bg-brutal-bg flex flex-col shrink-0 z-20 relative" vid="134">
+                <div class="h-10 border-b-2 border-brutal-fg bg-brutal-lightgray flex items-center justify-between px-4 shrink-0" vid="135">
+                    <div class="font-bold text-sm tracking-wider uppercase flex items-center gap-2" vid="136">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" vid="137"><circle cx="11" cy="11" r="8" vid="138"></circle><line x1="21" y1="21" x2="16.65" y2="16.65" vid="139"></line></svg>
+                        REPLAY INSPECTOR: <span class="text-brutal-accent" vid="140">04_Web_Search</span>
+                    </div>
+                </div>
+                
+                <div class="flex-1 flex overflow-hidden" vid="141">
+                    <div class="w-1/3 border-r-2 border-brutal-fg p-4 overflow-y-auto bg-white" vid="142">
+                        <h4 class="text-xs font-bold uppercase text-brutal-gray mb-3 border-b-2 border-brutal-fg pb-1" vid="143">RECORDED DATA</h4>
+                        <table class="w-full text-sm font-mono text-left" vid="144">
+                            <tbody vid="145">
+                                <tr class="border-b border-brutal-gray/20" vid="146">
+                                    <td class="py-2 text-brutal-gray pr-4 w-1/3" vid="147">Timestamp</td>
+                                    <td class="py-2" vid="148">14:02:01.332</td>
+                                </tr>
+                                <tr class="border-b border-brutal-gray/20" vid="149">
+                                    <td class="py-2 text-brutal-gray pr-4" vid="150">Duration</td>
+                                    <td class="py-2" vid="151">2.84s (Final)</td>
+                                </tr>
+                                <tr vid="152">
+                                    <td class="py-2 text-brutal-gray pr-4" vid="153">Status</td>
+                                    <td class="py-2 font-bold" vid="154">SUCCESS</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="w-2/3 bg-[#1E1E1E] text-[#D4D4D4] p-4 overflow-y-auto font-mono text-xs leading-relaxed" vid="155">
+                        <div class="flex justify-between items-center mb-2 text-[#858585] border-b border-[#333] pb-2" vid="156">
+                            <span vid="157">Recorded Request</span>
+                        </div>
+<pre vid="158"><code vid="159">{
+  <span class="text-[#9CDCFE]" vid="160">"tool"</span>: <span class="text-[#CE9178]" vid="161">"tavily_search_results_json"</span>,
+  <span class="text-[#9CDCFE]" vid="162">"tool_input"</span>: {
+    <span class="text-[#9CDCFE]" vid="163">"query"</span>: <span class="text-[#CE9178]" vid="164">"latest AI agent frameworks Q3 2024"</span>
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="w-80 border-l-2 border-brutal-fg bg-white flex flex-col shrink-0 z-30 relative" vid="165">
+            <div class="h-10 border-b-2 border-brutal-fg bg-brutal-bg flex items-center justify-between px-4 shrink-0" vid="166">
+                <span class="font-bold text-sm tracking-wider uppercase" vid="167">TRACE HISTORY</span>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto bg-brutal-bg font-mono text-[11px] leading-tight flex flex-col p-2 gap-1" vid="168">
+                <div class="p-2 border border-brutal-fg/30 bg-white/50 opacity-60 flex flex-col gap-1" vid="169">
+                    <div class="flex gap-2 text-brutal-gray" vid="170"><span vid="171">00:00.000</span><span class="font-bold" vid="172">[SYS]</span></div>
+                    <div class="pl-2" vid="173">Trace Started</div>
+                </div>
+
+                <div class="p-2 border border-brutal-fg/30 bg-white/50 opacity-60 flex flex-col gap-1" vid="174">
+                    <div class="flex gap-2 text-brutal-gray" vid="175"><span vid="176">00:00.100</span><span class="font-bold" vid="177">[NODE]</span></div>
+                    <div class="pl-2" vid="178">01_User_Input Complete</div>
+                </div>
+
+                <div class="p-2 border-2 border-brutal-accent bg-brutal-accentbg flex flex-col gap-1 brutal-shadow-accent mt-1 mb-1" vid="179">
+                    <div class="flex gap-2 text-brutal-accent" vid="180">
+                        <span vid="181">00:01.450</span>
+                        <span class="font-bold" vid="182">[TOOL]</span>
+                    </div>
+                    <div class="pl-2 text-brutal-fg font-bold" vid="183">04_Web_Search Execution</div>
+                    <div class="pl-2 text-brutal-accent text-[9px] mt-1 uppercase" vid="184">Selection Marker</div>
+                </div>
+
+                <div class="p-2 border border-brutal-lightgray border-dashed bg-transparent flex flex-col gap-1 opacity-20 mt-1" vid="185">
+                    <div class="flex gap-2 text-brutal-gray" vid="186"><span vid="187">--:--:---</span><span class="font-bold" vid="188">[NODE]</span></div>
+                    <div class="pl-2" vid="189">05_Synthesizer (Future)</div>
+                </div>
+            </div>
+            
+            <div class="h-8 border-t-2 border-brutal-fg bg-brutal-lightgray flex items-center px-3 text-xs font-mono justify-between" vid="190">
+                <span vid="191">STEP LOCK</span>
+                <input type="checkbox" checked="" class="accent-brutal-fg w-4 h-4 rounded-none border-2 border-brutal-fg bg-white" vid="192">
+            </div>
+        </aside>
+
+    </main>
+
+</body></html>

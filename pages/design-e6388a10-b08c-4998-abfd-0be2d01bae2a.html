@@ -1,0 +1,110 @@
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">Search Header Redesign</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17" vid="5"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" vid="6">
+    <style vid="7">
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#121212] flex items-center justify-center min-h-screen p-4" vid="8">
+
+    <div class="w-full h-full max-w-[360px] max-h-[320px] bg-slate-50 rounded-[40px] overflow-hidden relative shadow-2xl flex flex-col ring-8 ring-slate-800/40" vid="9">
+        
+        <header class="bg-white px-5 pt-6 pb-5 flex-shrink-0 relative z-10 border-b border-slate-100 shadow-[0_8px_30px_-15px_rgba(0,0,0,0.04)]" vid="10">
+            
+            <div class="flex justify-between items-center mb-5" vid="11">
+                <button class="group flex items-center gap-2 bg-slate-100 hover:bg-slate-200/80 transition-colors pl-3 pr-4 py-2 rounded-full border border-slate-200/50" aria-label="Filters" vid="12">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-600 group-hover:text-slate-900 transition-colors" vid="13">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" vid="14"></path>
+                    </svg>
+                    <span class="text-[14px] font-semibold text-slate-800 tracking-tight" vid="15">Filters</span>
+                    <span class="flex items-center justify-center min-w-[18px] h-[18px] bg-indigo-600 text-white text-[10px] font-bold rounded-full ml-0.5" vid="16">
+                        3
+                    </span>
+                </button>
+
+                <button class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors focus:outline-none" aria-label="Close search" vid="17">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4" vid="18">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" vid="19"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="relative flex items-center w-full h-[52px] bg-white rounded-2xl border border-slate-200 shadow-sm focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-50 transition-all mb-4 group" vid="20">
+                
+                <div class="pl-4 flex items-center justify-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors" vid="21">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5" vid="22">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" vid="23"></path>
+                    </svg>
+                </div>
+
+                <input type="text" placeholder="What are you looking for?" class="w-full h-full pl-3 pr-[56px] bg-transparent text-[15px] font-medium text-slate-900 placeholder-slate-400 outline-none" value="" vid="24">
+
+                <button class="absolute right-1.5 w-[40px] h-[40px] flex items-center justify-center rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition-all focus:outline-none" aria-label="Submit Search" vid="25">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4" vid="26">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" vid="27"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-between" vid="28">
+                
+                <div class="flex items-center gap-2.5" vid="29">
+                    
+                    <button class="flex items-center gap-1.5 h-9 px-3.5 bg-indigo-50 border border-indigo-100 rounded-xl text-[13px] font-semibold text-indigo-700 hover:bg-indigo-100 transition-all" vid="30">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-indigo-600" vid="31">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" vid="32"></path>
+                        </svg>
+                        AI Search
+                    </button>
+
+                    <button class="flex items-center gap-1.5 h-9 px-3.5 bg-white border border-slate-200 rounded-xl text-[13px] font-semibold text-slate-700 hover:bg-slate-50 border-b-2 hover:border-b-slate-300 transition-all" vid="33">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-amber-500" vid="34">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.82 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.496 1.509 1.333 1.509 2.316V18" vid="35"></path>
+                        </svg>
+                        Tips
+                    </button>
+                </div>
+
+                <div class="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/60" vid="36">
+                    <button class="p-1.5 bg-white rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.1)] text-slate-800 transition-all" aria-label="Grid View" vid="37">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4" vid="38">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" vid="39"></path>
+                        </svg>
+                    </button>
+                    <button class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg transition-all" aria-label="List View" vid="40">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4" vid="41">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" vid="42"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 px-5 pt-5 pb-6 bg-slate-50 relative overflow-hidden" vid="43">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-50 z-10 pointer-events-none" vid="44"></div>
+            
+            <div class="grid grid-cols-2 gap-4 opacity-50" vid="45">
+                <div class="bg-white p-3.5 rounded-3xl border border-slate-200/60 shadow-sm flex flex-col gap-3" vid="46">
+                    <div class="w-full h-24 bg-slate-100 rounded-2xl animate-pulse" vid="47"></div>
+                    <div class="flex flex-col gap-1.5 px-1" vid="48">
+                        <div class="h-3.5 w-4/5 bg-slate-200 rounded-full animate-pulse" vid="49"></div>
+                        <div class="h-3 w-1/2 bg-slate-100 rounded-full animate-pulse" vid="50"></div>
+                    </div>
+                </div>
+                <div class="bg-white p-3.5 rounded-3xl border border-slate-200/60 shadow-sm flex flex-col gap-3" vid="51">
+                    <div class="w-full h-24 bg-slate-100 rounded-2xl animate-pulse" vid="52"></div>
+                    <div class="flex flex-col gap-1.5 px-1" vid="53">
+                        <div class="h-3.5 w-3/4 bg-slate-200 rounded-full animate-pulse" vid="54"></div>
+                        <div class="h-3 w-2/3 bg-slate-100 rounded-full animate-pulse" vid="55"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+    </div>
+
+
+</body></html>

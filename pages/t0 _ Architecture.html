@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-width=1.0" vid="3">
+    <title vid="4">t0 — Architecture</title>
+    
+    
+
+    <style vid="5">
+        :root {
+            --bg-color: #e2e2e0;
+            --text-main: #111111;
+            --text-muted: #555555;
+            --accent-red: #e62e31;
+            
+            
+            --font-sys: "Helvetica Neue", Inter, Roboto, Arial, sans-serif;
+            --font-mono: "SF Mono", "Roboto Mono", Menlo, monospace;
+            
+            
+            --padding-outer: clamp(2rem, 6vw, 6rem);
+            --grid-gap: clamp(2rem, 4vw, 4rem);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sys);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .section-wrapper {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: var(--padding-outer);
+        }
+
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: clamp(4rem, 8vw, 8rem);
+            border-top: 1px solid var(--text-main);
+            padding-top: 1.5rem;
+            position: relative;
+        }
+
+        .section-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 10px;
+            height: 10px;
+            border-left: 1px solid var(--text-main);
+            border-top: 1px solid var(--text-main);
+            transform: translate(-100%, -100%);
+        }
+
+        .title {
+            font-size: clamp(2.5rem, 5.5vw, 6.5rem);
+            font-weight: 400;
+            letter-spacing: -0.04em;
+            line-height: 1.05;
+            max-width: 15ch;
+            text-wrap: balance;
+        }
+
+        .metadata {
+            text-align: right;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1.4;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--grid-gap);
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fig-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--text-main);
+            padding-bottom: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .fig-num {
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .fig-sys {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        
+        .visual-container {
+            width: 100%;
+            aspect-ratio: 1 / 1.1;
+            margin-bottom: 2.5rem;
+            position: relative;
+            background: transparent;
+            overflow: hidden;
+            
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .visual-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            outline: none;
+        }
+
+        
+        .step-title {
+            font-size: 1.35rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .step-desc {
+            font-size: 0.9rem;
+            line-height: 1.55;
+            color: var(--text-muted);
+            max-width: 90%;
+            font-weight: 400;
+        }
+
+        
+        @media (max-width: 900px) {
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2rem;
+            }
+            .metadata {
+                text-align: left;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 5rem;
+            }
+            .visual-container {
+                aspect-ratio: 16 / 9;
+            }
+        }
+    </style>
+</head>
+<body vid="6">
+
+    <main class="section-wrapper" vid="7">
+        <header class="section-header" vid="8">
+            <h2 class="title" vid="9">How t0 runs your finance function.</h2>
+            <div class="metadata" vid="10">
+                System Architecture<br vid="11">
+                Render_Engine: WebGL<br vid="12">
+                Rev. 1.0.4
+            </div>
+        </header>
+
+        <div class="grid" vid="13">
+            
+            <article class="column" vid="14">
+                <header class="fig-header" vid="15">
+                    <span class="fig-num" vid="16">FIG 01</span>
+                    <span class="fig-sys" vid="17">SYS.CONNECT</span>
+                </header>
+                <div class="visual-container" id="canvas-step-1" vid="18"><canvas data-engine="three.js r160" width="336" height="369" style="display: block; width: 336.344px; height: 369.969px;"></canvas></div>
+                <h3 class="step-title" vid="19">Connect everything.</h3>
+                <p class="step-desc" vid="20">Banks, cards, payroll, Stripe, accounting systems — t0 pulls raw data from every financial tool you use.</p>
+            </article>
+
+            
+            <article class="column" vid="21">
+                <header class="fig-header" vid="22">
+                    <span class="fig-num" vid="23">FIG 02</span>
+                    <span class="fig-sys" vid="24">SYS.PROCESS</span>
+                </header>
+                <div class="visual-container" id="canvas-step-2" vid="25"><canvas data-engine="three.js r160" width="336" height="369" style="display: block; width: 336.344px; height: 369.969px;"></canvas></div>
+                <h3 class="step-title" vid="26">AI turns events into books.</h3>
+                <p class="step-desc" vid="27">t0's AI normalizes every transaction, applies explicit rules, and generates balanced journal entries in a single ledger — automatically.</p>
+            </article>
+
+            
+            <article class="column" vid="28">
+                <header class="fig-header" vid="29">
+                    <span class="fig-num" vid="30">FIG 03</span>
+                    <span class="fig-sys" vid="31">SYS.INSIGHT</span>
+                </header>
+                <div class="visual-container" id="canvas-step-3" vid="32"><canvas data-engine="three.js r160" width="336" height="369" style="display: block; width: 336.344px; height: 369.969px;"></canvas></div>
+                <h3 class="step-title" vid="33">You review, decide, and move.</h3>
+                <p class="step-desc" vid="34">You see exactly what changed, why, and where it landed in your financials — with real‑time P&amp;L, balance sheet, and cash insights.</p>
+            </article>
+        </div>
+    </main>
+
+    
+    <script type="importmap" vid="35">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module" vid="36">
+        import * as THREE from 'three';
+
+        
+        
+        
+        
+        
+        
+        
+        const stippleMaterialTemplate = new THREE.ShaderMaterial({
+            uniforms: {
+                u_color: { value: new THREE.Color('#e62e31') }, 
+                u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+            },
+            vertexShader: `
+                varying vec3 vPosition;
+                void main() {
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 u_color;
+                uniform vec2 u_resolution;
+                varying vec3 vPosition;
+
+                // High-frequency hash function for dense print grain
+                float hash(vec2 p) {
+                    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+                }
+
+                void main() {
+                    // Fixed-scale screen space coordinates for consistent grain size
+                    vec2 screenPos = gl_FragCoord.xy * 0.6; 
+                    float noise = hash(floor(screenPos));
+
+                    // Fade gradient based on the local Y position of the geometry
+                    // This creates the volumetric dissolving effect from the reference
+                    float fade = smoothstep(-1.5, 1.5, vPosition.y);
+
+                    // High fade = mostly solid red. Low fade = mostly dissolved into background.
+                    float threshold = 1.0 - fade;
+                    
+                    if (noise < threshold) {
+                        discard; // Creates the raw, jagged dithered edge native to the aesthetic
+                    }
+
+                    gl_FragColor = vec4(u_color, 1.0);
+                }
+            `,
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+
+        const wireframeMaterial = new THREE.LineBasicMaterial({
+            color: 0x111111,
+            linewidth: 1,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        
+        
+        
+        const scenes = [];
+
+        function createIsoScene(containerId, geometryBuilder) {
+            const container = document.getElementById(containerId);
+            const rect = container.getBoundingClientRect();
+
+            const scene = new THREE.Scene();
+
+            
+            const aspect = rect.width / rect.height;
+            const frustumSize = 4.5;
+            const camera = new THREE.OrthographicCamera(
+                (frustumSize * aspect) / -2, 
+                (frustumSize * aspect) / 2, 
+                frustumSize / 2, 
+                frustumSize / -2, 
+                0.1, 100
+            );
+            
+            
+            camera.position.set(10, 10, 10);
+            camera.lookAt(scene.position);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
+            renderer.setSize(rect.width, rect.height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); 
+            container.appendChild(renderer.domElement);
+
+            const group = new THREE.Group();
+            geometryBuilder(group);
+            scene.add(group);
+
+            
+            scenes.push({
+                container,
+                renderer,
+                camera,
+                scene,
+                group,
+                frustumSize
+            });
+        }
+
+        
+        function createStippledMesh(geometry) {
+            const mesh = new THREE.Mesh(geometry, stippleMaterialTemplate.clone());
+            
+            const edges = new THREE.EdgesGeometry(geometry);
+            const wireframe = new THREE.LineSegments(edges, wireframeMaterial);
+            
+            const group = new THREE.Group();
+            group.add(mesh);
+            group.add(wireframe);
+            return group;
+        }
+
+        
+        
+        
+
+        
+        createIsoScene('canvas-step-1', (group) => {
+            const centerGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+            const center = createStippledMesh(centerGeo);
+            group.add(center);
+
+            const nodePositions = [
+                [1.8, 0.5, 0], [-1.8, -0.5, 0],
+                [0, 1.8, 1.8], [0, -1.8, -1.8],
+                [1.5, -1.5, 1.5]
+            ];
+
+            nodePositions.forEach(pos => {
+                const nodeGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+                const node = createStippledMesh(nodeGeo);
+                node.position.set(...pos);
+                group.add(node);
+                
+                
+                const points = [
+                    new THREE.Vector3(0,0,0),
+                    new THREE.Vector3(...pos)
+                ];
+                const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+                const line = new THREE.Line(lineGeo, new THREE.LineDashedMaterial({
+                    color: 0x111111,
+                    dashSize: 0.1,
+                    gapSize: 0.1,
+                }));
+                line.computeLineDistances();
+                group.add(line);
+            });
+        });
+
+        
+        createIsoScene('canvas-step-2', (group) => {
+            const numLayers = 6;
+            const height = 0.25;
+            const gap = 0.15;
+            const totalHeight = (numLayers * height) + ((numLayers - 1) * gap);
+            const startY = -(totalHeight / 2) + (height / 2);
+
+            for(let i = 0; i < numLayers; i++) {
+                
+                const width = 2.0 - (i * 0.1); 
+                const depth = 2.0 - (i * 0.1);
+                
+                const geo = new THREE.BoxGeometry(width, height, depth);
+                const layer = createStippledMesh(geo);
+                layer.position.y = startY + (i * (height + gap));
+                
+                
+                const chaos = (numLayers - 1 - i) * 0.05;
+                layer.rotation.y = (Math.random() - 0.5) * chaos;
+                
+                group.add(layer);
+            }
+        });
+
+        
+        createIsoScene('canvas-step-3', (group) => {
+            const bars = [
+                { x: -1.0, z: 0.5, h: 1.5 },
+                { x: 0.0,  z: 0.0, h: 3.2 },
+                { x: 1.0,  z: -0.5, h: 2.0 },
+                { x: 0.5,  z: 1.0, h: 0.8 }
+            ];
+
+            bars.forEach(b => {
+                const geo = new THREE.BoxGeometry(0.7, b.h, 0.7);
+                const bar = createStippledMesh(geo);
+                
+                bar.position.set(b.x, (b.h / 2) - 1.0, b.z);
+                group.add(bar);
+            });
+        });
+
+        
+        
+        
+        
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+
+            scenes.forEach((s, index) => {
+                
+                const speed = 0.2 + (index * 0.05);
+                s.group.rotation.y = Math.sin(time * speed) * 0.1 + (time * 0.1);
+                
+                
+                s.scene.traverse((child) => {
+                    if (child.isMesh && child.material.uniforms) {
+                        child.material.uniforms.u_resolution.value.set(
+                            s.renderer.domElement.width,
+                            s.renderer.domElement.height
+                        );
+                    }
+                });
+
+                s.renderer.render(s.scene, s.camera);
+            });
+        }
+
+        animate();
+
+        
+        window.addEventListener('resize', () => {
+            scenes.forEach(s => {
+                const rect = s.container.getBoundingClientRect();
+                const aspect = rect.width / rect.height;
+                
+                s.camera.left = (s.frustumSize * aspect) / -2;
+                s.camera.right = (s.frustumSize * aspect) / 2;
+                s.camera.top = s.frustumSize / 2;
+                s.camera.bottom = s.frustumSize / -2;
+                s.camera.updateProjectionMatrix();
+                
+                s.renderer.setSize(rect.width, rect.height);
+            });
+        });
+
+    </script>
+
+</body></html>

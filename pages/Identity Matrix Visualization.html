@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">Identity Matrix Visualization</title>
+    <style vid="5">
+        
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;700&display=swap');
+
+        :root {
+            --bg-color: #F3F3F8;
+            --ink-color: #16161A;
+            --surface-color: #FFFFFF;
+            --lavender: #C6BBFF;
+            --lime: #CDFF4D;
+            
+            --font-display: 'Oswald', sans-serif;
+            --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            
+            --radius-sm: 12px;
+            --radius-md: 24px;
+            --radius-pill: 999px;
+            
+            --border-width: 1.5px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--ink-color);
+            font-family: var(--font-ui);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        
+        .dashboard {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            padding: 24px;
+            gap: 24px;
+        }
+
+        .side-panel {
+            width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            z-index: 10;
+        }
+
+        .vis-container {
+            flex: 1;
+            background-color: var(--bg-color);
+            position: relative;
+            border-radius: var(--radius-md);
+            
+            overflow: hidden;
+        }
+
+        
+        
+        .card {
+            background: var(--surface-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card--outlined {
+            border: var(--border-width) solid var(--ink-color);
+        }
+
+        .card--lavender {
+            background: var(--lavender);
+            border: none;
+        }
+
+        .card--lime {
+            background: var(--lime);
+            border: none;
+        }
+
+        .header-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .title-display {
+            font-family: var(--font-display);
+            font-size: 42px;
+            line-height: 1.1;
+            font-weight: 700;
+            text-transform: capitalize;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--ink-color);
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px dashed var(--ink-color);
+            padding-bottom: 12px;
+            margin-bottom: 8px;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .metric-value {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.6;
+        }
+
+        .pill-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .pill {
+            background: var(--bg-color);
+            border: var(--border-width) solid var(--ink-color);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .pill:hover {
+            background: var(--surface-color);
+        }
+
+        .pill-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--lavender);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pill-icon.lime { background: var(--lime); }
+        .pill-icon.dark { background: var(--ink-color); color: var(--surface-color); }
+
+        .pill-value {
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .pill-label {
+            font-size: 10px;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        .btn-primary {
+            background: var(--ink-color);
+            color: var(--surface-color);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 18px 24px;
+            font-family: var(--font-ui);
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.1s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        
+        .legend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: var(--border-width) solid var(--ink-color);
+        }
+
+        .legend-dot.meta { background: var(--lavender); }
+        .legend-dot.state { background: var(--surface-color); }
+        .legend-dot.nature { background: var(--lime); }
+
+        
+        #galaxy-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        
+        .axis-line {
+            stroke: var(--ink-color);
+            stroke-width: 0.5;
+            stroke-dasharray: 4 6;
+            opacity: 0.3;
+        }
+
+        .web-connection {
+            stroke: var(--ink-color);
+            stroke-width: 1;
+            opacity: 0.4;
+            transition: stroke-width 0.3s, opacity 0.3s;
+        }
+
+        .spiral-path {
+            fill: none;
+            stroke: var(--ink-color);
+            stroke-width: 1.5;
+            opacity: 0.15;
+            stroke-linecap: round;
+        }
+
+        .node {
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        .node:hover {
+            transform: scale(1.3);
+        }
+
+        .node-base {
+            stroke: var(--ink-color);
+            stroke-width: var(--border-width);
+        }
+
+        
+        .center-identity {
+            fill: var(--ink-color);
+        }
+        
+        .center-ring {
+            fill: none;
+            stroke: var(--ink-color);
+            stroke-width: 3;
+            stroke-dasharray: 12 8;
+        }
+
+        .axis-label {
+            font-family: var(--font-ui);
+            font-size: 9px;
+            font-weight: 600;
+            fill: var(--ink-color);
+            opacity: 0.5;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        
+        .top-bar {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .icon-btn {
+            width: 48px;
+            height: 48px;
+            background: var(--surface-color);
+            border: var(--border-width) solid var(--ink-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .icon-btn.dark {
+            background: var(--ink-color);
+            border: none;
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: var(--ink-color);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .icon-btn.dark svg {
+            stroke: var(--surface-color);
+        }
+
+        .date-badge {
+            background: var(--bg-color);
+            border: var(--border-width) solid var(--ink-color);
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        
+        #tooltip {
+            position: absolute;
+            background: var(--ink-color);
+            color: var(--surface-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+            transform: translate(-50%, -120%);
+        }
+
+    </style>
+</head>
+<body vid="6">
+
+    <div class="dashboard" vid="7">
+        
+        
+        <div class="side-panel" vid="8">
+            
+            
+            <div class="card card--lavender" vid="9">
+                <div class="header-group" vid="10">
+                    <span class="subtitle" vid="11">System Identity</span>
+                    <h1 class="title-display" vid="12">Radial Spiral Matrix</h1>
+                </div>
+                <p style="font-size: 13px; font-weight: 500; opacity: 0.8; line-height: 1.4;" vid="13">
+                    Gravitational center analysis across 36 axes. Nodes sized by score deviation from core identity.
+                </p>
+            </div>
+
+            
+            <div class="card card--outlined" vid="14">
+                <div class="metric-row" vid="15">
+                    <div vid="16">
+                        <div class="metric-label" vid="17">Structural Integrity</div>
+                        <div class="metric-value" vid="18">94.2<span style="font-size:16px" vid="19">%</span></div>
+                    </div>
+                    <div style="text-align: right;" vid="20">
+                        <div class="metric-label" vid="21">Deviation</div>
+                        <div class="metric-value" vid="22">1.8<span style="font-size:16px" vid="23">σ</span></div>
+                    </div>
+                </div>
+                
+                <div class="pill-row" vid="24">
+                    <div class="pill" vid="25">
+                        <div class="pill-icon lime" vid="26">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vid="27"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" vid="28"></polyline></svg>
+                        </div>
+                        <div style="text-align:center;" vid="29">
+                            <div class="pill-value" vid="30">2,346</div>
+                            <div class="pill-label" vid="31">Total Nodes</div>
+                        </div>
+                    </div>
+                    <div class="pill" vid="32">
+                        <div class="pill-icon" vid="33">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vid="34"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" vid="35"></path><path d="M13.73 21a2 2 0 0 1-3.46 0" vid="36"></path></svg>
+                        </div>
+                        <div style="text-align:center;" vid="37">
+                            <div class="pill-value" vid="38">36</div>
+                            <div class="pill-label" vid="39">Active Axes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="card card--outlined" style="flex: 1; justify-content: space-between;" vid="40">
+                <div vid="41">
+                    <h3 style="font-size: 14px; margin-bottom: 16px; border-bottom: 1.5px solid var(--ink-color); padding-bottom: 8px;" vid="42">Orbital Layers</h3>
+                    <div class="legend-list" vid="43">
+                        <div class="legend-item" vid="44">
+                            <div class="legend-dot meta" vid="45"></div>
+                            <span vid="46">Inner Arm: META</span>
+                        </div>
+                        <div class="legend-item" vid="47">
+                            <div class="legend-dot state" vid="48"></div>
+                            <span vid="49">Middle Arm: STATE</span>
+                        </div>
+                        <div class="legend-item" vid="50">
+                            <div class="legend-dot nature" vid="51"></div>
+                            <span vid="52">Outer Arm: NATURE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-primary" vid="53">
+                    Recalibrate Center
+                </button>
+            </div>
+
+        </div>
+
+        
+        <div class="vis-container" vid="54">
+            <div class="top-bar" vid="55">
+                <div class="date-badge" vid="56">Seq: 88.4A</div>
+                <div class="icon-btn dark" vid="57">
+                    <svg viewBox="0 0 24 24" vid="58"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" vid="59"></path></svg>
+                </div>
+                <div class="icon-btn" vid="60">
+                    <svg viewBox="0 0 24 24" vid="61"><line x1="3" y1="12" x2="21" y2="12" vid="62"></line><line x1="3" y1="6" x2="21" y2="6" vid="63"></line><line x1="3" y1="18" x2="21" y2="18" vid="64"></line></svg>
+                </div>
+            </div>
+
+            <svg id="galaxy-canvas" vid="65" viewBox="0 0 828 912"><circle cx="414" cy="456" r="111.78" fill="none" class="axis-line"></circle><circle cx="414" cy="456" r="223.56" fill="none" class="axis-line"></circle><circle cx="414" cy="456" r="335.34000000000003" fill="none" class="axis-line"></circle><line x1="414" y1="456" x2="786.6" y2="456" class="axis-line"></line><text x="806.6" y="456" class="axis-label">A00</text><line x1="414" y1="456" x2="780.9393687723488" y2="520.7013109986982" class="axis-line"></line><line x1="414" y1="456" x2="764.1294705048294" y2="583.4367054031442" class="axis-line"></line><line x1="414" y1="456" x2="736.6810654500819" y2="642.3" class="axis-line"></line><text x="754.0015735257707" y="652.3" class="axis-label">A03</text><line x1="414" y1="456" x2="699.4281595061312" y2="695.5026633692046" class="axis-line"></line><line x1="414" y1="456" x2="653.5026633692046" y2="741.4281595061312" class="axis-line"></line><line x1="414" y1="456" x2="600.3000000000001" y2="778.6810654500819" class="axis-line"></line><text x="610.3000000000001" y="796.0015735257706" class="axis-label">A06</text><line x1="414" y1="456" x2="541.4367054031442" y2="806.1294705048294" class="axis-line"></line><line x1="414" y1="456" x2="478.70131099869826" y2="822.9393687723488" class="axis-line"></line><line x1="414" y1="456" x2="414" y2="828.6" class="axis-line"></line><text x="414" y="848.6" class="axis-label">A09</text><line x1="414" y1="456" x2="349.2986890013018" y2="822.9393687723488" class="axis-line"></line><line x1="414" y1="456" x2="286.5632945968558" y2="806.1294705048294" class="axis-line"></line><line x1="414" y1="456" x2="227.70000000000007" y2="778.6810654500819" class="axis-line"></line><text x="217.70000000000007" y="796.0015735257707" class="axis-label">A12</text><line x1="414" y1="456" x2="174.49733663079542" y2="741.4281595061312" class="axis-line"></line><line x1="414" y1="456" x2="128.57184049386882" y2="695.5026633692046" class="axis-line"></line><line x1="414" y1="456" x2="91.31893454991814" y2="642.3" class="axis-line"></line><text x="73.99842647422935" y="652.3" class="axis-label">A15</text><line x1="414" y1="456" x2="63.87052949517056" y2="583.4367054031443" class="axis-line"></line><line x1="414" y1="456" x2="47.06063122765124" y2="520.7013109986983" class="axis-line"></line><line x1="414" y1="456" x2="41.39999999999998" y2="456.00000000000006" class="axis-line"></line><text x="21.399999999999977" y="456.00000000000006" class="axis-label">A18</text><line x1="414" y1="456" x2="47.06063122765124" y2="391.29868900130185" class="axis-line"></line><line x1="414" y1="456" x2="63.8705294951705" y2="328.5632945968558" class="axis-line"></line><line x1="414" y1="456" x2="91.31893454991808" y2="269.7000000000001" class="axis-line"></line><text x="73.99842647422929" y="259.7000000000001" class="axis-label">A21</text><line x1="414" y1="456" x2="128.57184049386876" y2="216.49733663079547" class="axis-line"></line><line x1="414" y1="456" x2="174.4973366307954" y2="170.57184049386882" class="axis-line"></line><line x1="414" y1="456" x2="227.69999999999982" y2="133.31893454991825" class="axis-line"></line><text x="217.69999999999982" y="115.99842647422946" class="axis-label">A24</text><line x1="414" y1="456" x2="286.5632945968556" y2="105.87052949517056" class="axis-line"></line><line x1="414" y1="456" x2="349.29868900130174" y2="89.06063122765124" class="axis-line"></line><line x1="414" y1="456" x2="413.99999999999994" y2="83.39999999999998" class="axis-line"></line><text x="413.99999999999994" y="63.39999999999998" class="axis-label">A27</text><line x1="414" y1="456" x2="478.7013109986981" y2="89.06063122765124" class="axis-line"></line><line x1="414" y1="456" x2="541.436705403144" y2="105.87052949517044" class="axis-line"></line><line x1="414" y1="456" x2="600.3000000000001" y2="133.31893454991814" class="axis-line"></line><text x="610.3000000000001" y="115.9984264742294" class="axis-label">A30</text><line x1="414" y1="456" x2="653.5026633692046" y2="170.5718404938687" class="axis-line"></line><line x1="414" y1="456" x2="699.4281595061311" y2="216.49733663079533" class="axis-line"></line><line x1="414" y1="456" x2="736.6810654500817" y2="269.6999999999998" class="axis-line"></line><text x="754.0015735257705" y="259.6999999999998" class="axis-label">A33</text><line x1="414" y1="456" x2="764.1294705048294" y2="328.56329459685554" class="axis-line"></line><line x1="414" y1="456" x2="780.9393687723488" y2="391.29868900130174" class="axis-line"></line><path d="M 515.3378437611959 456 L 528.1961823415028 476.13586804071053 L 503.5617580616554 488.5978140629936 L 513.993454775901 513.7312480320671 L 500.61242164988437 528.6764510617891 L 489.1377808215021 545.5457202335814 L 469.6619946075537 552.4094027109079 L 451.37066814656 558.6750668826057 L 435.18834575886416 576.1650800900202 L 414 552.2587191742497 L 395.4869949052841 560.9924692201523 L 372.91845736499585 568.8706107460363 L 354.09807727511725 559.7531736305617 L 346.8592606800537 536.0152172939773 L 325.58962164915926 530.1851158664342 L 331.31832496046394 503.7362873411253 L 302.1930040428792 496.6944185111136 L 284.8972696781119 478.76429463887774 L 311.57048335052644 456 L 293.8493195965185 434.8141932943864 L 324.60839537736734 423.4641167240687 L 330.4406660109963 407.7569960281429 L 319.32037470540723 376.5543613353041 L 339.06028516088975 366.6903256125048 L 350.20079216673616 345.49653055014085 L 373.2828546140231 344.1305624673778 L 397.0300850294018 359.75882974678797 L 414 352.0262737828844 L 435.43576312549607 334.43174629674223 L 451.2899408354747 353.5467295817343 L 474.0165119544175 352.04835200188404 L 497.2542991092293 356.781389937663 L 485.98273459228403 395.5993139524824 L 507.5189422060883 402.0068135429858 L 511.13368692788833 420.6462292137164 L 530.9801438921068 435.373244424663 Z" class="spiral-path"></path><path d="M 414 659.7186450884642 L 373.8142014638961 683.9049886446262 L 333.1303593373341 678.187511640084 L 306.6851578744717 641.874758967648 L 283.0927204361411 612.0092207169635 L 232.98735792148315 607.8876412065085 L 236.11257491194766 558.7033527600365 L 211.57905532192126 529.6751986548663 L 175.0387490842917 498.13531588028474 L 189.32551032828036 456 L 192.9901418588839 417.0299990071709 L 187.43237859018947 373.53612975833505 L 205.94913884012155 335.8817793042108 L 242.4529474817893 312.0549315024199 L 260.4279178958541 272.9799194302111 L 295.6589885983815 251.0273556333088 L 343.8226876816112 263.189419047212 L 373.46909957435633 226.13784128331127 L 413.99999999999994 214.68782896791524 L 456.1449786578389 216.9839487496214 L 487.94488033899466 252.83811098433773 L 524.5697152538276 264.4876354019467 L 567.1169946003004 273.52227159786383 L 580.7759352856751 316.058374212544 L 596.3476838845293 350.7215156231621 L 639.2080445786315 374.03097525608194 L 641.8279690573468 415.8277820951765 L 630.5121797278125 455.99999999999994 L 625.9269650146871 493.3684418717482 L 631.0841134119746 535.012155614027 L 621.3020822148997 575.6859129703422 L 598.3221970450267 610.6646875582678 L 553.6352679761463 622.4108322634274 L 516.5807780881865 633.675119528687 L 496.6612339283823 683.1098736824861 L 450.2270615108495 661.4538753246532 Z" class="spiral-path"></path><path d="M 88.62668994625204 456.00000000000006 L 94.65452398806877 399.69077641190876 L 90.53399200033118 338.26800129120727 L 109.3080854566569 280.08604111849854 L 146.23633231546432 231.31960520323037 L 194.42009610035007 194.3148606661009 L 247.73766212104388 168.02518340846484 L 296.4994844043617 133.1699866267079 L 353.62143781854894 113.5761580056793 L 413.99999999999994 119.40925173246518 L 471.8887856104775 127.69638260755096 L 522.7113991868822 157.31788549672302 L 575.5032864351704 176.2681023049348 L 634.928356193583 192.70783780036413 L 661.3792537508472 248.42415941675324 L 714.5553714157968 282.47427540670185 L 712.6158511962029 347.31271868451665 L 738.0230312888864 398.8659972128262 L 747.10738943336 455.99999999999994 L 736.5866779004166 512.8807349309544 L 720.7305121031436 567.6407763467731 L 714.4652945199741 629.4737186732468 L 668.0039100936365 669.1345872771573 L 636.730870156658 721.4403146908317 L 589.0900710476769 759.2648989554204 L 529.4534802529259 773.2058299923633 L 469.5638084314804 771.118016586176 L 414.0000000000001 803.4508981951384 L 354.93637544861286 790.9664601190091 L 303.6281925467464 759.2440487222083 L 241.11505937751903 755.445501021665 L 186.2396949523151 727.4341617909313 L 154.5079984281976 673.7396428123534 L 106.7238105420252 633.4059906991241 L 116.82369837362165 564.1633281213166 L 83.85097187155827 514.2141813137223 Z" class="spiral-path"></path><line x1="515.3378437611959" y1="456" x2="528.1961823415028" y2="476.13586804071053" class="web-connection"></line><line x1="515.3378437611959" y1="456" x2="513.993454775901" y2="513.7312480320671" class="web-connection"></line><line x1="515.3378437611959" y1="456" x2="530.9801438921068" y2="435.373244424663" class="web-connection"></line><line x1="528.1961823415028" y1="476.13586804071053" x2="513.993454775901" y2="513.7312480320671" class="web-connection"></line><line x1="528.1961823415028" y1="476.13586804071053" x2="485.98273459228403" y2="395.5993139524824" class="web-connection"></line><line x1="503.5617580616554" y1="488.5978140629936" x2="500.61242164988437" y2="528.6764510617891" class="web-connection"></line><line x1="503.5617580616554" y1="488.5978140629936" x2="469.6619946075537" y2="552.4094027109079" class="web-connection"></line><line x1="503.5617580616554" y1="488.5978140629936" x2="451.37066814656" y2="558.6750668826057" class="web-connection"></line><line x1="513.993454775901" y1="513.7312480320671" x2="511.13368692788833" y2="420.6462292137164" class="web-connection"></line><line x1="500.61242164988437" y1="528.6764510617891" x2="435.18834575886416" y2="576.1650800900202" class="web-connection"></line><line x1="489.1377808215021" y1="545.5457202335814" x2="435.18834575886416" y2="576.1650800900202" class="web-connection"></line><line x1="451.37066814656" y1="558.6750668826057" x2="435.18834575886416" y2="576.1650800900202" class="web-connection"></line><line x1="435.18834575886416" y1="576.1650800900202" x2="395.4869949052841" y2="560.9924692201523" class="web-connection"></line><line x1="435.18834575886416" y1="576.1650800900202" x2="354.09807727511725" y2="559.7531736305617" class="web-connection"></line><line x1="435.18834575886416" y1="576.1650800900202" x2="414" y2="659.7186450884642" class="web-connection"></line><line x1="435.18834575886416" y1="576.1650800900202" x2="450.2270615108495" y2="661.4538753246532" class="web-connection"></line><line x1="414" y1="552.2587191742497" x2="354.09807727511725" y2="559.7531736305617" class="web-connection"></line><line x1="395.4869949052841" y1="560.9924692201523" x2="372.91845736499585" y2="568.8706107460363" class="web-connection"></line><line x1="395.4869949052841" y1="560.9924692201523" x2="354.09807727511725" y2="559.7531736305617" class="web-connection"></line><line x1="395.4869949052841" y1="560.9924692201523" x2="346.8592606800537" y2="536.0152172939773" class="web-connection"></line><line x1="395.4869949052841" y1="560.9924692201523" x2="331.31832496046394" y2="503.7362873411253" class="web-connection"></line><line x1="372.91845736499585" y1="568.8706107460363" x2="331.31832496046394" y2="503.7362873411253" class="web-connection"></line><line x1="354.09807727511725" y1="559.7531736305617" x2="346.8592606800537" y2="536.0152172939773" class="web-connection"></line><line x1="346.8592606800537" y1="536.0152172939773" x2="325.58962164915926" y2="530.1851158664342" class="web-connection"></line><line x1="346.8592606800537" y1="536.0152172939773" x2="331.31832496046394" y2="503.7362873411253" class="web-connection"></line><line x1="346.8592606800537" y1="536.0152172939773" x2="302.1930040428792" y2="496.6944185111136" class="web-connection"></line><line x1="325.58962164915926" y1="530.1851158664342" x2="331.31832496046394" y2="503.7362873411253" class="web-connection"></line><line x1="325.58962164915926" y1="530.1851158664342" x2="302.1930040428792" y2="496.6944185111136" class="web-connection"></line><line x1="325.58962164915926" y1="530.1851158664342" x2="284.8972696781119" y2="478.76429463887774" class="web-connection"></line><line x1="325.58962164915926" y1="530.1851158664342" x2="311.57048335052644" y2="456" class="web-connection"></line><line x1="331.31832496046394" y1="503.7362873411253" x2="284.8972696781119" y2="478.76429463887774" class="web-connection"></line><line x1="331.31832496046394" y1="503.7362873411253" x2="324.60839537736734" y2="423.4641167240687" class="web-connection"></line><line x1="302.1930040428792" y1="496.6944185111136" x2="284.8972696781119" y2="478.76429463887774" class="web-connection"></line><line x1="302.1930040428792" y1="496.6944185111136" x2="311.57048335052644" y2="456" class="web-connection"></line><line x1="284.8972696781119" y1="478.76429463887774" x2="311.57048335052644" y2="456" class="web-connection"></line><line x1="284.8972696781119" y1="478.76429463887774" x2="330.4406660109963" y2="407.7569960281429" class="web-connection"></line><line x1="311.57048335052644" y1="456" x2="330.4406660109963" y2="407.7569960281429" class="web-connection"></line><line x1="293.8493195965185" y1="434.8141932943864" x2="319.32037470540723" y2="376.5543613353041" class="web-connection"></line><line x1="293.8493195965185" y1="434.8141932943864" x2="339.06028516088975" y2="366.6903256125048" class="web-connection"></line><line x1="324.60839537736734" y1="423.4641167240687" x2="339.06028516088975" y2="366.6903256125048" class="web-connection"></line><line x1="330.4406660109963" y1="407.7569960281429" x2="397.0300850294018" y2="359.75882974678797" class="web-connection"></line><line x1="319.32037470540723" y1="376.5543613353041" x2="350.20079216673616" y2="345.49653055014085" class="web-connection"></line><line x1="350.20079216673616" y1="345.49653055014085" x2="373.2828546140231" y2="344.1305624673778" class="web-connection"></line><line x1="350.20079216673616" y1="345.49653055014085" x2="414" y2="352.0262737828844" class="web-connection"></line><line x1="350.20079216673616" y1="345.49653055014085" x2="343.8226876816112" y2="263.189419047212" class="web-connection"></line><line x1="373.2828546140231" y1="344.1305624673778" x2="397.0300850294018" y2="359.75882974678797" class="web-connection"></line><line x1="373.2828546140231" y1="344.1305624673778" x2="435.43576312549607" y2="334.43174629674223" class="web-connection"></line><line x1="397.0300850294018" y1="359.75882974678797" x2="435.43576312549607" y2="334.43174629674223" class="web-connection"></line><line x1="397.0300850294018" y1="359.75882974678797" x2="451.2899408354747" y2="353.5467295817343" class="web-connection"></line><line x1="397.0300850294018" y1="359.75882974678797" x2="474.0165119544175" y2="352.04835200188404" class="web-connection"></line><line x1="435.43576312549607" y1="334.43174629674223" x2="451.2899408354747" y2="353.5467295817343" class="web-connection"></line><line x1="435.43576312549607" y1="334.43174629674223" x2="497.2542991092293" y2="356.781389937663" class="web-connection"></line><line x1="451.2899408354747" y1="353.5467295817343" x2="485.98273459228403" y2="395.5993139524824" class="web-connection"></line><line x1="451.2899408354747" y1="353.5467295817343" x2="511.13368692788833" y2="420.6462292137164" class="web-connection"></line><line x1="474.0165119544175" y1="352.04835200188404" x2="511.13368692788833" y2="420.6462292137164" class="web-connection"></line><line x1="497.2542991092293" y1="356.781389937663" x2="485.98273459228403" y2="395.5993139524824" class="web-connection"></line><line x1="485.98273459228403" y1="395.5993139524824" x2="511.13368692788833" y2="420.6462292137164" class="web-connection"></line><line x1="373.8142014638961" y1="683.9049886446262" x2="333.1303593373341" y2="678.187511640084" class="web-connection"></line><line x1="373.8142014638961" y1="683.9049886446262" x2="306.6851578744717" y2="641.874758967648" class="web-connection"></line><line x1="236.11257491194766" y1="558.7033527600365" x2="175.0387490842917" y2="498.13531588028474" class="web-connection"></line><line x1="211.57905532192126" y1="529.6751986548663" x2="189.32551032828036" y2="456" class="web-connection"></line><line x1="175.0387490842917" y1="498.13531588028474" x2="116.82369837362165" y2="564.1633281213166" class="web-connection"></line><line x1="189.32551032828036" y1="456" x2="187.43237859018947" y2="373.53612975833505" class="web-connection"></line><line x1="192.9901418588839" y1="417.0299990071709" x2="187.43237859018947" y2="373.53612975833505" class="web-connection"></line><line x1="205.94913884012155" y1="335.8817793042108" x2="242.4529474817893" y2="312.0549315024199" class="web-connection"></line><line x1="260.4279178958541" y1="272.9799194302111" x2="295.6589885983815" y2="251.0273556333088" class="web-connection"></line><line x1="295.6589885983815" y1="251.0273556333088" x2="373.46909957435633" y2="226.13784128331127" class="web-connection"></line><line x1="456.1449786578389" y1="216.9839487496214" x2="487.94488033899466" y2="252.83811098433773" class="web-connection"></line><line x1="456.1449786578389" y1="216.9839487496214" x2="471.8887856104775" y2="127.69638260755096" class="web-connection"></line><line x1="487.94488033899466" y1="252.83811098433773" x2="567.1169946003004" y2="273.52227159786383" class="web-connection"></line><line x1="524.5697152538276" y1="264.4876354019467" x2="580.7759352856751" y2="316.058374212544" class="web-connection"></line><line x1="567.1169946003004" y1="273.52227159786383" x2="580.7759352856751" y2="316.058374212544" class="web-connection"></line><line x1="567.1169946003004" y1="273.52227159786383" x2="596.3476838845293" y2="350.7215156231621" class="web-connection"></line><line x1="641.8279690573468" y1="415.8277820951765" x2="630.5121797278125" y2="455.99999999999994" class="web-connection"></line><line x1="641.8279690573468" y1="415.8277820951765" x2="625.9269650146871" y2="493.3684418717482" class="web-connection"></line><line x1="625.9269650146871" y1="493.3684418717482" x2="631.0841134119746" y2="535.012155614027" class="web-connection"></line><line x1="625.9269650146871" y1="493.3684418717482" x2="621.3020822148997" y2="575.6859129703422" class="web-connection"></line><line x1="631.0841134119746" y1="535.012155614027" x2="621.3020822148997" y2="575.6859129703422" class="web-connection"></line><line x1="621.3020822148997" y1="575.6859129703422" x2="553.6352679761463" y2="622.4108322634274" class="web-connection"></line><line x1="598.3221970450267" y1="610.6646875582678" x2="516.5807780881865" y2="633.675119528687" class="web-connection"></line><line x1="553.6352679761463" y1="622.4108322634274" x2="516.5807780881865" y2="633.675119528687" class="web-connection"></line><line x1="553.6352679761463" y1="622.4108322634274" x2="496.6612339283823" y2="683.1098736824861" class="web-connection"></line><line x1="516.5807780881865" y1="633.675119528687" x2="450.2270615108495" y2="661.4538753246532" class="web-connection"></line><line x1="496.6612339283823" y1="683.1098736824861" x2="450.2270615108495" y2="661.4538753246532" class="web-connection"></line><line x1="496.6612339283823" y1="683.1098736824861" x2="469.5638084314804" y2="771.118016586176" class="web-connection"></line><line x1="88.62668994625204" y1="456.00000000000006" x2="94.65452398806877" y2="399.69077641190876" class="web-connection"></line><line x1="88.62668994625204" y1="456.00000000000006" x2="83.85097187155827" y2="514.2141813137223" class="web-connection"></line><line x1="94.65452398806877" y1="399.69077641190876" x2="90.53399200033118" y2="338.26800129120727" class="web-connection"></line><line x1="90.53399200033118" y1="338.26800129120727" x2="109.3080854566569" y2="280.08604111849854" class="web-connection"></line><line x1="109.3080854566569" y1="280.08604111849854" x2="146.23633231546432" y2="231.31960520323037" class="web-connection"></line><line x1="146.23633231546432" y1="231.31960520323037" x2="194.42009610035007" y2="194.3148606661009" class="web-connection"></line><line x1="247.73766212104388" y1="168.02518340846484" x2="296.4994844043617" y2="133.1699866267079" class="web-connection"></line><line x1="296.4994844043617" y1="133.1699866267079" x2="353.62143781854894" y2="113.5761580056793" class="web-connection"></line><line x1="413.99999999999994" y1="119.40925173246518" x2="471.8887856104775" y2="127.69638260755096" class="web-connection"></line><line x1="575.5032864351704" y1="176.2681023049348" x2="634.928356193583" y2="192.70783780036413" class="web-connection"></line><line x1="661.3792537508472" y1="248.42415941675324" x2="714.5553714157968" y2="282.47427540670185" class="web-connection"></line><line x1="712.6158511962029" y1="347.31271868451665" x2="738.0230312888864" y2="398.8659972128262" class="web-connection"></line><line x1="738.0230312888864" y1="398.8659972128262" x2="747.10738943336" y2="455.99999999999994" class="web-connection"></line><line x1="747.10738943336" y1="455.99999999999994" x2="736.5866779004166" y2="512.8807349309544" class="web-connection"></line><line x1="736.5866779004166" y1="512.8807349309544" x2="720.7305121031436" y2="567.6407763467731" class="web-connection"></line><line x1="720.7305121031436" y1="567.6407763467731" x2="714.4652945199741" y2="629.4737186732468" class="web-connection"></line><line x1="589.0900710476769" y1="759.2648989554204" x2="529.4534802529259" y2="773.2058299923633" class="web-connection"></line><line x1="469.5638084314804" y1="771.118016586176" x2="414.0000000000001" y2="803.4508981951384" class="web-connection"></line><line x1="241.11505937751903" y1="755.445501021665" x2="186.2396949523151" y2="727.4341617909313" class="web-connection"></line><line x1="186.2396949523151" y1="727.4341617909313" x2="154.5079984281976" y2="673.7396428123534" class="web-connection"></line><line x1="154.5079984281976" y1="673.7396428123534" x2="106.7238105420252" y2="633.4059906991241" class="web-connection"></line><line x1="106.7238105420252" y1="633.4059906991241" x2="116.82369837362165" y2="564.1633281213166" class="web-connection"></line><g><circle cx="414" cy="456" r="32" class="center-ring"></circle><circle cx="414" cy="456" r="12" class="center-identity"></circle></g><g class="node"><circle cx="515.3378437611959" cy="456" r="4.162195689147836" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="528.1961823415028" cy="476.13586804071053" r="6.854984172866889" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="503.5617580616554" cy="488.5978140629936" r="7.195993720558425" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="513.993454775901" cy="513.7312480320671" r="10.297324383858113" fill="var(--lavender)" class="node-base"></circle><circle cx="513.993454775901" cy="513.7312480320671" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="500.61242164988437" cy="528.6764510617891" r="15.57198244487267" fill="var(--lavender)" class="node-base"></circle><circle cx="500.61242164988437" cy="528.6764510617891" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="489.1377808215021" cy="545.5457202335814" r="10.124101704894205" fill="var(--lavender)" class="node-base"></circle><circle cx="489.1377808215021" cy="545.5457202335814" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="469.6619946075537" cy="552.4094027109079" r="11.400319616645984" fill="var(--lavender)" class="node-base"></circle><circle cx="469.6619946075537" cy="552.4094027109079" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="451.37066814656" cy="558.6750668826057" r="9.654808065663179" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="435.18834575886416" cy="576.1650800900202" r="8.94172317086319" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="414" cy="552.2587191742497" r="13.375637936999714" fill="var(--lavender)" class="node-base"></circle><circle cx="414" cy="552.2587191742497" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="395.4869949052841" cy="560.9924692201523" r="11.184552201821084" fill="var(--lavender)" class="node-base"></circle><circle cx="395.4869949052841" cy="560.9924692201523" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="372.91845736499585" cy="568.8706107460363" r="6.924065894107251" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="354.09807727511725" cy="559.7531736305617" r="15.677586340070128" fill="var(--lavender)" class="node-base"></circle><circle cx="354.09807727511725" cy="559.7531736305617" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="346.8592606800537" cy="536.0152172939773" r="8.436750100883271" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="325.58962164915926" cy="530.1851158664342" r="11.928135725204374" fill="var(--lavender)" class="node-base"></circle><circle cx="325.58962164915926" cy="530.1851158664342" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="331.31832496046394" cy="503.7362873411253" r="14.628208849021956" fill="var(--lavender)" class="node-base"></circle><circle cx="331.31832496046394" cy="503.7362873411253" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="302.1930040428792" cy="496.6944185111136" r="5.039830683354108" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="284.8972696781119" cy="478.76429463887774" r="12.022046887704867" fill="var(--lavender)" class="node-base"></circle><circle cx="284.8972696781119" cy="478.76429463887774" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="311.57048335052644" cy="456" r="6.395989183856344" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="293.8493195965185" cy="434.8141932943864" r="9.968834961411925" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="324.60839537736734" cy="423.4641167240687" r="13.325607763134604" fill="var(--lavender)" class="node-base"></circle><circle cx="324.60839537736734" cy="423.4641167240687" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="330.4406660109963" cy="407.7569960281429" r="12.84515646764928" fill="var(--lavender)" class="node-base"></circle><circle cx="330.4406660109963" cy="407.7569960281429" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="319.32037470540723" cy="376.5543613353041" r="10.568398687967678" fill="var(--lavender)" class="node-base"></circle><circle cx="319.32037470540723" cy="376.5543613353041" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="339.06028516088975" cy="366.6903256125048" r="7.349759782537104" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="350.20079216673616" cy="345.49653055014085" r="7.334231189515729" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="373.2828546140231" cy="344.1305624673778" r="15.929218509669663" fill="var(--lavender)" class="node-base"></circle><circle cx="373.2828546140231" cy="344.1305624673778" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="397.0300850294018" cy="359.75882974678797" r="13.778605105615217" fill="var(--lavender)" class="node-base"></circle><circle cx="397.0300850294018" cy="359.75882974678797" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="414" cy="352.0262737828844" r="6.232005159875243" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="435.43576312549607" cy="334.43174629674223" r="11.826893216833653" fill="var(--lavender)" class="node-base"></circle><circle cx="435.43576312549607" cy="334.43174629674223" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="451.2899408354747" cy="353.5467295817343" r="10.881934930093419" fill="var(--lavender)" class="node-base"></circle><circle cx="451.2899408354747" cy="353.5467295817343" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="474.0165119544175" cy="352.04835200188404" r="14.388588615421959" fill="var(--lavender)" class="node-base"></circle><circle cx="474.0165119544175" cy="352.04835200188404" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="497.2542991092293" cy="356.781389937663" r="9.742857500955798" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="485.98273459228403" cy="395.5993139524824" r="6.3026241674286965" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="507.5189422060883" cy="402.0068135429858" r="10.958071303865065" fill="var(--lavender)" class="node-base"></circle><circle cx="507.5189422060883" cy="402.0068135429858" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="511.13368692788833" cy="420.6462292137164" r="7.10075156865932" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="530.9801438921068" cy="435.373244424663" r="4.2174213265184495" fill="var(--lavender)" class="node-base"></circle></g><g class="node"><circle cx="414" cy="659.7186450884642" r="15.141358457673167" fill="var(--surface-color)" class="node-base"></circle><circle cx="414" cy="659.7186450884642" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="373.8142014638961" cy="683.9049886446262" r="8.822726102876388" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="333.1303593373341" cy="678.187511640084" r="4.621795965850177" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="306.6851578744717" cy="641.874758967648" r="9.321586057068073" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="283.0927204361411" cy="612.0092207169635" r="11.227971049611114" fill="var(--surface-color)" class="node-base"></circle><circle cx="283.0927204361411" cy="612.0092207169635" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="232.98735792148315" cy="607.8876412065085" r="4.984397537915403" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="236.11257491194766" cy="558.7033527600365" r="14.373600063984464" fill="var(--surface-color)" class="node-base"></circle><circle cx="236.11257491194766" cy="558.7033527600365" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="211.57905532192126" cy="529.6751986548663" r="12.169139264491545" fill="var(--surface-color)" class="node-base"></circle><circle cx="211.57905532192126" cy="529.6751986548663" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="175.0387490842917" cy="498.13531588028474" r="15.750889780135031" fill="var(--surface-color)" class="node-base"></circle><circle cx="175.0387490842917" cy="498.13531588028474" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="189.32551032828036" cy="456" r="10.602331158122272" fill="var(--surface-color)" class="node-base"></circle><circle cx="189.32551032828036" cy="456" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="192.9901418588839" cy="417.0299990071709" r="11.0912704749183" fill="var(--surface-color)" class="node-base"></circle><circle cx="192.9901418588839" cy="417.0299990071709" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="187.43237859018947" cy="373.53612975833505" r="11.741564146481" fill="var(--surface-color)" class="node-base"></circle><circle cx="187.43237859018947" cy="373.53612975833505" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="205.94913884012155" cy="335.8817793042108" r="5.868893360447322" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="242.4529474817893" cy="312.0549315024199" r="4.051980979032637" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="260.4279178958541" cy="272.9799194302111" r="5.085789356361046" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="295.6589885983815" cy="251.0273556333088" r="9.519141027273191" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="343.8226876816112" cy="263.189419047212" r="14.822940205888873" fill="var(--surface-color)" class="node-base"></circle><circle cx="343.8226876816112" cy="263.189419047212" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="373.46909957435633" cy="226.13784128331127" r="13.360543510567615" fill="var(--surface-color)" class="node-base"></circle><circle cx="373.46909957435633" cy="226.13784128331127" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="413.99999999999994" cy="214.68782896791524" r="13.597857409496463" fill="var(--surface-color)" class="node-base"></circle><circle cx="413.99999999999994" cy="214.68782896791524" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="456.1449786578389" cy="216.9839487496214" r="7.413998430106165" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="487.94488033899466" cy="252.83811098433773" r="6.539902723193853" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="524.5697152538276" cy="264.4876354019467" r="4.736958091636923" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="567.1169946003004" cy="273.52227159786383" r="13.012209472817696" fill="var(--surface-color)" class="node-base"></circle><circle cx="567.1169946003004" cy="273.52227159786383" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="580.7759352856751" cy="316.058374212544" r="12.405543966860524" fill="var(--surface-color)" class="node-base"></circle><circle cx="580.7759352856751" cy="316.058374212544" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="596.3476838845293" cy="350.7215156231621" r="14.974725498814983" fill="var(--surface-color)" class="node-base"></circle><circle cx="596.3476838845293" cy="350.7215156231621" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="639.2080445786315" cy="374.03097525608194" r="9.462028412685175" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="641.8279690573468" cy="415.8277820951765" r="4.42166124910978" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="630.5121797278125" cy="455.99999999999994" r="6.753760244786678" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="625.9269650146871" cy="493.3684418717482" r="15.43863687575902" fill="var(--surface-color)" class="node-base"></circle><circle cx="625.9269650146871" cy="493.3684418717482" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="631.0841134119746" cy="535.012155614027" r="15.167482812402485" fill="var(--surface-color)" class="node-base"></circle><circle cx="631.0841134119746" cy="535.012155614027" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="621.3020822148997" cy="575.6859129703422" r="15.019038132578789" fill="var(--surface-color)" class="node-base"></circle><circle cx="621.3020822148997" cy="575.6859129703422" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="598.3221970450267" cy="610.6646875582678" r="13.172827586869033" fill="var(--surface-color)" class="node-base"></circle><circle cx="598.3221970450267" cy="610.6646875582678" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="553.6352679761463" cy="622.4108322634274" r="6.168728835307087" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="516.5807780881865" cy="633.675119528687" r="9.326797851435021" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="496.6612339283823" cy="683.1098736824861" r="5.553711599971239" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="450.2270615108495" cy="661.4538753246532" r="4.024065484736716" fill="var(--surface-color)" class="node-base"></circle></g><g class="node"><circle cx="88.62668994625204" cy="456.00000000000006" r="10.774926934259657" fill="var(--lime)" class="node-base"></circle><circle cx="88.62668994625204" cy="456.00000000000006" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="94.65452398806877" cy="399.69077641190876" r="15.48540891971916" fill="var(--lime)" class="node-base"></circle><circle cx="94.65452398806877" cy="399.69077641190876" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="90.53399200033118" cy="338.26800129120727" r="11.920328064601863" fill="var(--lime)" class="node-base"></circle><circle cx="90.53399200033118" cy="338.26800129120727" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="109.3080854566569" cy="280.08604111849854" r="12.396103045543965" fill="var(--lime)" class="node-base"></circle><circle cx="109.3080854566569" cy="280.08604111849854" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="146.23633231546432" cy="231.31960520323037" r="10.520327646765026" fill="var(--lime)" class="node-base"></circle><circle cx="146.23633231546432" cy="231.31960520323037" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="194.42009610035007" cy="194.3148606661009" r="13.53526852528153" fill="var(--lime)" class="node-base"></circle><circle cx="194.42009610035007" cy="194.3148606661009" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="247.73766212104388" cy="168.02518340846484" r="10.039721177822086" fill="var(--lime)" class="node-base"></circle><circle cx="247.73766212104388" cy="168.02518340846484" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="296.4994844043617" cy="133.1699866267079" r="7.256281931164811" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="353.62143781854894" cy="113.5761580056793" r="6.739014160369518" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="413.99999999999994" cy="119.40925173246518" r="12.201518080826556" fill="var(--lime)" class="node-base"></circle><circle cx="413.99999999999994" cy="119.40925173246518" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="471.8887856104775" cy="127.69638260755096" r="9.026430604186576" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="522.7113991868822" cy="157.31788549672302" r="14.781517141589685" fill="var(--lime)" class="node-base"></circle><circle cx="522.7113991868822" cy="157.31788549672302" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="575.5032864351704" cy="176.2681023049348" r="6.364471094926255" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="634.928356193583" cy="192.70783780036413" r="14.379451002524464" fill="var(--lime)" class="node-base"></circle><circle cx="634.928356193583" cy="192.70783780036413" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="661.3792537508472" cy="248.42415941675324" r="15.594120107945884" fill="var(--lime)" class="node-base"></circle><circle cx="661.3792537508472" cy="248.42415941675324" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="714.5553714157968" cy="282.47427540670185" r="5.334924054600586" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="712.6158511962029" cy="347.31271868451665" r="7.066443414694422" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="738.0230312888864" cy="398.8659972128262" r="5.9762691908110686" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="747.10738943336" cy="455.99999999999994" r="12.25743092798943" fill="var(--lime)" class="node-base"></circle><circle cx="747.10738943336" cy="455.99999999999994" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="736.5866779004166" cy="512.8807349309544" r="13.06989212546281" fill="var(--lime)" class="node-base"></circle><circle cx="736.5866779004166" cy="512.8807349309544" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="720.7305121031436" cy="567.6407763467731" r="14.384281054911444" fill="var(--lime)" class="node-base"></circle><circle cx="720.7305121031436" cy="567.6407763467731" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="714.4652945199741" cy="629.4737186732468" r="6.718530490592541" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="668.0039100936365" cy="669.1345872771573" r="6.401627124040168" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="636.730870156658" cy="721.4403146908317" r="4.9040238910566085" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="589.0900710476769" cy="759.2648989554204" r="5.379074896130668" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="529.4534802529259" cy="773.2058299923633" r="14.362436896682372" fill="var(--lime)" class="node-base"></circle><circle cx="529.4534802529259" cy="773.2058299923633" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="469.5638084314804" cy="771.118016586176" r="8.27325844092314" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="414.0000000000001" cy="803.4508981951384" r="13.07490381459682" fill="var(--lime)" class="node-base"></circle><circle cx="414.0000000000001" cy="803.4508981951384" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="354.93637544861286" cy="790.9664601190091" r="11.506682964407982" fill="var(--lime)" class="node-base"></circle><circle cx="354.93637544861286" cy="790.9664601190091" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="303.6281925467464" cy="759.2440487222083" r="7.961210333711167" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="241.11505937751903" cy="755.445501021665" r="11.82471220655194" fill="var(--lime)" class="node-base"></circle><circle cx="241.11505937751903" cy="755.445501021665" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="186.2396949523151" cy="727.4341617909313" r="5.2029259198665265" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="154.5079984281976" cy="673.7396428123534" r="5.304087990337595" fill="var(--lime)" class="node-base"></circle></g><g class="node"><circle cx="106.7238105420252" cy="633.4059906991241" r="11.471122626472699" fill="var(--lime)" class="node-base"></circle><circle cx="106.7238105420252" cy="633.4059906991241" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="116.82369837362165" cy="564.1633281213166" r="12.13549279026909" fill="var(--lime)" class="node-base"></circle><circle cx="116.82369837362165" cy="564.1633281213166" r="2" fill="var(--ink-color)"></circle></g><g class="node"><circle cx="83.85097187155827" cy="514.2141813137223" r="5.3472381219546286" fill="var(--lime)" class="node-base"></circle></g></svg>
+            <div id="tooltip" vid="66"></div>
+        </div>
+
+    </div>
+
+    <script vid="67">
+        
+
+        const svg = document.getElementById('galaxy-canvas');
+        const tooltip = document.getElementById('tooltip');
+        let width, height, cx, cy;
+
+        
+        const NUM_AXES = 36;
+        const LAYERS = [
+            { name: 'META', radiusMult: 0.3, color: 'var(--lavender)' }, 
+            { name: 'STATE', radiusMult: 0.6, color: 'var(--surface-color)' }, 
+            { name: 'NATURE', radiusMult: 0.9, color: 'var(--lime)' }    
+        ];
+        const SPIRAL_TWIST = Math.PI * 1.5; 
+
+        
+        let nodes = [];
+        let connections = [];
+
+        function init() {
+            resize();
+            window.addEventListener('resize', () => {
+                resize();
+                render();
+            });
+            generateData();
+            render();
+        }
+
+        function resize() {
+            width = svg.clientWidth;
+            height = svg.clientHeight;
+            cx = width / 2;
+            cy = height / 2;
+            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        }
+
+        function generateData() {
+            nodes = [];
+            connections = [];
+            const maxRadius = Math.min(width, height) * 0.45;
+
+            
+            LAYERS.forEach((layer, layerIndex) => {
+                const layerBaseRadius = maxRadius * layer.radiusMult;
+                
+                for (let i = 0; i < NUM_AXES; i++) {
+                    
+                    const angleStep = (Math.PI * 2) / NUM_AXES;
+                    const baseAngle = i * angleStep;
+                    
+                    
+                    const twistOffset = (layerIndex / LAYERS.length) * SPIRAL_TWIST;
+                    const finalAngle = baseAngle + twistOffset;
+
+                    
+                    
+                    const radiusDeviation = (Math.random() - 0.5) * 40; 
+                    const r = layerBaseRadius + radiusDeviation;
+                    
+                    const x = cx + r * Math.cos(finalAngle);
+                    const y = cy + r * Math.sin(finalAngle);
+
+                    
+                    const scoreDeviation = Math.random(); 
+                    const baseSize = 4 + (scoreDeviation * 12);
+
+                    nodes.push({
+                        id: `node-${layerIndex}-${i}`,
+                        layer: layer.name,
+                        axisIndex: i,
+                        x: x,
+                        y: y,
+                        r: baseSize,
+                        color: layer.color,
+                        score: (scoreDeviation * 100).toFixed(1)
+                    });
+                }
+            });
+
+            
+            
+            for (let i = 0; i < nodes.length; i++) {
+                const nodeA = nodes[i];
+                
+                
+                
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const nodeB = nodes[j];
+                    const dx = nodeA.x - nodeB.x;
+                    const dy = nodeA.y - nodeB.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+
+                    
+                    if (dist < maxRadius * 0.25 && Math.random() > 0.6) {
+                        connections.push({ source: nodeA, target: nodeB });
+                    }
+                }
+            }
+        }
+
+        function render() {
+            svg.innerHTML = ''; 
+
+            const maxRadius = Math.min(width, height) * 0.45;
+
+            
+            LAYERS.forEach((layer) => {
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute('cx', cx);
+                circle.setAttribute('cy', cy);
+                circle.setAttribute('r', maxRadius * layer.radiusMult);
+                circle.setAttribute('fill', 'none');
+                circle.setAttribute('class', 'axis-line');
+                svg.appendChild(circle);
+            });
+
+            
+            for (let i = 0; i < NUM_AXES; i++) {
+                const angle = i * ((Math.PI * 2) / NUM_AXES);
+                const x2 = cx + maxRadius * Math.cos(angle);
+                const y2 = cy + maxRadius * Math.sin(angle);
+                
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute('x1', cx);
+                line.setAttribute('y1', cy);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                line.setAttribute('class', 'axis-line');
+                svg.appendChild(line);
+
+                
+                if (i % 3 === 0) { 
+                    const lx = cx + (maxRadius + 20) * Math.cos(angle);
+                    const ly = cy + (maxRadius + 20) * Math.sin(angle);
+                    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    text.setAttribute('x', lx);
+                    text.setAttribute('y', ly);
+                    text.setAttribute('class', 'axis-label');
+                    text.textContent = `A${i.toString().padStart(2, '0')}`;
+                    svg.appendChild(text);
+                }
+            }
+
+            
+            LAYERS.forEach((layer, layerIndex) => {
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                let d = '';
+                const layerNodes = nodes.filter(n => n.layer === layer.name);
+                
+                layerNodes.sort((a,b) => a.axisIndex - b.axisIndex);
+                
+                layerNodes.forEach((n, i) => {
+                    if (i === 0) d += `M ${n.x} ${n.y} `;
+                    else d += `L ${n.x} ${n.y} `;
+                });
+                d += 'Z'; 
+                path.setAttribute('d', d);
+                path.setAttribute('class', 'spiral-path');
+                svg.appendChild(path);
+            });
+
+            
+            connections.forEach(conn => {
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute('x1', conn.source.x);
+                line.setAttribute('y1', conn.source.y);
+                line.setAttribute('x2', conn.target.x);
+                line.setAttribute('y2', conn.target.y);
+                line.setAttribute('class', 'web-connection');
+                svg.appendChild(line);
+            });
+
+            
+            
+            const centerGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            
+            const outerRing = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            outerRing.setAttribute('cx', cx);
+            outerRing.setAttribute('cy', cy);
+            outerRing.setAttribute('r', 32);
+            outerRing.setAttribute('class', 'center-ring');
+            
+            const core = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            core.setAttribute('cx', cx);
+            core.setAttribute('cy', cy);
+            core.setAttribute('r', 12);
+            core.setAttribute('class', 'center-identity');
+
+            centerGroup.appendChild(outerRing);
+            centerGroup.appendChild(core);
+            svg.appendChild(centerGroup);
+
+            
+            nodes.forEach(n => {
+                const nodeGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                nodeGroup.setAttribute('class', 'node');
+                
+                
+                const shape = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                shape.setAttribute('cx', n.x);
+                shape.setAttribute('cy', n.y);
+                shape.setAttribute('r', n.r);
+                shape.setAttribute('fill', n.color);
+                shape.setAttribute('class', 'node-base');
+                
+                
+                if (n.r > 10) {
+                    const innerDot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    innerDot.setAttribute('cx', n.x);
+                    innerDot.setAttribute('cy', n.y);
+                    innerDot.setAttribute('r', 2);
+                    innerDot.setAttribute('fill', 'var(--ink-color)');
+                    nodeGroup.appendChild(shape);
+                    nodeGroup.appendChild(innerDot);
+                } else {
+                    nodeGroup.appendChild(shape);
+                }
+
+                
+                nodeGroup.addEventListener('mouseenter', (e) => {
+                    tooltip.style.opacity = 1;
+                    tooltip.style.left = e.clientX + 'px';
+                    tooltip.style.top = e.clientY + 'px';
+                    tooltip.innerHTML = `${n.layer} Axis ${n.axisIndex}<br><span style="color:var(--lime)">Dev: ${n.score}</span>`;
+                    
+                    
+                    const connectedLines = Array.from(svg.querySelectorAll('.web-connection')).filter(
+                        line => (parseFloat(line.getAttribute('x1')) === n.x && parseFloat(line.getAttribute('y1')) === n.y) || 
+                                (parseFloat(line.getAttribute('x2')) === n.x && parseFloat(line.getAttribute('y2')) === n.y)
+                    );
+                    connectedLines.forEach(l => {
+                        l.style.strokeWidth = '2.5px';
+                        l.style.opacity = '1';
+                    });
+                });
+
+                nodeGroup.addEventListener('mouseleave', () => {
+                    tooltip.style.opacity = 0;
+                    
+                    const lines = svg.querySelectorAll('.web-connection');
+                    lines.forEach(l => {
+                        l.style.strokeWidth = '1px';
+                        l.style.opacity = '0.4';
+                    });
+                });
+
+                svg.appendChild(nodeGroup);
+            });
+        }
+
+        
+        init();
+
+    </script>
+
+</body></html>

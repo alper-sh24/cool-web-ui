@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">Spacecraft Cockpit Wireframe UI</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" vid="6">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" vid="7">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet" vid="8">
+    <script src="https://unpkg.com/lucide@latest" vid="9"></script>
+    <style vid="10">
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: #030303; 
+            color: #e2e8f0; 
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        
+        .wf-line {
+            stroke: #e2e8f0;
+            stroke-width: 1.5;
+            fill: none;
+            vector-effect: non-scaling-stroke;
+        }
+        .wf-line-thin {
+            stroke: #e2e8f0;
+            stroke-width: 0.5;
+            opacity: 0.5;
+            fill: none;
+            vector-effect: non-scaling-stroke;
+        }
+        .wf-line-dashed {
+            stroke: #e2e8f0;
+            stroke-width: 1;
+            stroke-dasharray: 4 4;
+            fill: none;
+            vector-effect: non-scaling-stroke;
+        }
+
+        
+        .panel-glass {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(226, 232, 240, 0.4);
+            backdrop-filter: blur(8px);
+            box-shadow: inset 0 0 20px rgba(226, 232, 240, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        
+        .scanlines::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        
+        .corner-br { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-bottom: 2px solid #e2e8f0; border-right: 2px solid #e2e8f0; }
+        .corner-tl { position: absolute; top: 0; left: 0; width: 10px; height: 10px; border-top: 2px solid #e2e8f0; border-left: 2px solid #e2e8f0; }
+        .corner-tr { position: absolute; top: 0; right: 0; width: 10px; height: 10px; border-top: 2px solid #e2e8f0; border-right: 2px solid #e2e8f0; }
+        .corner-bl { position: absolute; bottom: 0; left: 0; width: 10px; height: 10px; border-bottom: 2px solid #e2e8f0; border-left: 2px solid #e2e8f0; }
+
+        
+        .bg-blueprint-grid {
+            background-image: 
+                linear-gradient(rgba(226, 232, 240, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(226, 232, 240, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .bg-viewport-grid {
+            background-image: 
+                linear-gradient(rgba(226, 232, 240, 0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(226, 232, 240, 0.2) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center center;
+        }
+
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: rotate-slow 60s linear infinite;
+        }
+        .animate-spin-slow-reverse {
+            animation: rotate-slow 90s linear infinite reverse;
+        }
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #000; border-left: 1px solid rgba(255,255,255,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.5); }
+    </style>
+
+  <style type="text/css">
+*, ::before, ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}
+
+::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}/*
+! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com
+*//*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/
+
+*,
+::before,
+::after {
+  box-sizing: border-box; /* 1 */
+  border-width: 0; /* 2 */
+  border-style: solid; /* 2 */
+  border-color: #e5e7eb; /* 2 */
+}
+
+::before,
+::after {
+  --tw-content: '';
+}
+
+/*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+6. Use the user's configured `sans` font-variation-settings by default.
+7. Disable tap highlights on iOS
+*/
+
+html,
+:host {
+  line-height: 1.5; /* 1 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+  -moz-tab-size: 4; /* 3 */
+  tab-size: 4; /* 3 */
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 4 */
+  font-feature-settings: normal; /* 5 */
+  font-variation-settings: normal; /* 6 */
+  -webkit-tap-highlight-color: transparent; /* 7 */
+}
+
+/*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/
+
+body {
+  margin: 0; /* 1 */
+  line-height: inherit; /* 2 */
+}
+
+/*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/
+
+hr {
+  height: 0; /* 1 */
+  color: inherit; /* 2 */
+  border-top-width: 1px; /* 3 */
+}
+
+/*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/
+
+abbr:where([title]) {
+  text-decoration: underline dotted;
+}
+
+/*
+Remove the default font size and weight for headings.
+*/
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/*
+Add the correct font weight in Edge and Safari.
+*/
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+/*
+1. Use the user's configured `mono` font-family by default.
+2. Use the user's configured `mono` font-feature-settings by default.
+3. Use the user's configured `mono` font-variation-settings by default.
+4. Correct the odd `em` font sizing in all browsers.
+*/
+
+code,
+kbd,
+samp,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* 1 */
+  font-feature-settings: normal; /* 2 */
+  font-variation-settings: normal; /* 3 */
+  font-size: 1em; /* 4 */
+}
+
+/*
+Add the correct font size in all browsers.
+*/
+
+small {
+  font-size: 80%;
+}
+
+/*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/
+
+table {
+  text-indent: 0; /* 1 */
+  border-color: inherit; /* 2 */
+  border-collapse: collapse; /* 3 */
+}
+
+/*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit; /* 1 */
+  font-feature-settings: inherit; /* 1 */
+  font-variation-settings: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  font-weight: inherit; /* 1 */
+  line-height: inherit; /* 1 */
+  letter-spacing: inherit; /* 1 */
+  color: inherit; /* 1 */
+  margin: 0; /* 2 */
+  padding: 0; /* 3 */
+}
+
+/*
+Remove the inheritance of text transform in Edge and Firefox.
+*/
+
+button,
+select {
+  text-transform: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/
+
+button,
+input:where([type='button']),
+input:where([type='reset']),
+input:where([type='submit']) {
+  -webkit-appearance: button; /* 1 */
+  background-color: transparent; /* 2 */
+  background-image: none; /* 2 */
+}
+
+/*
+Use the modern Firefox focus style for all focusable elements.
+*/
+
+:-moz-focusring {
+  outline: auto;
+}
+
+/*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+/*
+Add the correct vertical alignment in Chrome and Firefox.
+*/
+
+progress {
+  vertical-align: baseline;
+}
+
+/*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/
+
+[type='search'] {
+  -webkit-appearance: textfield; /* 1 */
+  outline-offset: -2px; /* 2 */
+}
+
+/*
+Remove the inner padding in Chrome and Safari on macOS.
+*/
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button; /* 1 */
+  font: inherit; /* 2 */
+}
+
+/*
+Add the correct display in Chrome and Safari.
+*/
+
+summary {
+  display: list-item;
+}
+
+/*
+Removes the default spacing and border for appropriate elements.
+*/
+
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+Reset default styling for dialogs.
+*/
+dialog {
+  padding: 0;
+}
+
+/*
+Prevent resizing textareas horizontally by default.
+*/
+
+textarea {
+  resize: vertical;
+}
+
+/*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}
+
+/*
+Set the default cursor for buttons.
+*/
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+:disabled {
+  cursor: default;
+}
+
+/*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block; /* 1 */
+  vertical-align: middle; /* 2 */
+}
+
+/*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Make elements with the HTML hidden attribute stay hidden by default */
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none;
+}
+.pointer-events-none {
+  pointer-events: none;
+}
+.absolute {
+  position: absolute;
+}
+.relative {
+  position: relative;
+}
+.inset-0 {
+  inset: 0px;
+}
+.-right-8 {
+  right: -2rem;
+}
+.bottom-0 {
+  bottom: 0px;
+}
+.bottom-1 {
+  bottom: 0.25rem;
+}
+.bottom-4 {
+  bottom: 1rem;
+}
+.bottom-\[10\%\] {
+  bottom: 10%;
+}
+.bottom-\[35\%\] {
+  bottom: 35%;
+}
+.bottom-\[8\%\] {
+  bottom: 8%;
+}
+.left-0 {
+  left: 0px;
+}
+.left-1\/2 {
+  left: 50%;
+}
+.left-1\/4 {
+  left: 25%;
+}
+.left-4 {
+  left: 1rem;
+}
+.left-\[2\%\] {
+  left: 2%;
+}
+.left-\[28\%\] {
+  left: 28%;
+}
+.left-\[4\%\] {
+  left: 4%;
+}
+.left-\[5\%\] {
+  left: 5%;
+}
+.right-4 {
+  right: 1rem;
+}
+.right-\[15\%\] {
+  right: 15%;
+}
+.right-\[5\%\] {
+  right: 5%;
+}
+.right-\[8\%\] {
+  right: 8%;
+}
+.top-0 {
+  top: 0px;
+}
+.top-1 {
+  top: 0.25rem;
+}
+.top-1\/2 {
+  top: 50%;
+}
+.top-4 {
+  top: 1rem;
+}
+.top-\[15\%\] {
+  top: 15%;
+}
+.top-\[20\%\] {
+  top: 20%;
+}
+.top-\[45\%\] {
+  top: 45%;
+}
+.top-\[50\%\] {
+  top: 50%;
+}
+.z-0 {
+  z-index: 0;
+}
+.z-10 {
+  z-index: 10;
+}
+.z-20 {
+  z-index: 20;
+}
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+.ml-auto {
+  margin-left: auto;
+}
+.mt-1 {
+  margin-top: 0.25rem;
+}
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.mt-4 {
+  margin-top: 1rem;
+}
+.block {
+  display: block;
+}
+.flex {
+  display: flex;
+}
+.grid {
+  display: grid;
+}
+.hidden {
+  display: none;
+}
+.h-1 {
+  height: 0.25rem;
+}
+.h-12 {
+  height: 3rem;
+}
+.h-16 {
+  height: 4rem;
+}
+.h-20 {
+  height: 5rem;
+}
+.h-24 {
+  height: 6rem;
+}
+.h-4 {
+  height: 1rem;
+}
+.h-8 {
+  height: 2rem;
+}
+.h-\[120px\] {
+  height: 120px;
+}
+.h-\[1px\] {
+  height: 1px;
+}
+.h-\[20\%\] {
+  height: 20%;
+}
+.h-\[2px\] {
+  height: 2px;
+}
+.h-\[30\%\] {
+  height: 30%;
+}
+.h-\[40\%\] {
+  height: 40%;
+}
+.h-\[50\%\] {
+  height: 50%;
+}
+.h-\[60\%\] {
+  height: 60%;
+}
+.h-\[70\%\] {
+  height: 70%;
+}
+.h-\[80\%\] {
+  height: 80%;
+}
+.h-\[800px\] {
+  height: 800px;
+}
+.h-\[90\%\] {
+  height: 90%;
+}
+.h-full {
+  height: 100%;
+}
+.h-screen {
+  height: 100vh;
+}
+.max-h-\[1080px\] {
+  max-height: 1080px;
+}
+.w-0\.5 {
+  width: 0.125rem;
+}
+.w-1 {
+  width: 0.25rem;
+}
+.w-1\/2 {
+  width: 50%;
+}
+.w-12 {
+  width: 3rem;
+}
+.w-2 {
+  width: 0.5rem;
+}
+.w-20 {
+  width: 5rem;
+}
+.w-3 {
+  width: 0.75rem;
+}
+.w-32 {
+  width: 8rem;
+}
+.w-4 {
+  width: 1rem;
+}
+.w-48 {
+  width: 12rem;
+}
+.w-8 {
+  width: 2rem;
+}
+.w-\[200px\] {
+  width: 200px;
+}
+.w-\[220px\] {
+  width: 220px;
+}
+.w-\[240px\] {
+  width: 240px;
+}
+.w-\[260px\] {
+  width: 260px;
+}
+.w-\[600px\] {
+  width: 600px;
+}
+.w-\[800px\] {
+  width: 800px;
+}
+.w-\[95\%\] {
+  width: 95%;
+}
+.w-full {
+  width: 100%;
+}
+.w-screen {
+  width: 100vw;
+}
+.max-w-\[1920px\] {
+  max-width: 1920px;
+}
+.flex-1 {
+  flex: 1 1 0%;
+}
+.origin-bottom-left {
+  transform-origin: bottom left;
+}
+.origin-bottom-right {
+  transform-origin: bottom right;
+}
+.-translate-x-1\/2 {
+  --tw-translate-x: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.-translate-y-1\/2 {
+  --tw-translate-y: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.-rotate-12 {
+  --tw-rotate: -12deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.-rotate-90 {
+  --tw-rotate: -90deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.rotate-90 {
+  --tw-rotate: 90deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.-skew-x-6 {
+  --tw-skew-x: -6deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.skew-x-3 {
+  --tw-skew-x: 3deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.skew-x-6 {
+  --tw-skew-x: 6deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.transform {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+@keyframes pulse {
+
+  50% {
+    opacity: .5;
+  }
+}
+.animate-\[pulse_2s_ease-in-out_infinite\] {
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+
+  50% {
+    opacity: .5;
+  }
+}
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.cursor-pointer {
+  cursor: pointer;
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.flex-col {
+  flex-direction: column;
+}
+.items-end {
+  align-items: flex-end;
+}
+.items-center {
+  align-items: center;
+}
+.justify-end {
+  justify-content: flex-end;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-around {
+  justify-content: space-around;
+}
+.gap-1 {
+  gap: 0.25rem;
+}
+.gap-2 {
+  gap: 0.5rem;
+}
+.gap-\[1px\] {
+  gap: 1px;
+}
+.gap-\[2px\] {
+  gap: 2px;
+}
+.space-y-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
+}
+.self-end {
+  align-self: flex-end;
+}
+.overflow-hidden {
+  overflow: hidden;
+}
+.rounded-full {
+  border-radius: 9999px;
+}
+.rounded-sm {
+  border-radius: 0.125rem;
+}
+.rounded-t-lg {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+.border {
+  border-width: 1px;
+}
+.border-2 {
+  border-width: 2px;
+}
+.border-b {
+  border-bottom-width: 1px;
+}
+.border-l {
+  border-left-width: 1px;
+}
+.border-l-4 {
+  border-left-width: 4px;
+}
+.border-r {
+  border-right-width: 1px;
+}
+.border-r-4 {
+  border-right-width: 4px;
+}
+.border-t-2 {
+  border-top-width: 2px;
+}
+.border-dashed {
+  border-style: dashed;
+}
+.border-white {
+  --tw-border-opacity: 1;
+  border-color: rgb(255 255 255 / var(--tw-border-opacity, 1));
+}
+.border-white\/20 {
+  border-color: rgb(255 255 255 / 0.2);
+}
+.border-white\/30 {
+  border-color: rgb(255 255 255 / 0.3);
+}
+.border-white\/40 {
+  border-color: rgb(255 255 255 / 0.4);
+}
+.border-white\/50 {
+  border-color: rgb(255 255 255 / 0.5);
+}
+.border-l-white\/50 {
+  border-left-color: rgb(255 255 255 / 0.5);
+}
+.border-r-white\/50 {
+  border-right-color: rgb(255 255 255 / 0.5);
+}
+.bg-\[\#000\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
+}
+.bg-black {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
+}
+.bg-black\/80 {
+  background-color: rgb(0 0 0 / 0.8);
+}
+.bg-black\/90 {
+  background-color: rgb(0 0 0 / 0.9);
+}
+.bg-transparent {
+  background-color: transparent;
+}
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+}
+.bg-white\/10 {
+  background-color: rgb(255 255 255 / 0.1);
+}
+.bg-white\/20 {
+  background-color: rgb(255 255 255 / 0.2);
+}
+.bg-white\/30 {
+  background-color: rgb(255 255 255 / 0.3);
+}
+.bg-white\/40 {
+  background-color: rgb(255 255 255 / 0.4);
+}
+.bg-white\/50 {
+  background-color: rgb(255 255 255 / 0.5);
+}
+.p-1 {
+  padding: 0.25rem;
+}
+.p-2 {
+  padding: 0.5rem;
+}
+.p-3 {
+  padding: 0.75rem;
+}
+.p-4 {
+  padding: 1rem;
+}
+.p-\[1px\] {
+  padding: 1px;
+}
+.px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+.pb-1 {
+  padding-bottom: 0.25rem;
+}
+.pb-4 {
+  padding-bottom: 1rem;
+}
+.text-center {
+  text-align: center;
+}
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+.text-\[10px\] {
+  font-size: 10px;
+}
+.text-\[8px\] {
+  font-size: 8px;
+}
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+.font-bold {
+  font-weight: 700;
+}
+.tracking-wide {
+  letter-spacing: 0.025em;
+}
+.tracking-widest {
+  letter-spacing: 0.1em;
+}
+.text-black {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
+.text-white\/70 {
+  color: rgb(255 255 255 / 0.7);
+}
+.antialiased {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.opacity-20 {
+  opacity: 0.2;
+}
+.opacity-40 {
+  opacity: 0.4;
+}
+.opacity-50 {
+  opacity: 0.5;
+}
+.opacity-70 {
+  opacity: 0.7;
+}
+.shadow-\[0_0_10px_\#fff\] {
+  --tw-shadow: 0 0 10px #fff;
+  --tw-shadow-colored: 0 0 10px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+.shadow-\[0_0_5px_\#fff\] {
+  --tw-shadow: 0 0 5px #fff;
+  --tw-shadow-colored: 0 0 5px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+.shadow-\[inset_0_0_100px_rgba\(255\2c 255\2c 255\2c 0\.05\)\] {
+  --tw-shadow: inset 0 0 100px rgba(255,255,255,0.05);
+  --tw-shadow-colored: inset 0 0 100px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+.blur {
+  --tw-blur: blur(8px);
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.backdrop-blur-md {
+  --tw-backdrop-blur: blur(12px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+.backdrop-filter {
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+.transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.selection\:bg-slate-200 *::selection {
+  --tw-bg-opacity: 1;
+  background-color: rgb(226 232 240 / var(--tw-bg-opacity, 1));
+}
+.selection\:text-black *::selection {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
+.selection\:bg-slate-200::selection {
+  --tw-bg-opacity: 1;
+  background-color: rgb(226 232 240 / var(--tw-bg-opacity, 1));
+}
+.selection\:text-black::selection {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
+.hover\:bg-white:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+}
+.hover\:bg-white\/30:hover {
+  background-color: rgb(255 255 255 / 0.3);
+}
+.hover\:bg-white\/5:hover {
+  background-color: rgb(255 255 255 / 0.05);
+}
+.hover\:bg-white\/60:hover {
+  background-color: rgb(255 255 255 / 0.6);
+}
+.hover\:text-black:hover {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
+.group:hover .group-hover\:border-l-white {
+  --tw-border-opacity: 1;
+  border-left-color: rgb(255 255 255 / var(--tw-border-opacity, 1));
+}
+.group:hover .group-hover\:border-r-white {
+  --tw-border-opacity: 1;
+  border-right-color: rgb(255 255 255 / var(--tw-border-opacity, 1));
+}* {
+      -ms-overflow-style: none !important;
+      scrollbar-width: none !important;
+    }
+
+    *::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+  </style></head>
+<body class="antialiased selection:bg-slate-200 selection:text-black" vid="11">
+
+    
+    <main class="relative w-screen h-screen flex items-center justify-center bg-blueprint-grid" vid="12">
+        
+        
+        <div class="relative w-full h-full max-w-[1920px] max-h-[1080px] overflow-hidden" style="aspect-ratio: 4/3;" vid="13">
+            
+            
+            <svg class="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 1280 960" preserveAspectRatio="xMidYMid slice" vid="14">
+                <defs vid="15">
+                    <pattern id="diag-hatch" width="10" height="10" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse" vid="16">
+                        <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(226, 232, 240, 0.2)" stroke-width="1" vid="17"></line>
+                    </pattern>
+                </defs>
+
+                
+                <g stroke="rgba(226, 232, 240, 0.3)" stroke-width="2" fill="none" vid="18">
+                    
+                    <polygon points="0,0 300,150 280,850 0,960" fill="rgba(0,0,0,0.5)" vid="19"></polygon>
+                    
+                    <polygon points="1280,0 980,150 1000,850 1280,960" fill="rgba(0,0,0,0.5)" vid="20"></polygon>
+                    
+                    <polygon points="0,960 280,850 1000,850 1280,960" fill="rgba(0,0,0,0.8)" vid="21"></polygon>
+                    
+                    <polygon points="0,0 300,150 980,150 1280,0" fill="rgba(0,0,0,0.8)" vid="22"></polygon>
+                </g>
+
+                
+                <g class="wf-line-thin" vid="23">
+                    
+                    <line x1="0" y1="100" x2="300" y2="200" vid="24"></line>
+                    <line x1="0" y1="300" x2="290" y2="350" vid="25"></line>
+                    <line x1="0" y1="700" x2="285" y2="650" vid="26"></line>
+                    
+                    <line x1="1280" y1="100" x2="980" y2="200" vid="27"></line>
+                    <line x1="1280" y1="300" x2="990" y2="350" vid="28"></line>
+                    <line x1="1280" y1="700" x2="995" y2="650" vid="29"></line>
+
+                    
+                    <path d="M 1280 50 Q 1100 50 1050 150" class="wf-line" stroke-width="6" stroke-opacity="0.2" fill="none" vid="30"></path>
+                    <path d="M 1280 50 Q 1100 50 1050 150" class="wf-line" stroke-width="2" vid="31"></path>
+                    <path d="M 1280 80 Q 1120 80 1070 180" class="wf-line" stroke-width="6" stroke-opacity="0.2" fill="none" vid="32"></path>
+                    <path d="M 1280 80 Q 1120 80 1070 180" class="wf-line" stroke-width="2" vid="33"></path>
+                    <path d="M 1280 110 Q 1140 110 1090 210" class="wf-line" stroke-width="6" stroke-opacity="0.2" fill="none" vid="34"></path>
+                    <path d="M 1280 110 Q 1140 110 1090 210" class="wf-line" stroke-width="2" vid="35"></path>
+                    
+                    
+                    <circle cx="1050" cy="150" r="15" class="wf-line" fill="#000" vid="36"></circle>
+                    <circle cx="1050" cy="150" r="5" fill="#e2e8f0" vid="37"></circle>
+                    <circle cx="1070" cy="180" r="15" class="wf-line" fill="#000" vid="38"></circle>
+                    <circle cx="1070" cy="180" r="5" fill="#e2e8f0" vid="39"></circle>
+                    <circle cx="1090" cy="210" r="15" class="wf-line" fill="#000" vid="40"></circle>
+                    <circle cx="1090" cy="210" r="5" fill="#e2e8f0" vid="41"></circle>
+                </g>
+
+                
+                
+                <g transform="translate(640, 480)" vid="42">
+                    
+                    <circle r="460" class="wf-line" stroke-width="2" stroke-opacity="0.2" vid="43"></circle>
+                    <circle r="450" class="wf-line" stroke-width="4" stroke-opacity="0.5" vid="44"></circle>
+                    
+                    
+                    <path d="M 0 -440 A 440 440 0 1 1 -0.1 -440 Z" fill="url(#diag-hatch)" stroke="none" stroke-width="0" clip-path="url(#ring-clip)" vid="45"></path>
+                    <clipPath id="ring-clip" vid="46">
+                        <path d="M 0 -440 A 440 440 0 1 1 -0.1 -440 L 0 -420 A 420 420 0 1 0 0.1 -420 Z" vid="47"></path>
+                    </clipPath>
+
+                    
+                    <circle r="420" class="wf-line" stroke-width="6" stroke-opacity="0.8" vid="48"></circle>
+                    <circle r="410" class="wf-line-thin" vid="49"></circle>
+                    
+                    
+                    <circle r="430" stroke="#e2e8f0" stroke-width="10" stroke-opacity="0.3" fill="none" stroke-dasharray="2 12" vid="50"></circle>
+                    
+                    
+                    <line x1="-550" y1="0" x2="-430" y2="0" class="wf-line-thin" vid="51"></line>
+                    <line x1="430" y1="0" x2="550" y2="0" class="wf-line-thin" vid="52"></line>
+                    <line x1="0" y1="-550" x2="0" y2="-430" class="wf-line-thin" vid="53"></line>
+                    <line x1="0" y1="430" x2="0" y2="550" class="wf-line-thin" vid="54"></line>
+                    
+                    
+                    <g transform="rotate(45)" vid="55"> <line x1="420" y1="0" x2="450" y2="0" class="wf-line" stroke-width="4" vid="56"></line> </g>
+                    <g transform="rotate(135)" vid="57"> <line x1="420" y1="0" x2="450" y2="0" class="wf-line" stroke-width="4" vid="58"></line> </g>
+                    <g transform="rotate(225)" vid="59"> <line x1="420" y1="0" x2="450" y2="0" class="wf-line" stroke-width="4" vid="60"></line> </g>
+                    <g transform="rotate(315)" vid="61"> <line x1="420" y1="0" x2="450" y2="0" class="wf-line" stroke-width="4" vid="62"></line> </g>
+                </g>
+            </svg>
+
+            
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full overflow-hidden z-10 bg-black border border-white/20 shadow-[inset_0_0_100px_rgba(255,255,255,0.05)]" vid="63">
+                
+                
+                <div class="absolute inset-0 bg-viewport-grid opacity-40" vid="64"></div>
+                
+                
+                <svg class="absolute inset-0 w-full h-full" viewBox="0 0 800 800" vid="65">
+                    <g transform="translate(400, 400)" vid="66">
+                        
+                        <circle r="100" class="wf-line-thin" stroke-opacity="0.2" vid="67"></circle>
+                        <circle r="200" class="wf-line-thin" stroke-opacity="0.2" vid="68"></circle>
+                        <circle r="300" class="wf-line-thin" stroke-opacity="0.2" vid="69"></circle>
+                        <circle r="380" class="wf-line-thin" stroke-opacity="0.4" vid="70"></circle>
+                        
+                        
+                        <g class="animate-spin-slow" vid="71">
+                            
+                            <circle r="370" stroke="#e2e8f0" stroke-width="4" stroke-opacity="0.5" fill="none" stroke-dasharray="1 8" vid="72"></circle>
+                            <line x1="0" y1="-380" x2="0" y2="380" class="wf-line-thin" stroke-dasharray="4 8" vid="73"></line>
+                            <line x1="-380" y1="0" x2="380" y2="0" class="wf-line-thin" stroke-dasharray="4 8" vid="74"></line>
+                        </g>
+
+                        
+                        <g stroke="rgba(226, 232, 240, 0.15)" stroke-width="1" vid="75">
+                            <line x1="0" y1="-400" x2="0" y2="400" transform="rotate(15)" vid="76"></line>
+                            <line x1="0" y1="-400" x2="0" y2="400" transform="rotate(30)" vid="77"></line>
+                            <line x1="0" y1="-400" x2="0" y2="400" transform="rotate(45)" vid="78"></line>
+                            <line x1="0" y1="-400" x2="0" y2="400" transform="rotate(60)" vid="79"></line>
+                            <line x1="0" y1="-400" x2="0" y2="400" transform="rotate(75)" vid="80"></line>
+                            <line x1="0" y1="-400" x2="0" y2="400" transform="rotate(105)" vid="81"></line>
+                            <line x1="0" y1="-400" x2="0" y2="400" transform="rotate(120)" vid="82"></line>
+                            <line x1="0" y1="-400" x2="0" y2="400" transform="rotate(135)" vid="83"></line>
+                            <line x1="0" y1="-400" x2="0" y2="400" transform="rotate(150)" vid="84"></line>
+                            <line x1="0" y1="-400" x2="0" y2="400" transform="rotate(165)" vid="85"></line>
+                        </g>
+
+                        
+                        
+                        <g fill="#e2e8f0" opacity="0.8" vid="86">
+                            
+                            <circle cx="120" cy="-150" r="2" vid="87"></circle>
+                            <circle cx="180" cy="-100" r="2.5" vid="88"></circle>
+                            <circle cx="250" cy="-180" r="1.5" vid="89"></circle>
+                            <circle cx="150" cy="-250" r="3" vid="90"></circle>
+                            <polyline points="120,-150 180,-100 250,-180 150,-250 120,-150" class="wf-line-thin" stroke-dasharray="2 4" vid="91"></polyline>
+                            
+                            
+                            <circle cx="-150" cy="120" r="2" vid="92"></circle>
+                            <circle cx="-220" cy="80" r="1.5" vid="93"></circle>
+                            <circle cx="-280" cy="190" r="2.5" vid="94"></circle>
+                            <circle cx="-100" cy="220" r="2" vid="95"></circle>
+                            <circle cx="-180" cy="280" r="1" vid="96"></circle>
+                            <polyline points="-220,80 -150,120 -100,220 -180,280 -280,190 -220,80" class="wf-line-thin" stroke-dasharray="2 4" vid="97"></polyline>
+
+                            
+                            <circle cx="20" cy="180" r="2" vid="98"></circle>
+                            <circle cx="-40" cy="250" r="2" vid="99"></circle>
+                            <circle cx="80" cy="290" r="2.5" vid="100"></circle>
+                            <polyline points="20,180 -40,250 80,290" class="wf-line-thin" stroke-dasharray="2 4" vid="101"></polyline>
+
+                            
+                            <circle cx="-300" cy="-200" r="1" opacity="0.5" vid="102"></circle>
+                            <circle cx="-250" cy="-300" r="1.5" opacity="0.7" vid="103"></circle>
+                            <circle cx="-100" cy="-100" r="1" opacity="0.4" vid="104"></circle>
+                            <circle cx="-50" cy="-350" r="2" opacity="0.8" vid="105"></circle>
+                            <circle cx="50" cy="-280" r="1" opacity="0.3" vid="106"></circle>
+                            <circle cx="280" cy="-50" r="1.5" opacity="0.6" vid="107"></circle>
+                            <circle cx="320" cy="100" r="1" opacity="0.5" vid="108"></circle>
+                            <circle cx="200" cy="200" r="2" opacity="0.9" vid="109"></circle>
+                            <circle cx="350" cy="250" r="1" opacity="0.4" vid="110"></circle>
+                            <circle cx="150" cy="320" r="1.5" opacity="0.6" vid="111"></circle>
+                            <circle cx="-320" cy="50" r="1" opacity="0.5" vid="112"></circle>
+                            <circle cx="-350" cy="-50" r="2" opacity="0.7" vid="113"></circle>
+                        </g>
+
+                        
+                        <g fill="#e2e8f0" opacity="0.3" vid="114">
+                            
+                            <circle cx="200" cy="-300" r="0.5" vid="115"></circle><circle cx="190" cy="-290" r="1" vid="116"></circle><circle cx="210" cy="-280" r="0.5" vid="117"></circle>
+                            <circle cx="150" cy="-200" r="0.5" vid="118"></circle><circle cx="160" cy="-190" r="1" vid="119"></circle><circle cx="140" cy="-180" r="0.5" vid="120"></circle>
+                            <circle cx="100" cy="-100" r="0.5" vid="121"></circle><circle cx="110" cy="-90" r="1" vid="122"></circle><circle cx="90" cy="-80" r="0.5" vid="123"></circle>
+                            <circle cx="50" cy="0" r="0.5" vid="124"></circle><circle cx="60" cy="10" r="1" vid="125"></circle><circle cx="40" cy="-10" r="0.5" vid="126"></circle>
+                            <circle cx="0" cy="100" r="0.5" vid="127"></circle><circle cx="10" cy="110" r="1" vid="128"></circle><circle cx="-10" cy="90" r="0.5" vid="129"></circle>
+                            <circle cx="-50" cy="200" r="0.5" vid="130"></circle><circle cx="-40" cy="210" r="1" vid="131"></circle><circle cx="-60" cy="190" r="0.5" vid="132"></circle>
+                            <circle cx="-100" cy="300" r="0.5" vid="133"></circle><circle cx="-90" cy="310" r="1" vid="134"></circle><circle cx="-110" cy="290" r="0.5" vid="135"></circle>
+                            
+                            <circle cx="180" cy="-250" r="0.5" vid="136"></circle><circle cx="120" cy="-150" r="0.5" vid="137"></circle><circle cx="70" cy="-50" r="0.5" vid="138"></circle>
+                            <circle cx="20" cy="50" r="0.5" vid="139"></circle><circle cx="-30" cy="150" r="0.5" vid="140"></circle><circle cx="-80" cy="250" r="0.5" vid="141"></circle>
+                        </g>
+
+                        
+                        <g class="animate-pulse" vid="142">
+                            <circle cx="0" cy="0" r="16" class="wf-line" stroke-width="2" fill="#000" vid="143"></circle>
+                            <circle cx="0" cy="0" r="12" class="wf-line" stroke-dasharray="2 4" vid="144"></circle>
+                            <circle cx="0" cy="0" r="4" fill="#e2e8f0" vid="145"></circle>
+                            
+                            <line x1="-30" y1="0" x2="-20" y2="0" class="wf-line" stroke-width="2" vid="146"></line>
+                            <line x1="20" y1="0" x2="30" y2="0" class="wf-line" stroke-width="2" vid="147"></line>
+                            <line x1="0" y1="-30" x2="0" y2="-20" class="wf-line" stroke-width="2" vid="148"></line>
+                            <line x1="0" y1="20" x2="0" y2="30" class="wf-line" stroke-width="2" vid="149"></line>
+                        </g>
+                    </g>
+                </svg>
+
+                
+                <div class="absolute top-4 right-4 text-xs opacity-70 flex flex-col items-end" vid="150">
+                    <span vid="151">FOV: 120°</span>
+                    <span vid="152">MAG: 1.0x</span>
+                </div>
+                <div class="absolute bottom-4 left-4 text-xs opacity-70" vid="153">
+                    <span class="blink" vid="154">REC ●</span>
+                </div>
+            </div>
+
+            
+            
+            
+            <div class="absolute top-[15%] left-[4%] w-[240px] transform -skew-x-6 z-20 group" vid="155">
+                <div class="panel-glass scanlines p-4 border-l-4 border-l-white/50 transition-colors group-hover:border-l-white" vid="156">
+                    <div class="corner-tl" vid="157"></div><div class="corner-tr" vid="158"></div><div class="corner-bl" vid="159"></div><div class="corner-br" vid="160"></div>
+                    
+                    <div class="text-[10px] tracking-widest mb-3 border-b border-white/20 pb-1 flex justify-between" vid="161">
+                        <span vid="162">NAV_SYS</span>
+                        <span class="opacity-50" vid="163">ONLINE</span>
+                    </div>
+                    
+                    <div class="space-y-3 text-sm tracking-wide" vid="164">
+                        <div class="flex justify-between items-center" vid="165">
+                            <span class="opacity-50 text-xs" vid="166">VIEWPORT:</span> 
+                            <span class="font-bold" vid="167">STARBOARD</span>
+                        </div>
+                        <div class="flex justify-between items-center" vid="168">
+                            <span class="opacity-50 text-xs" vid="169">COURSE:</span> 
+                            <span class="font-bold" vid="170">SOL-9</span>
+                        </div>
+                        <div class="flex justify-between items-center" vid="171">
+                            <span class="opacity-50 text-xs" vid="172">TARGET:</span> 
+                            <span class="bg-white text-black px-1 font-bold" vid="173">PBD</span>
+                        </div>
+                        <div class="flex justify-between items-center" vid="174">
+                            <span class="opacity-50 text-xs" vid="175">DISTANCE:</span> 
+                            <span class="font-bold" vid="176">3.7 LY</span>
+                        </div>
+                    </div>
+
+                    
+                    <div class="mt-4 flex gap-1 h-4 opacity-50" vid="177">
+                        <div class="w-1 h-full bg-white" vid="178"></div>
+                        <div class="w-2 h-full bg-white" vid="179"></div>
+                        <div class="w-0.5 h-full bg-white" vid="180"></div>
+                        <div class="w-3 h-full bg-white" vid="181"></div>
+                        <div class="w-1 h-full bg-white" vid="182"></div>
+                        <div class="w-2 h-full bg-white" vid="183"></div>
+                        <div class="w-1 h-full bg-white" vid="184"></div>
+                        <div class="ml-auto text-[8px] self-end" vid="185">ID:9948-X</div>
+                    </div>
+                </div>
+                
+                <div class="absolute -right-8 top-1/2 w-8 h-[2px] bg-white/30 transform -rotate-12" vid="186"></div>
+            </div>
+
+            
+            <div class="absolute top-[45%] left-[2%] w-[200px] z-20" vid="187">
+                <div class="panel-glass scanlines p-3" vid="188">
+                    <div class="corner-tl" vid="189"></div><div class="corner-tr" vid="190"></div><div class="corner-bl" vid="191"></div><div class="corner-br" vid="192"></div>
+                    <div class="text-[10px] tracking-widest mb-2 opacity-50 text-center" vid="193">MANUAL OVERRIDE</div>
+                    
+                    <div class="flex justify-between gap-2" vid="194">
+                        
+                        <div class="flex-1 border border-white/20 h-24 relative flex flex-col items-center justify-between p-1 hover:bg-white/5 cursor-pointer" vid="195">
+                            <div class="text-[8px] mt-1" vid="196">THRUST</div>
+                            <div class="w-4 h-12 border border-white/40 rounded-full relative" vid="197">
+                                <div class="absolute top-1 left-1/2 -translate-x-1/2 w-2 h-4 bg-white rounded-sm shadow-[0_0_5px_#fff]" vid="198"></div>
+                            </div>
+                            <div class="text-[8px] opacity-50 mb-1" vid="199">ON</div>
+                        </div>
+                        
+                        <div class="flex-1 border border-white/20 h-24 relative flex flex-col items-center justify-between p-1 hover:bg-white/5 cursor-pointer" vid="200">
+                            <div class="text-[8px] mt-1" vid="201">SHIELD</div>
+                            <div class="w-4 h-12 border border-white/40 rounded-full relative" vid="202">
+                                <div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-2 h-4 bg-white/50 rounded-sm" vid="203"></div>
+                            </div>
+                            <div class="text-[8px] opacity-50 mb-1" vid="204">OFF</div>
+                        </div>
+                        
+                        <div class="flex-1 border border-white/20 h-24 relative flex flex-col items-center justify-between p-1 hover:bg-white/5 cursor-pointer" vid="205">
+                            <div class="text-[8px] mt-1" vid="206">COMMS</div>
+                            <div class="w-4 h-12 border border-white/40 rounded-full relative" vid="207">
+                                <div class="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-2 h-4 bg-white rounded-sm" vid="208"></div>
+                            </div>
+                            <div class="text-[8px] opacity-50 mb-1" vid="209">STBY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="absolute bottom-[10%] left-[5%] w-[260px] z-20" vid="210">
+                <div class="panel-glass scanlines p-4 transform skew-x-6" vid="211">
+                    <div class="corner-tl" vid="212"></div><div class="corner-tr" vid="213"></div><div class="corner-bl" vid="214"></div><div class="corner-br" vid="215"></div>
+                    
+                    <div class="flex justify-between items-end mb-3" vid="216">
+                        <div class="text-xs" vid="217">INPUT_MATRIX</div>
+                        <div class="w-12 h-4 border border-white/30 flex p-[1px] gap-[1px]" vid="218">
+                            <div class="flex-1 bg-white" vid="219"></div>
+                            <div class="flex-1 bg-white" vid="220"></div>
+                            <div class="flex-1 bg-white" vid="221"></div>
+                            <div class="flex-1 bg-transparent" vid="222"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-2" vid="223">
+                        
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center" vid="224">A1</button>
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center" vid="225">A2</button>
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center" vid="226">A3</button>
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center bg-white/10" vid="227">SYS</button>
+                        
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center" vid="228">B1</button>
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center" vid="229">B2</button>
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center" vid="230">B3</button>
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center bg-white/10" vid="231">RTR</button>
+                        
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center" vid="232">C1</button>
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center" vid="233">C2</button>
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center" vid="234">C3</button>
+                        <button class="h-8 border border-white/20 hover:bg-white hover:text-black transition-colors text-xs flex items-center justify-center bg-white/10" vid="235">EXE</button>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="absolute bottom-[35%] right-[5%] w-[240px] transform skew-x-3 z-20 group" vid="236">
+                <div class="panel-glass scanlines p-4 border-r-4 border-r-white/50 transition-colors group-hover:border-r-white" vid="237">
+                    <div class="corner-tl" vid="238"></div><div class="corner-tr" vid="239"></div><div class="corner-bl" vid="240"></div><div class="corner-br" vid="241"></div>
+                    
+                    <div class="space-y-3 text-sm tracking-wide" vid="242">
+                        <div class="flex justify-between items-center" vid="243">
+                            <span class="opacity-50 text-xs" vid="244">COURSE:</span> 
+                            <span class="font-bold" vid="245">SOL-9</span>
+                        </div>
+                        <div class="flex justify-between items-center" vid="246">
+                            <span class="opacity-50 text-xs" vid="247">TARGET:</span> 
+                            <span class="bg-white text-black px-1 font-bold" vid="248">PBD</span>
+                        </div>
+                        <div class="flex justify-between items-center" vid="249">
+                            <span class="opacity-50 text-xs" vid="250">DISTANCE:</span> 
+                            <span class="font-bold" vid="251">3.7 LY</span>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="mt-4 h-12 border border-white/20 relative overflow-hidden flex items-end p-1 gap-[2px]" vid="252">
+                        <div class="w-1 h-[20%] bg-white/50" vid="253"></div>
+                        <div class="w-1 h-[40%] bg-white/50" vid="254"></div>
+                        <div class="w-1 h-[30%] bg-white/50" vid="255"></div>
+                        <div class="w-1 h-[60%] bg-white/50" vid="256"></div>
+                        <div class="w-1 h-[80%] bg-white" vid="257"></div>
+                        <div class="w-1 h-[50%] bg-white/50" vid="258"></div>
+                        <div class="w-1 h-[70%] bg-white/50" vid="259"></div>
+                        <div class="w-1 h-[40%] bg-white/50" vid="260"></div>
+                        <div class="w-1 h-[20%] bg-white/50" vid="261"></div>
+                        <div class="w-1 h-[30%] bg-white/50" vid="262"></div>
+                        <div class="w-1 h-[50%] bg-white/50" vid="263"></div>
+                        <div class="w-1 h-[90%] bg-white" vid="264"></div>
+                        <div class="w-1 h-[60%] bg-white/50" vid="265"></div>
+                        <div class="w-1 h-[40%] bg-white/50" vid="266"></div>
+                        <div class="w-1 h-[50%] bg-white/50" vid="267"></div>
+                        
+                        <div class="absolute top-1/2 left-0 w-full h-[1px] bg-white/30 border-dashed border-b border-white/50" vid="268"></div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="absolute bottom-[8%] right-[8%] w-[220px] z-20 transform -skew-x-6" vid="269">
+                <div class="panel-glass scanlines p-3" vid="270">
+                    <div class="corner-tl" vid="271"></div><div class="corner-tr" vid="272"></div><div class="corner-bl" vid="273"></div><div class="corner-br" vid="274"></div>
+                    
+                    <div class="text-[10px] tracking-widest mb-3 text-center border-b border-white/20 pb-1" vid="275">REACTOR STATS</div>
+                    
+                    <div class="flex justify-around" vid="276">
+                        
+                        <div class="relative w-20 h-20" vid="277">
+                            <svg viewBox="0 0 100 100" class="w-full h-full" vid="278">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" vid="279"></circle>
+                                <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="6" stroke-dasharray="2 6" vid="280"></circle>
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="80 100" transform="rotate(-90 50 50)" vid="281"></circle>
+                                
+                                <g transform="rotate(45 50 50)" vid="282">
+                                    <line x1="50" y1="50" x2="50" y2="15" stroke="#e2e8f0" stroke-width="2" vid="283"></line>
+                                    <circle cx="50" cy="50" r="4" fill="#e2e8f0" vid="284"></circle>
+                                </g>
+                                <text x="50" y="85" text-anchor="middle" fill="#e2e8f0" font-size="10" font-family="monospace" vid="285">TEMP</text>
+                            </svg>
+                        </div>
+                        
+                        <div class="relative w-20 h-20" vid="286">
+                            <svg viewBox="0 0 100 100" class="w-full h-full" vid="287">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" vid="288"></circle>
+                                <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="6" stroke-dasharray="2 6" vid="289"></circle>
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="140 100" transform="rotate(-90 50 50)" vid="290"></circle>
+                                
+                                <g transform="rotate(120 50 50)" vid="291">
+                                    <line x1="50" y1="50" x2="50" y2="15" stroke="#e2e8f0" stroke-width="2" vid="292"></line>
+                                    <circle cx="50" cy="50" r="4" fill="#e2e8f0" vid="293"></circle>
+                                </g>
+                                <text x="50" y="85" text-anchor="middle" fill="#e2e8f0" font-size="10" font-family="monospace" vid="294">PRES</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[120px] z-20 flex flex-col items-center justify-end pb-4" vid="295">
+                
+                <div class="w-full h-4 border-t-2 border-l border-r border-white/50 rounded-t-lg bg-black/80 backdrop-blur-md relative" vid="296">
+                    <div class="absolute top-0 left-1/4 w-1/2 h-[2px] bg-white shadow-[0_0_10px_#fff]" vid="297"></div>
+                </div>
+                
+                <div class="w-[95%] h-full bg-black/90 border-l border-r border-white/30 p-4 flex justify-between items-end" vid="298">
+                    
+                    
+                    <div class="w-32 h-16 border border-white/20 flex gap-2 p-2" vid="299">
+                        <div class="flex-1 bg-white/10 relative" vid="300">
+                            <div class="absolute bottom-0 left-0 w-full h-[70%] bg-white/40 border-t-2 border-white" vid="301"></div>
+                        </div>
+                        <div class="flex-1 bg-white/10 relative" vid="302">
+                            <div class="absolute bottom-0 left-0 w-full h-[70%] bg-white/40 border-t-2 border-white" vid="303"></div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="w-48 h-20 border-2 border-white/50 rounded-sm scanlines flex items-center justify-center flex-col relative overflow-hidden bg-[#000]" vid="304">
+                        <div class="absolute inset-0 bg-viewport-grid opacity-20" vid="305"></div>
+                        <div class="text-xs tracking-widest text-white/70" vid="306">AUTOPILOT</div>
+                        <div class="text-xl font-bold tracking-widest mt-1" vid="307">ENGAGED</div>
+                        <div class="w-32 h-1 bg-white/20 mt-2 overflow-hidden" vid="308">
+                            <div class="h-full bg-white w-1/2 animate-[pulse_2s_ease-in-out_infinite]" vid="309"></div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="w-32 h-16 border border-white/20 grid grid-cols-3 gap-1 p-1" vid="310">
+                        <div class="bg-white/10 hover:bg-white/30 cursor-pointer" vid="311"></div>
+                        <div class="bg-white/10 hover:bg-white/30 cursor-pointer" vid="312"></div>
+                        <div class="bg-white/10 hover:bg-white/30 cursor-pointer" vid="313"></div>
+                        <div class="bg-white/10 hover:bg-white/30 cursor-pointer" vid="314"></div>
+                        <div class="bg-white/40 hover:bg-white/60 cursor-pointer" vid="315"></div>
+                        <div class="bg-white/10 hover:bg-white/30 cursor-pointer" vid="316"></div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="absolute top-[20%] right-[15%] text-[8px] opacity-40 font-mono rotate-90 origin-bottom-right" vid="317">
+                SEQ: 0x99A4F // PROTOCOL: OMEGA
+            </div>
+            <div class="absolute top-[50%] left-[28%] text-[8px] opacity-40 font-mono -rotate-90 origin-bottom-left" vid="318">
+                CALIBRATION_MATRIX_ACTIVE
+            </div>
+
+        </div>
+    </main>
+
+    <script vid="319">
+        
+        lucide.createIcons();
+    </script>
+
+</body></html>

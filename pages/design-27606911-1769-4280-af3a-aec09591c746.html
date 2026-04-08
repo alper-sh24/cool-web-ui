@@ -1,0 +1,379 @@
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">BIO-LINK // DANGER PROTOCOL</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;900&amp;display=swap" rel="stylesheet" vid="5">
+    <style vid="6">
+        :root {
+            --bg-color: #050000;
+            --surface-color: #111111;
+            --primary-accent: #ff2200; 
+            --secondary-accent: #ffd600; 
+            --hairline: rgba(255, 34, 0, 0.2);
+            --font-display: 'Barlow Condensed', sans-serif;
+            --font-mono: 'SF Mono', 'Fira Code', 'Menlo', 'Monaco', 'Courier New', monospace;
+            --pad: 32px;
+            --crt-opacity: 0.12;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: crosshair;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--primary-accent);
+            font-family: var(--font-display);
+            height: 960px;
+            width: 1280px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            position: relative;
+            border-radius: 20px;
+        }
+
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, var(--crt-opacity)), rgba(255, 214, 0, 0.05), rgba(0, 0, 0, 0.1));
+            z-index: 10000;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            border-radius: 20px;
+        }
+
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: radial-gradient(circle, transparent 40%, black 150%);
+            z-index: 10001;
+            pointer-events: none;
+            border-radius: 20px;
+        }
+
+        .corner-index {
+            position: fixed;
+            font-size: 0.9rem;
+            z-index: 1000;
+            padding: 4px 10px;
+            background: var(--surface-color);
+            border: 1px solid var(--primary-accent);
+            font-weight: 700;
+        }
+
+        .tl { top: var(--pad); left: var(--pad); }
+        .tr { top: var(--pad); right: var(--pad); }
+        .bl { bottom: var(--pad); left: var(--pad); }
+        .br { bottom: var(--pad); right: var(--pad); }
+
+        #main-display {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            grid-template-rows: 1fr 320px;
+            height: 100%;
+            width: 100%;
+            border: 1px solid var(--hairline);
+        }
+
+        .waveform-container {
+            background: var(--surface-color);
+            border-right: 1px solid var(--hairline);
+            border-bottom: 1px solid var(--hairline);
+            position: relative;
+            padding: var(--pad);
+        }
+
+        .hero-text {
+            position: absolute;
+            top: 70px;
+            left: var(--pad);
+            z-index: 5;
+        }
+
+        .hero-headline {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--primary-accent);
+            text-shadow: 0 0 15px var(--primary-accent);
+            margin-bottom: 5px;
+            line-height: 0.9;
+        }
+
+        .hero-subline {
+            color: var(--secondary-accent);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        #ascii-canvas {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 75%;
+            opacity: 0.6;
+        }
+
+        .status-sidebar {
+            background: var(--surface-color);
+            border-bottom: 1px solid var(--hairline);
+            padding: var(--pad);
+            padding-top: 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .service-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 34, 0, 0.15);
+            padding-bottom: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 2px;
+            font-weight: 900;
+        }
+
+        .badge.operational { background: var(--secondary-accent); color: black; }
+        .badge.degraded { background: var(--secondary-accent); color: black; border: 1px solid var(--primary-accent); }
+        .badge.incident { background: var(--primary-accent); color: white; animation: blink 0.6s infinite; }
+
+        @keyframes blink { 50% { opacity: 0.2; } }
+
+        .terminal-logs {
+            background: var(--surface-color);
+            border-right: 1px solid var(--hairline);
+            padding: var(--pad);
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .log-entry {
+            display: flex;
+            gap: 15px;
+            font-family: var(--font-mono); 
+        }
+
+        .log-entry .highlight { color: var(--secondary-accent); font-weight: bold; }
+
+        .timestamp { color: var(--primary-accent); opacity: 0.7; min-width: 90px; }
+
+        .bio-data {
+            background: var(--surface-color);
+            padding: var(--pad);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-box {
+            border: 2px solid var(--hairline);
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .stat-label { font-size: 0.8rem; color: var(--primary-accent); font-weight: 700; }
+        .stat-value { font-size: 1.8rem; color: var(--secondary-accent); font-weight: 900; margin-top: 2px; }
+
+        .flicker { animation: flicker 0.15s infinite; }
+        @keyframes flicker {
+            0% { opacity: 1; }
+            50% { opacity: 0.85; }
+            100% { opacity: 0.95; }
+        }
+
+        .scanline-move {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 34, 0, 0.15);
+            position: absolute;
+            z-index: 100;
+            animation: scan 6s linear infinite;
+        }
+
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+    </style>
+</head>
+<body vid="7">
+    <div class="scanline-move" vid="8"></div>
+    
+    <div class="corner-index tl" vid="9">LINK_ID: SZ-491</div>
+    <div class="corner-index tr" vid="10">AUTH: LVL_07</div>
+    <div class="corner-index bl" vid="11">LOCAL_HOST: TBILISI_SUB</div>
+    <div class="corner-index br" vid="12">CORE: K01_V4</div>
+
+    <main id="main-display" vid="13">
+        <section class="waveform-container" vid="14">
+            <div class="hero-text" vid="15">
+                <div class="hero-headline flicker" vid="16">BIO-INTERFACE</div>
+                <div class="hero-subline" vid="17">CRITICAL OVERLOAD: 88.4% CAPACITY</div>
+            </div>
+            <canvas id="ascii-canvas" vid="18"></canvas>
+        </section>
+
+        <aside class="status-sidebar" vid="19">
+            <div style="font-size: 1.1rem; border-left: 4px solid var(--primary-accent); padding-left: 12px; margin-bottom: 25px; font-weight: 900;" vid="20">SYSTEM_RESOURCES</div>
+            <div class="service-row" vid="21"><span vid="22">Neural Link</span><span class="badge operational" vid="23">OPERATIONAL</span></div>
+            <div class="service-row" vid="24"><span vid="25">Optic Nerve</span><span class="badge operational" vid="26">OPERATIONAL</span></div>
+            <div class="service-row" vid="27"><span vid="28">Motor Cortex</span><span class="badge degraded" vid="29">DEGRADED</span></div>
+            <div class="service-row" vid="30"><span vid="31">Cardiac Sync</span><span class="badge operational" vid="32">OPERATIONAL</span></div>
+            <div class="service-row" vid="33"><span vid="34">Endocrine Loop</span><span class="badge incident" vid="35">INCIDENT</span></div>
+            <div class="service-row" vid="36"><span vid="37">Cognitive Filter</span><span class="badge operational" vid="38">OPERATIONAL</span></div>
+            
+            <div style="margin-top: auto; font-size: 0.8rem; color: var(--secondary-accent); font-weight: 700; line-height: 1.3;" vid="39">
+                [DANGER] RECEPTOR DESENSITIZATION DETECTED. SECTOR 7G SEALED. INITIATING COUNTER-MEASURES.
+            </div>
+        </aside>
+
+        <section class="terminal-logs" id="terminal-logs" vid="40">
+            <div class="log-entry" vid="41"><span class="timestamp" vid="42">10:33:12</span> <span vid="43">SYSCALL: <span class="highlight" vid="44">NEURAL_BUFFER_CRITICAL</span></span></div>
+            <div class="log-entry" vid="45"><span class="timestamp" vid="46">10:33:14</span> <span vid="47">SYNC: HEARTBEAT <span class="highlight" vid="48">UNSTABLE</span> @ 114BPM</span></div>
+            <div class="log-entry" vid="49"><span class="timestamp" vid="50">10:34:01</span> <span vid="51">WARN: NOISE INTERFERENCE <span class="highlight" vid="52">&gt; 82%</span></span></div>
+            <div class="log-entry" vid="53"><span class="timestamp" vid="54">10:34:45</span> <span vid="55">EVENT: <span class="highlight" vid="56">SYSTEM_BREACH_DETECTED</span></span></div>
+            <div class="log-entry" vid="57"><span class="timestamp" vid="58">10:35:02</span> <span vid="59">DEBUG: DUMPING STACK...</span></div>
+        </section>
+
+        <section class="bio-data" vid="60">
+            <div class="stat-grid" vid="61">
+                <div class="stat-box" vid="62">
+                    <div class="stat-label" vid="63">HEART_RATE</div>
+                    <div class="stat-value" id="val-hr" vid="64">112 BPM</div>
+                </div>
+                <div class="stat-box" vid="65">
+                    <div class="stat-label" vid="66">O2_SAT</div>
+                    <div class="stat-value" vid="67">84.2%</div>
+                </div>
+                <div class="stat-box" vid="68">
+                    <div class="stat-label" vid="69">CORE_TEMP</div>
+                    <div class="stat-value" vid="70">39.1°C</div>
+                </div>
+                <div class="stat-box" vid="71">
+                    <div class="stat-label" vid="72">STRESS_IDX</div>
+                    <div class="stat-value" id="val-stress" vid="73">MAX_VAL</div>
+                </div>
+            </div>
+
+            <div style="text-align: right; font-size: 0.8rem; color: var(--primary-accent); font-weight: 700;" vid="74">
+                THREAT_LEVEL: <span style="color: var(--secondary-accent);" vid="75">OMEGA</span><br vid="76">
+                CURSOR_TRACK: <span id="mouse-x" vid="77">0</span> / <span id="mouse-y" vid="78">0</span>
+            </div>
+        </section>
+    </main>
+
+    <script vid="79">
+        const canvas = document.getElementById('ascii-canvas');
+        const ctx = canvas.getContext('2d');
+        const logContainer = document.getElementById('terminal-logs');
+
+        let width, height;
+        const charSize = 16; 
+        const densityChars = " .:-=+*#%@";
+
+        function resize() {
+            width = canvas.offsetWidth;
+            height = canvas.offsetHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        let time = 0;
+        window.addEventListener('mousemove', (e) => {
+            document.getElementById('mouse-x').textContent = e.clientX;
+            document.getElementById('mouse-y').textContent = e.clientY;
+        });
+
+        function render() {
+            ctx.fillStyle = '#111111';
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.font = `900 ${charSize}px 'Barlow Condensed'`;
+            ctx.fillStyle = '#ff2200';
+            
+            const cols = Math.ceil(width / (charSize * 0.7));
+            const rows = Math.ceil(height / charSize);
+
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const posX = x * (charSize * 0.7);
+                    const posY = y * charSize;
+
+                    const baseWave = Math.sin(x * 0.15 + time * 3.5);
+                    const spike = Math.pow(Math.abs(Math.sin(x * 0.08 + time * 0.8)), 15) * 12;
+                    const combined = (baseWave + spike) * 0.25;
+                    
+                    const normalizedY = 1 - (posY / height);
+                    const threshold = 0.4 + combined;
+                    
+                    if (Math.abs(normalizedY - threshold) < 0.06) {
+                        const charIdx = Math.floor(Math.random() * densityChars.length);
+                        ctx.globalAlpha = 1.0;
+                        ctx.fillStyle = (Math.random() > 0.9) ? '#ffd600' : '#ff2200';
+                        ctx.fillText(densityChars[charIdx], posX, posY);
+                    } else if (Math.abs(normalizedY - threshold) < 0.2) {
+                        ctx.globalAlpha = 0.2;
+                        ctx.fillStyle = '#ff2200';
+                        ctx.fillText(':', posX, posY);
+                    }
+                }
+            }
+
+            time += 0.06;
+            
+            if (Math.random() > 0.97) {
+                document.getElementById('val-hr').textContent = (110 + Math.floor(Math.random()*15)) + " BPM";
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        setInterval(() => {
+            const log = document.createElement('div');
+            log.className = 'log-entry';
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+            const events = [
+                "CORE TEMPERATURE CRITICAL",
+                "MEM_LEAK IN COGNITIVE_FILTER",
+                "NEURAL_RECEPTOR_FAIL: 0xFD2",
+                "DANGER: ADRENALINE SPIKE",
+                "FORCED SHUTDOWN PREVENTED"
+            ];
+            log.innerHTML = `<span class="timestamp">${timeStr}</span> <span><span class="highlight">${events[Math.floor(Math.random()*events.length)]}</span></span>`;
+            logContainer.prepend(log);
+            if(logContainer.children.length > 12) logContainer.lastElementChild.remove();
+        }, 2000);
+
+        render();
+    </script>
+
+</body></html>

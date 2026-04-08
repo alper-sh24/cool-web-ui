@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">T E R R A I N . S Y S</title>
+    <style vid="5">
+        :root {
+            --bg-color: #0a0f0a;
+            --grid-color: #1f2922;
+            --text-main: #e0e5df;
+            --text-dim: #7a8a7f;
+            --accent-green: #26A66A;
+            --accent-cyan: #00e5ff;
+            --accent-red: #ff3333;
+            --font-stack: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --border: 1px solid var(--grid-color);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-stack);
+            font-size: 11px;
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        
+        .layout-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            border-bottom: var(--border);
+        }
+
+        
+        .header {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            border-bottom: var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .header-col {
+            display: flex;
+            padding: 12px 24px;
+        }
+
+        .header-col:nth-child(2) {
+            border-left: var(--border);
+            border-right: var(--border);
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .header-col:nth-child(3) {
+            justify-content: flex-end;
+            gap: 24px;
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .nav-items span { color: var(--text-dim); margin-right: 4px; }
+
+        
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: var(--border);
+            flex-grow: 1;
+        }
+
+        .hero-left {
+            padding: 40px;
+            border-right: var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .page-title {
+            font-size: 24px;
+            text-transform: uppercase;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            margin-bottom: 40px;
+        }
+
+        .hero-text {
+            font-size: 16px;
+            line-height: 1.5;
+            max-width: 480px;
+            margin-bottom: 40px;
+        }
+
+        .hero-subtext {
+            font-size: 11px;
+            color: var(--text-dim);
+            max-width: 480px;
+            margin-bottom: 20px;
+        }
+
+        
+        .hero-right {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            background-color: #070a07; 
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 1/1;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            box-shadow: 0 0 40px rgba(38, 166, 106, 0.05), inset 0 0 40px rgba(0, 229, 255, 0.05);
+        }
+
+        
+        #webgl-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            
+            overflow: hidden; 
+        }
+
+        
+        .canvas-overlay {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: calc(100% + 20px);
+            height: calc(100% + 20px);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .readout-badge {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-color);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 4px 12px;
+            font-family: monospace;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            z-index: 11;
+        }
+
+        
+        .lists-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: var(--border);
+        }
+
+        .list-col {
+            padding: 40px;
+        }
+
+        .list-col:first-child {
+            border-right: var(--border);
+        }
+
+        .list-header {
+            font-size: 16px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            letter-spacing: 0.05em;
+        }
+
+        ul.data-list {
+            list-style: none;
+        }
+
+        ul.data-list li {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        ul.data-list li::before {
+            content: "▪";
+            margin-right: 12px;
+            font-size: 8px;
+            color: var(--text-dim);
+        }
+
+        ul.data-list.warning li::before {
+            color: var(--accent-red);
+        }
+        
+        ul.data-list.safe li::before {
+            color: var(--accent-green);
+        }
+
+        
+        .footer {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+        }
+
+        .footer-col {
+            padding: 24px;
+            border-right: var(--border);
+        }
+        .footer-col:last-child {
+            border-right: none;
+        }
+
+        .col-title {
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 24px;
+            letter-spacing: 0.05em;
+        }
+
+        .micro-data {
+            font-family: monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            line-height: 1.8;
+            text-transform: uppercase;
+        }
+
+        
+        @media (max-width: 1024px) {
+            .hero, .lists-section, .footer {
+                grid-template-columns: 1fr;
+            }
+            .hero-left, .list-col:first-child, .footer-col {
+                border-right: none;
+                border-bottom: var(--border);
+            }
+            .header {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .header-col { border: none !important; justify-content: center !important; }
+        }
+    </style>
+    
+    
+    <script type="importmap" vid="6">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body vid="7">
+
+<div class="layout-wrapper" vid="8">
+    <header class="header" vid="9">
+        <div class="header-col" vid="10">
+            <ul class="nav-items" vid="11">
+                <li vid="12"><span vid="13">1</span> TOPOLOGY</li>
+                <li vid="14"><span vid="15">2</span> SEISMIC</li>
+                <li vid="16"><span vid="17">3</span> THERMAL</li>
+                <li vid="18"><span vid="19">4</span> ALL</li>
+            </ul>
+        </div>
+        <div class="header-col" vid="20">
+            S P A T I A L . R E C O N
+        </div>
+        <div class="header-col" vid="21">
+            <div vid="22">UPLINK [ACTIVE]</div>
+            <div vid="23">NODE (0)</div>
+        </div>
+    </header>
+
+    <main class="hero" vid="24">
+        <div class="hero-left" vid="25">
+            <div vid="26">
+                <h1 class="page-title" vid="27">Sector 4<br vid="28">Analysis</h1>
+                <div class="hero-text" vid="29">
+                    Topographical clarity; absolute precision in spatial analysis, devoid of arbitrary data.
+                </div>
+                <div class="hero-subtext" vid="30">
+                    Scan initiated at standard epoch. Generation of 512x512 topological matrix complete. Utilizing layered Simplex noise algorithms with injected Gaussian perturbations to simulate complex geomorphology. 
+                    <br vid="31"><br vid="32">
+                    Contour extraction achieved via Marching Squares logic, delineating elevation thresholds into discrete vector paths. Post-processing indicates high luminescence in elevated zones (#26A66A). Proceed with caution in sub-zero anomalous depressions.
+                </div>
+            </div>
+            <div class="hero-subtext" style="font-family: monospace;" vid="33">
+                COORD: 47°36'N 122°20'W<br vid="34">
+                ELEVATION DELTA: 14.2 km<br vid="35">
+                ATMOSPHERE: TOXIC
+            </div>
+        </div>
+
+        <div class="hero-right" vid="36">
+            <div class="canvas-container" vid="37">
+                <div id="webgl-canvas" vid="38"><canvas data-engine="three.js r160" width="551" height="551" style="display: block; width: 551px; height: 551px; touch-action: none;"></canvas></div>
+                
+                
+                <svg class="canvas-overlay" viewBox="0 0 100 100" preserveAspectRatio="none" vid="39">
+                    
+                    <circle cx="50" cy="50" r="49.5" fill="none" stroke="rgba(0, 229, 255, 0.3)" stroke-width="0.2" stroke-dasharray="1 2" vid="40"></circle>
+                    <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(0, 229, 255, 0.1)" stroke-width="0.1" vid="41"></circle>
+                    
+                    
+                    <line x1="50" y1="0" x2="50" y2="4" stroke="rgba(0, 229, 255, 0.5)" stroke-width="0.5" vid="42"></line>
+                    <line x1="50" y1="96" x2="50" y2="100" stroke="rgba(0, 229, 255, 0.5)" stroke-width="0.5" vid="43"></line>
+                    <line x1="0" y1="50" x2="4" y2="50" stroke="rgba(0, 229, 255, 0.5)" stroke-width="0.5" vid="44"></line>
+                    <line x1="96" y1="50" x2="100" y2="50" stroke="rgba(0, 229, 255, 0.5)" stroke-width="0.5" vid="45"></line>
+                </svg>
+
+                <div class="readout-badge" vid="46">LVL #26A66A</div>
+            </div>
+        </div>
+    </main>
+
+    <section class="lists-section" vid="47">
+        <div class="list-col" vid="48">
+            <h2 class="list-header" vid="49">Anomalies</h2>
+            <ul class="data-list warning" vid="50">
+                <li vid="51">Zone 4: Sub-zero structural collapse detected.</li>
+                <li vid="52">Thermal venting exceeding safety thresholds.</li>
+                <li vid="53">Unidentified subterranean void geometry.</li>
+                <li vid="54">Electromagnetic interference at origin points.</li>
+                <li vid="55">Severe spatial distortion in sector D-9.</li>
+                <li vid="56">Atmospheric degradation near base level.</li>
+                <li vid="57">Unauthorized biological signatures.</li>
+            </ul>
+        </div>
+        <div class="list-col" vid="58">
+            <h2 class="list-header" vid="59">Verified Formations</h2>
+            <ul class="data-list safe" vid="60">
+                <li vid="61">Region 1: Singular spire (Alpha Peak).</li>
+                <li vid="62">Region 2: Stable twin-peak plateau base.</li>
+                <li vid="63">Region 3: Multi-fracture crystalline ridgeline.</li>
+                <li vid="64">Procedural noise generation normalized.</li>
+                <li vid="65">Isoline rendering algorithms optimal.</li>
+                <li vid="66">Mesh integrity at 99.8%.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer class="footer" vid="67">
+        <div class="footer-col" vid="68">
+            <div class="col-title" vid="69">Index</div>
+            <div class="micro-data" vid="70">
+                DATASET_001<br vid="71">
+                DATASET_002<br vid="72">
+                DATASET_003<br vid="73">
+                ARCHIVE_ROOT
+            </div>
+        </div>
+        <div class="footer-col" vid="74">
+            <div class="col-title" vid="75">Parameters</div>
+            <div class="micro-data" vid="76">
+                GRID: 512x512<br vid="77">
+                OCTAVES: 6<br vid="78">
+                PERSISTENCE: 0.5<br vid="79">
+                LACUNARITY: 2.0<br vid="80">
+                THRESHOLDS: 18<br vid="81">
+                ALGO: MARCHING_SQ
+            </div>
+        </div>
+        <div class="footer-col" vid="82">
+            <div class="col-title" vid="83">Spectroscopy</div>
+            <div class="micro-data" vid="84">
+                LOW: #008080 (TEAL)<br vid="85">
+                HIGH: #26A66A (NEON)<br vid="86">
+                WARN: #FF3333 (RED)<br vid="87">
+                VOID: #0A0F0A (BLK)
+            </div>
+        </div>
+        <div class="footer-col" vid="88">
+            <div class="col-title" vid="89">System Status</div>
+            <div class="micro-data" style="color: var(--accent-green);" vid="90">
+                ALL SYSTEMS NOMINAL.<br vid="91">
+                AWAITING FURTHER INPUT.<br vid="92">
+                <br vid="93">
+                <span style="color: var(--text-dim)" vid="94">© T E R R A I N 2024</span>
+            </div>
+        </div>
+    </footer>
+</div>
+
+
+<script type="module" vid="95">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    
+    
+    import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+    import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+    import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+
+    
+    
+    const F2 = 0.5 * (Math.sqrt(3.0) - 1.0);
+    const G2 = (3.0 - Math.sqrt(3.0)) / 6.0;
+    const p = new Uint8Array(256);
+    for (let i = 0; i < 256; i++) p[i] = Math.floor(Math.random() * 256);
+    const perm = new Uint8Array(512);
+    const permMod12 = new Uint8Array(512);
+    for (let i = 0; i < 512; i++) {
+        perm[i] = p[i & 255];
+        permMod12[i] = (perm[i] % 12);
+    }
+    const grad3 = new Float32Array([1,1,0,-1,1,0,1,-1,0,-1,-1,0,1,0,1,-1,0,1,1,0,-1,-1,0,-1,0,1,1,0,-1,1,0,1,-1,0,-1,-1]);
+    
+    function simplex2(xin, yin) {
+        let n0, n1, n2;
+        let s = (xin + yin) * F2;
+        let i = Math.floor(xin + s);
+        let j = Math.floor(yin + s);
+        let t = (i + j) * G2;
+        let X0 = i - t;
+        let Y0 = j - t;
+        let x0 = xin - X0;
+        let y0 = yin - Y0;
+        let i1, j1;
+        if (x0 > y0) { i1 = 1; j1 = 0; } else { i1 = 0; j1 = 1; }
+        let x1 = x0 - i1 + G2;
+        let y1 = y0 - j1 + G2;
+        let x2 = x0 - 1.0 + 2.0 * G2;
+        let y2 = y0 - 1.0 + 2.0 * G2;
+        let ii = i & 255;
+        let jj = j & 255;
+        let gi0 = permMod12[ii + perm[jj]] * 3;
+        let gi1 = permMod12[ii + i1 + perm[jj + j1]] * 3;
+        let gi2 = permMod12[ii + 1 + perm[jj + 1]] * 3;
+        let t0 = 0.5 - x0 * x0 - y0 * y0;
+        if (t0 < 0) n0 = 0.0;
+        else { t0 *= t0; n0 = t0 * t0 * (grad3[gi0] * x0 + grad3[gi0 + 1] * y0); }
+        let t1 = 0.5 - x1 * x1 - y1 * y1;
+        if (t1 < 0) n1 = 0.0;
+        else { t1 *= t1; n1 = t1 * t1 * (grad3[gi1] * x1 + grad3[gi1 + 1] * y1); }
+        let t2 = 0.5 - x2 * x2 - y2 * y2;
+        if (t2 < 0) n2 = 0.0;
+        else { t2 *= t2; n2 = t2 * t2 * (grad3[gi2] * x2 + grad3[gi2 + 1] * y2); }
+        return 70.0 * (n0 + n1 + n2);
+    }
+
+    
+    const container = document.getElementById('webgl-canvas');
+    let width = container.clientWidth;
+    let height = container.clientHeight;
+
+    const scene = new THREE.Scene();
+    
+    scene.background = new THREE.Color(0x0a0f0a);
+    scene.fog = new THREE.FogExp2(0x0a0f0a, 0.008);
+
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(0, 60, 80);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: false }); 
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.5;
+    controls.maxPolarAngle = Math.PI / 2 - 0.1;
+
+    
+    const renderScene = new RenderPass(scene, camera);
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(width, height), 1.5, 0.4, 0.85);
+    bloomPass.threshold = 0.1;
+    bloomPass.strength = 1.2; 
+    bloomPass.radius = 0.5;
+
+    const composer = new EffectComposer(renderer);
+    composer.addPass(renderScene);
+    composer.addPass(bloomPass);
+
+    
+    const SIZE = 512;
+    const heightData = new Float32Array(SIZE * SIZE);
+    let minH = Infinity;
+    let maxH = -Infinity;
+
+    
+    const octaves = 5;
+    const persistence = 0.5;
+    const lacunarity = 2.0;
+    const scale = 0.005;
+
+    
+    function addGaussian(x0, y0, amplitude, sigmaX, sigmaY) {
+        for (let y = 0; y < SIZE; y++) {
+            for (let x = 0; x < SIZE; x++) {
+                const dx = x - x0;
+                const dy = y - y0;
+                const val = amplitude * Math.exp(-( (dx*dx)/(2*sigmaX*sigmaX) + (dy*dy)/(2*sigmaY*sigmaY) ));
+                heightData[y * SIZE + x] += val;
+            }
+        }
+    }
+
+    
+    for (let y = 0; y < SIZE; y++) {
+        for (let x = 0; x < SIZE; x++) {
+            let amplitude = 1.0;
+            let frequency = scale;
+            let noiseValue = 0;
+            
+            for (let i = 0; i < octaves; i++) {
+                noiseValue += amplitude * simplex2(x * frequency, y * frequency);
+                amplitude *= persistence;
+                frequency *= lacunarity;
+            }
+            heightData[y * SIZE + x] = noiseValue;
+        }
+    }
+
+    
+    
+    addGaussian(100, 100, 3.5, 15, 15);
+    
+    
+    addGaussian(350, 150, 2.0, 50, 50); 
+    addGaussian(330, 140, 1.5, 10, 10); 
+    addGaussian(370, 160, 1.4, 12, 12); 
+
+    
+    addGaussian(150, 350, 1.8, 15, 25);
+    addGaussian(130, 370, 1.6, 12, 12);
+    addGaussian(160, 330, 1.9, 10, 20);
+
+    
+    addGaussian(400, 400, -2.5, 40, 40);
+
+    
+    const radiusSq = (SIZE/2) * (SIZE/2);
+    const cx = SIZE/2;
+    const cy = SIZE/2;
+
+    for (let y = 0; y < SIZE; y++) {
+        for (let x = 0; x < SIZE; x++) {
+            const idx = y * SIZE + x;
+            const distSq = (x-cx)*(x-cx) + (y-cy)*(y-cy);
+            
+            
+            if (distSq > radiusSq) {
+                heightData[idx] = -10; 
+            } else {
+                
+                const edgeFactor = 1.0 - Math.pow(distSq/radiusSq, 4);
+                heightData[idx] *= edgeFactor;
+                
+                
+                if (heightData[idx] < minH) minH = heightData[idx];
+                if (heightData[idx] > maxH) maxH = heightData[idx];
+            }
+        }
+    }
+
+    
+    
+    const levels = 18;
+    const contourSegments = []; 
+    for(let i=0; i<levels; i++) contourSegments.push([]);
+
+    const physScale = 0.2; 
+    const offsetXY = -(SIZE * physScale) / 2;
+    const heightMultiplier = 8.0;
+
+    
+    const edges = [
+        [], [ [0,3] ], [ [1,0] ], [ [1,3] ],
+        [ [2,1] ], [ [0,3], [2,1] ], [ [2,0] ], [ [2,3] ],
+        [ [3,2] ], [ [0,2] ], [ [1,0], [3,2] ], [ [1,2] ],
+        [ [3,1] ], [ [0,1] ], [ [3,0] ], []
+    ];
+
+    function getInterpolatedPoint(v1, v2, val1, val2, threshold) {
+        let t = (threshold - val1) / (val2 - val1);
+        if(isNaN(t) || t < 0) t = 0;
+        if(t > 1) t = 1;
+        return {
+            x: v1.x + t * (v2.x - v1.x),
+            y: v1.y + t * (v2.y - v1.y)
+        };
+    }
+
+    for (let y = 0; y < SIZE - 1; y++) {
+        for (let x = 0; x < SIZE - 1; x++) {
+            const idx0 = y * SIZE + x;
+            const idx1 = idx0 + 1;
+            const idx2 = (y + 1) * SIZE + x + 1;
+            const idx3 = (y + 1) * SIZE + x;
+
+            const v0 = heightData[idx0];
+            const v1 = heightData[idx1];
+            const v2 = heightData[idx2];
+            const v3 = heightData[idx3];
+
+            
+            if(v0 < -5 && v1 < -5 && v2 < -5 && v3 < -5) continue;
+
+            for (let l = 0; l < levels; l++) {
+                
+                
+                let normalizedLevel = Math.pow(l / (levels - 1), 1.2); 
+                const threshold = minH + normalizedLevel * (maxH - minH);
+
+                let cellIndex = 0;
+                if (v0 >= threshold) cellIndex |= 1;
+                if (v1 >= threshold) cellIndex |= 2;
+                if (v2 >= threshold) cellIndex |= 4;
+                if (v3 >= threshold) cellIndex |= 8;
+
+                if (cellIndex !== 0 && cellIndex !== 15) {
+                    const pts = [
+                        {x: x, y: y, val: v0},
+                        {x: x+1, y: y, val: v1},
+                        {x: x+1, y: y+1, val: v2},
+                        {x: x, y: y+1, val: v3}
+                    ];
+
+                    const caseEdges = edges[cellIndex];
+                    for (let i = 0; i < caseEdges.length; i++) {
+                        const edgePairs = caseEdges[i];
+                        
+                        let p1_idxA = edgePairs[0];
+                        let p1_idxB = (p1_idxA + 1) % 4;
+                        let pt1 = getInterpolatedPoint(pts[p1_idxA], pts[p1_idxB], pts[p1_idxA].val, pts[p1_idxB].val, threshold);
+
+                        let p2_idxA = edgePairs[1];
+                        let p2_idxB = (p2_idxA + 1) % 4;
+                        let pt2 = getInterpolatedPoint(pts[p2_idxA], pts[p2_idxB], pts[p2_idxA].val, pts[p2_idxB].val, threshold);
+
+                        
+                        contourSegments[l].push(
+                            pt1.x * physScale + offsetXY,
+                            threshold * heightMultiplier, 
+                            pt1.y * physScale + offsetXY,
+                            
+                            pt2.x * physScale + offsetXY,
+                            threshold * heightMultiplier,
+                            pt2.y * physScale + offsetXY
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    
+    
+    const colorLow = new THREE.Color(0x004040); 
+    const colorHigh = new THREE.Color(0x26A66A); 
+    
+    
+    const terrainGroup = new THREE.Group();
+
+    for(let l=0; l<levels; l++) {
+        if(contourSegments[l].length === 0) continue;
+        
+        
+        const lerpFactor = l / (levels - 1);
+        const levelColor = colorLow.clone().lerp(colorHigh, lerpFactor);
+
+        
+        const geometry = new LineSegmentsGeometry();
+        geometry.setPositions(contourSegments[l]);
+        
+        const material = new LineMaterial({
+            color: levelColor.getHex(),
+            linewidth: 1.5, 
+            resolution: new THREE.Vector2(width, height), 
+            dashed: false,
+            transparent: true,
+            opacity: 0.8 + (lerpFactor * 0.2) 
+        });
+
+        const lines = new LineSegments2(geometry, material);
+        lines.computeLineDistances();
+        terrainGroup.add(lines);
+    }
+
+    scene.add(terrainGroup);
+
+    
+    
+    
+    function get3DCoord(x, y) {
+        const height = heightData[y * SIZE + x] * heightMultiplier;
+        return new THREE.Vector3(
+            x * physScale + offsetXY,
+            height,
+            y * physScale + offsetXY
+        );
+    }
+
+    
+    const hexGeo = new THREE.CylinderGeometry(0.5, 0.5, 4, 6);
+    const hexMat = new THREE.MeshBasicMaterial({ color: 0x26A66A, wireframe: false });
+    
+    
+    const peaks = [
+        get3DCoord(100, 100), 
+        get3DCoord(330, 140), 
+        get3DCoord(370, 160), 
+    ];
+
+    peaks.forEach(pos => {
+        const marker = new THREE.Mesh(hexGeo, hexMat);
+        marker.position.copy(pos);
+        marker.position.y += 2; 
+        terrainGroup.add(marker);
+        
+        
+        const ring = new THREE.Mesh(
+            new THREE.RingGeometry(1, 1.2, 16),
+            new THREE.MeshBasicMaterial({ color: 0x26A66A, side: THREE.DoubleSide })
+        );
+        ring.position.copy(pos);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.y += 0.5;
+        terrainGroup.add(ring);
+    });
+
+    
+    const warnGeo = new THREE.OctahedronGeometry(1.5, 0);
+    const warnMat = new THREE.MeshBasicMaterial({ color: 0xff3333, wireframe: true });
+    
+    const depPos = get3DCoord(400, 400); 
+    
+    depPos.y = (minH * heightMultiplier) + 2; 
+    
+    const warnMarker = new THREE.Mesh(warnGeo, warnMat);
+    warnMarker.position.copy(depPos);
+    
+    
+    terrainGroup.add(warnMarker);
+
+    
+    const humanGroup = new THREE.Group();
+    const bodyGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.6, 8);
+    const headGeo = new THREE.SphereGeometry(0.15, 8, 8);
+    const humanMat = new THREE.MeshBasicMaterial({ color: 0xffffff }); 
+    
+    const body = new THREE.Mesh(bodyGeo, humanMat);
+    body.position.y = 0.3;
+    const head = new THREE.Mesh(headGeo, humanMat);
+    head.position.y = 0.75;
+    
+    humanGroup.add(body);
+    humanGroup.add(head);
+    
+    
+    const plateauPos = get3DCoord(350, 150);
+    humanGroup.position.copy(plateauPos);
+    terrainGroup.add(humanGroup);
+
+
+    
+    window.addEventListener('resize', onWindowResize, false);
+    function onWindowResize() {
+        width = container.clientWidth;
+        height = container.clientHeight;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+        composer.setSize(width, height);
+        
+        
+        terrainGroup.children.forEach(child => {
+            if(child.isLineSegments2) {
+                child.material.resolution.set(width, height);
+            }
+        });
+    }
+
+    
+    const clock = new THREE.Clock();
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        const time = clock.getElapsedTime();
+        controls.update();
+
+        
+        warnMarker.rotation.y += 0.02;
+        warnMarker.rotation.z += 0.01;
+        warnMarker.scale.setScalar(1 + Math.sin(time * 4) * 0.2);
+
+        
+        composer.render();
+    }
+
+    
+    animate();
+
+</script>
+
+</body></html>
