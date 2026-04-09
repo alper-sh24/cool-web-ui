@@ -64,73 +64,9 @@
             opacity: 0.6;
         }
 
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .back-btn {
-            display: none;
-            background: var(--ds-border);
-            color: var(--ds-bg-base);
-            border: none;
-            padding: 12px 20px;
-            font-family: var(--ds-font-mono);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .back-btn:hover {
-            opacity: 0.8;
-        }
-
-        .back-btn.visible {
-            display: block;
-        }
-
-        .current-title {
-            font-family: var(--ds-font-mono);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            max-width: 400px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            display: none;
-        }
-
-        .current-title.visible {
-            display: block;
-        }
-
-        .structural-band {
-            display: flex;
-            border-bottom: 1px solid var(--ds-border);
-            background-color: var(--ds-bg-base);
-        }
-
-        .band-item {
-            flex: 1;
-            padding: 10px 30px;
-            font-family: var(--ds-font-mono);
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            border-right: 1px solid var(--ds-border);
-        }
-
-        .band-item:last-child {
-            border-right: none;
-        }
-
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             background-color: var(--ds-border);
             gap: 1px;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -161,8 +97,7 @@
             flex-direction: column;
             cursor: pointer;
             transition: background-color 0.2s;
-            content-visibility: auto;
-            contain-intrinsic-size: 180px;
+            min-height: 200px;
         }
 
         .page-card:hover {
@@ -172,50 +107,131 @@
         .card-label-band {
             padding: 12px 20px;
             font-family: var(--ds-font-primary);
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             border-bottom: 1px solid var(--ds-border);
-            opacity: 0.5;
         }
 
         .card-title-band {
-            padding: 20px 20px;
+            padding: 25px 20px;
             border-bottom: 1px solid var(--ds-border);
         }
 
         .card-title-band h3 {
-            font-size: 1.4rem;
+            font-size: 2.2rem;
             font-weight: 400;
-            line-height: 1.1;
+            line-height: 1.05;
             text-transform: uppercase;
-            word-break: break-word;
         }
 
-        .card-meta-band {
-            padding: 15px 20px;
+        .card-footer-band {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-grow: 1;
+            min-height: 160px;
         }
 
-        .card-filename {
+        .visual-texture {
+            width: 50%;
+            border-right: 1px solid var(--ds-border);
+            background-color: #222;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pattern-target {
+            width: 150%;
+            height: 150%;
+            background-image: repeating-radial-gradient(
+                circle at center,
+                transparent 0,
+                transparent 10px,
+                var(--ds-accent-yellow) 10px,
+                var(--ds-accent-yellow) 11px
+            );
+            opacity: 0.8;
+        }
+
+        .visual-texture.cyan-target .pattern-target {
+            background-image: repeating-radial-gradient(
+                circle at center, transparent 0, transparent 15px, var(--ds-accent-cyan) 15px, var(--ds-accent-cyan) 16px
+            );
+        }
+
+        .visual-texture.green-target .pattern-target {
+            background-image: repeating-radial-gradient(
+                circle at center, transparent 0, transparent 8px, var(--ds-accent-green) 8px, var(--ds-accent-green) 9px
+            );
+        }
+
+        .visual-texture.white-target .pattern-target {
+            background-image: repeating-radial-gradient(
+                circle at center, transparent 0, transparent 12px, var(--ds-accent-white) 12px, var(--ds-accent-white) 13px
+            );
+        }
+
+        .metrics-stack {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-block {
+            height: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .metric-block.top {
+            border-bottom: 1px solid var(--ds-border);
+        }
+
+        .bg-green { background-color: var(--ds-accent-green); }
+        .bg-cyan { background-color: var(--ds-accent-cyan); }
+        .bg-yellow { background-color: var(--ds-accent-yellow); }
+        .bg-white { background-color: var(--ds-accent-white); }
+
+        .metric-value {
+            font-size: 2.8rem;
+            font-weight: 400;
+            line-height: 0.9;
+        }
+
+        .metric-unit {
+            font-size: 1rem;
+            vertical-align: super;
+            margin-left: 2px;
+        }
+
+        .metric-label {
+            font-family: var(--ds-font-primary);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .card-color-index {
             font-family: var(--ds-font-mono);
             font-size: 0.6rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             opacity: 0.6;
-            word-break: break-all;
-        }
-
-        .card-arrow {
-            font-size: 1.2rem;
-            opacity: 0.4;
+            margin-top: auto;
+            padding: 15px 20px;
+            border-top: 1px solid var(--ds-border);
         }
 
         .preview-container {
             position: fixed;
-            top: 85px;
+            top: 0;
             left: 0;
             right: 0;
             bottom: 0;
@@ -229,6 +245,52 @@
             display: block;
         }
 
+        .preview-header {
+            height: 100px;
+            border-bottom: 1px solid var(--ds-border);
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            background: var(--ds-bg-base);
+            gap: 20px;
+        }
+
+        .preview-header .current-title {
+            font-family: var(--ds-font-mono);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .preview-header .back-btn {
+            background: var(--ds-border);
+            color: var(--ds-bg-base);
+            border: none;
+            padding: 12px 20px;
+            font-family: var(--ds-font-mono);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .preview-header .back-btn:hover {
+            opacity: 0.8;
+        }
+
+        .preview-content {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
         .preview-iframe {
             width: 100%;
             height: 100%;
@@ -236,7 +298,10 @@
             background: white;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
             .module-title {
                 font-size: 2rem;
             }
@@ -244,9 +309,6 @@
                 flex-direction: column;
                 gap: 15px;
                 align-items: flex-start;
-            }
-            .gallery-grid {
-                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -258,44 +320,52 @@
                 <h2 class="module-title">Design<br>Gallery</h2>
                 <p class="header-subtitle" x-text="`${pagesData.length} PAGES AVAILABLE`"></p>
             </div>
-            <div class="header-actions">
-                <span class="current-title" :class="{ 'visible': activePage }" x-text="activePage?.title || ''"></span>
-                <button class="back-btn" :class="{ 'visible': activePage }" @click="closePreview()">
-                    ← Back to Gallery
-                </button>
-            </div>
         </header>
 
-        <div class="structural-band">
-            <div class="band-item">FILENAME</div>
-            <div class="band-item">PAGE TITLE</div>
-            <div class="band-item">PREVIEW</div>
-        </div>
-
         <div class="gallery-grid" :class="{ 'preview-mode': activePage }">
-            <template x-for="page in pagesData" :key="page.filename">
+            <template x-for="(page, index) in pagesData" :key="page.filename">
                 <article class="page-card" @click="openPreview(page)">
                     <div class="card-label-band">
-                        <span x-text="page.filename"></span>
+                        <span x-text="`PAGE ${index + 1}`"></span>
                     </div>
                     <div class="card-title-band">
                         <h3 x-text="page.title"></h3>
                     </div>
-                    <div class="card-meta-band">
-                        <span class="card-filename">CLICK TO PREVIEW</span>
-                        <span class="card-arrow">→</span>
+                    <div class="card-footer-band">
+                        <div class="visual-texture" :class="getTextureClass(index)">
+                            <div class="pattern-target"></div>
+                        </div>
+                        <div class="metrics-stack">
+                            <div class="metric-block top" :class="getBgClass(index, 0)">
+                                <span class="metric-label" style="font-size: 1.2rem; margin-top:0;" x-text="getMetric1(index)"></span>
+                                <span class="metric-label" x-text="getMetricLabel1(index)"></span>
+                            </div>
+                            <div class="metric-block" :class="getBgClass(index, 1)">
+                                <div><span class="metric-value" x-text="getMetricValue(index)"></span><span class="metric-unit" x-text="getMetricUnit(index)"></span></div>
+                                <span class="metric-label" x-text="getMetricLabel2(index)"></span>
+                            </div>
+                        </div>
                     </div>
+                    <div class="card-color-index">CLICK TO PREVIEW</div>
                 </article>
             </template>
         </div>
 
         <div class="preview-container" :class="{ 'active': activePage }">
-            <iframe 
-                class="preview-iframe"
-                :src="activePage ? 'pages/' + activePage.filename : ''"
-                loading="lazy"
-                :title="activePage?.title"
-            ></iframe>
+            <div class="preview-header">
+                <span class="current-title visible" x-text="activePage?.title || ''"></span>
+                <button class="back-btn visible" @click="closePreview()">
+                    ← Back to Gallery
+                </button>
+            </div>
+            <div class="preview-content">
+                <iframe 
+                    class="preview-iframe"
+                    :src="activePage ? 'pages/' + activePage.filename : ''"
+                    loading="lazy"
+                    :title="activePage?.title"
+                ></iframe>
+            </div>
         </div>
     </main>
 
@@ -314,6 +384,46 @@
                 closePreview() {
                     this.activePage = null;
                     document.body.style.overflow = '';
+                },
+
+                getTextureClass(index) {
+                    const classes = ['', 'cyan-target', 'green-target', 'white-target'];
+                    return classes[index % 4];
+                },
+
+                getBgClass(index, pos) {
+                    const combos = [
+                        ['bg-cyan', 'bg-white'],
+                        ['bg-white', 'bg-green'],
+                        ['bg-yellow', 'bg-white'],
+                        ['bg-white', 'bg-cyan']
+                    ];
+                    return combos[index % 4][pos];
+                },
+
+                getMetric1(index) {
+                    const vals = ['FULL', 'GRAPH', 'DEEP', 'EXACT'];
+                    return vals[index % 4];
+                },
+
+                getMetricLabel1(index) {
+                    const vals = ['VISIBILITY', 'GENERATION', 'INSPECTION', 'PRECISION'];
+                    return vals[index % 4];
+                },
+
+                getMetricValue(index) {
+                    const vals = ['0', '100', '60', '1'];
+                    return vals[index % 4];
+                },
+
+                getMetricUnit(index) {
+                    const vals = ['MS', '%', 'FPS', 'MS'];
+                    return vals[index % 4];
+                },
+
+                getMetricLabel2(index) {
+                    const vals = ['LATENCY', 'MAPPED', 'STABILITY', 'RESOLUTION'];
+                    return vals[index % 4];
                 }
             };
         }
