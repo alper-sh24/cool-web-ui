@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Gallery</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        :root {
+            --ds-bg-base: #e6e5e0;
+            --ds-border: #000000;
+            --ds-text: #000000;
+            --ds-accent-green: #7cb342;
+            --ds-accent-cyan: #4dd0e1;
+            --ds-accent-yellow: #ffee58;
+            --ds-accent-white: #ffffff;
+            --ds-font-primary: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --ds-font-mono: "Courier New", Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: var(--ds-text);
+            font-family: var(--ds-font-primary);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        .gallery-module {
+            background-color: var(--ds-bg-base);
+            min-height: 100vh;
+            border: 1px solid var(--ds-border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .module-header {
+            padding: 30px 30px;
+            border-bottom: 1px solid var(--ds-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .module-title {
+            font-size: 3rem;
+            font-weight: 400;
+            line-height: 0.95;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            font-family: var(--ds-font-mono);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .back-btn {
+            display: none;
+            background: var(--ds-border);
+            color: var(--ds-bg-base);
+            border: none;
+            padding: 12px 20px;
+            font-family: var(--ds-font-mono);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .back-btn:hover {
+            opacity: 0.8;
+        }
+
+        .back-btn.visible {
+            display: block;
+        }
+
+        .current-title {
+            font-family: var(--ds-font-mono);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: none;
+        }
+
+        .current-title.visible {
+            display: block;
+        }
+
+        .structural-band {
+            display: flex;
+            border-bottom: 1px solid var(--ds-border);
+            background-color: var(--ds-bg-base);
+        }
+
+        .band-item {
+            flex: 1;
+            padding: 10px 30px;
+            font-family: var(--ds-font-mono);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-right: 1px solid var(--ds-border);
+        }
+
+        .band-item:last-child {
+            border-right: none;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            background-color: var(--ds-border);
+            gap: 1px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gallery-grid.preview-mode {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
+
+        .gallery-grid:not(.preview-mode) {
+            position: relative;
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        .page-card {
+            background-color: var(--ds-bg-base);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            content-visibility: auto;
+            contain-intrinsic-size: 180px;
+        }
+
+        .page-card:hover {
+            background-color: var(--ds-accent-white);
+        }
+
+        .card-label-band {
+            padding: 12px 20px;
+            font-family: var(--ds-font-primary);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--ds-border);
+            opacity: 0.5;
+        }
+
+        .card-title-band {
+            padding: 20px 20px;
+            border-bottom: 1px solid var(--ds-border);
+        }
+
+        .card-title-band h3 {
+            font-size: 1.4rem;
+            font-weight: 400;
+            line-height: 1.1;
+            text-transform: uppercase;
+            word-break: break-word;
+        }
+
+        .card-meta-band {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-filename {
+            font-family: var(--ds-font-mono);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.6;
+            word-break: break-all;
+        }
+
+        .card-arrow {
+            font-size: 1.2rem;
+            opacity: 0.4;
+        }
+
+        .preview-container {
+            position: fixed;
+            top: 85px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--ds-bg-base);
+            border: 1px solid var(--ds-border);
+            display: none;
+            z-index: 10;
+        }
+
+        .preview-container.active {
+            display: block;
+        }
+
+        .preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        @media (max-width: 768px) {
+            .module-title {
+                font-size: 2rem;
+            }
+            .module-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="gallery-module" x-data="galleryApp()">
+        <header class="module-header">
+            <div>
+                <h2 class="module-title">Design<br>Gallery</h2>
+                <p class="header-subtitle" x-text="`${pagesData.length} PAGES AVAILABLE`"></p>
+            </div>
+            <div class="header-actions">
+                <span class="current-title" :class="{ 'visible': activePage }" x-text="activePage?.title || ''"></span>
+                <button class="back-btn" :class="{ 'visible': activePage }" @click="closePreview()">
+                    ← Back to Gallery
+                </button>
+            </div>
+        </header>
+
+        <div class="structural-band">
+            <div class="band-item">FILENAME</div>
+            <div class="band-item">PAGE TITLE</div>
+            <div class="band-item">PREVIEW</div>
+        </div>
+
+        <div class="gallery-grid" :class="{ 'preview-mode': activePage }">
+            <template x-for="page in pagesData" :key="page.filename">
+                <article class="page-card" @click="openPreview(page)">
+                    <div class="card-label-band">
+                        <span x-text="page.filename"></span>
+                    </div>
+                    <div class="card-title-band">
+                        <h3 x-text="page.title"></h3>
+                    </div>
+                    <div class="card-meta-band">
+                        <span class="card-filename">CLICK TO PREVIEW</span>
+                        <span class="card-arrow">→</span>
+                    </div>
+                </article>
+            </template>
+        </div>
+
+        <div class="preview-container" :class="{ 'active': activePage }">
+            <iframe 
+                class="preview-iframe"
+                :src="activePage ? 'pages/' + activePage.filename : ''"
+                loading="lazy"
+                :title="activePage?.title"
+            ></iframe>
+        </div>
+    </main>
+
+    <script src="pages-data.js"></script>
+    <script>
+        function galleryApp() {
+            return {
+                pagesData: typeof pagesData !== 'undefined' ? pagesData : [],
+                activePage: null,
+
+                openPreview(page) {
+                    this.activePage = page;
+                    document.body.style.overflow = 'hidden';
+                },
+
+                closePreview() {
+                    this.activePage = null;
+                    document.body.style.overflow = '';
+                }
+            };
+        }
+    </script>
+</body>
+</html>
