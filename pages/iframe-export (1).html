@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html vid="0"><head vid="1">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet" vid="3">
+    <script src="https://unpkg.com/@phosphor-icons/web" vid="4"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/thin/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/light/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/bold/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/fill/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/duotone/style.css">
+    <style vid="5">
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #FBFBFD;
+            color: #1D1D1F;
+            -webkit-font-smoothing: antialiased;
+        }
+        .apple-shadow {
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+        .apple-card {
+            background: #ffffff;
+            border: 1px solid #d2d2d7;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .apple-card:hover {
+            border-color: #86868b;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+        .donation-btn {
+            border: 1px solid #d2d2d7;
+            transition: all 0.2s ease;
+        }
+        .donation-btn:hover {
+            border-color: #0071e3;
+            color: #0071e3;
+        }
+        .donation-btn.active {
+            background-color: #0071e3;
+            border-color: #0071e3;
+            color: white;
+        }
+    </style>
+
+  <style type="text/css">
+*, ::before, ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}
+
+::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}/*
+! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com
+*//*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/
+
+*,
+::before,
+::after {
+  box-sizing: border-box; /* 1 */
+  border-width: 0; /* 2 */
+  border-style: solid; /* 2 */
+  border-color: #e5e7eb; /* 2 */
+}
+
+::before,
+::after {
+  --tw-content: '';
+}
+
+/*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+6. Use the user's configured `sans` font-variation-settings by default.
+7. Disable tap highlights on iOS
+*/
+
+html,
+:host {
+  line-height: 1.5; /* 1 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+  -moz-tab-size: 4; /* 3 */
+  tab-size: 4; /* 3 */
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 4 */
+  font-feature-settings: normal; /* 5 */
+  font-variation-settings: normal; /* 6 */
+  -webkit-tap-highlight-color: transparent; /* 7 */
+}
+
+/*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/
+
+body {
+  margin: 0; /* 1 */
+  line-height: inherit; /* 2 */
+}
+
+/*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/
+
+hr {
+  height: 0; /* 1 */
+  color: inherit; /* 2 */
+  border-top-width: 1px; /* 3 */
+}
+
+/*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/
+
+abbr:where([title]) {
+  text-decoration: underline dotted;
+}
+
+/*
+Remove the default font size and weight for headings.
+*/
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/*
+Add the correct font weight in Edge and Safari.
+*/
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+/*
+1. Use the user's configured `mono` font-family by default.
+2. Use the user's configured `mono` font-feature-settings by default.
+3. Use the user's configured `mono` font-variation-settings by default.
+4. Correct the odd `em` font sizing in all browsers.
+*/
+
+code,
+kbd,
+samp,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* 1 */
+  font-feature-settings: normal; /* 2 */
+  font-variation-settings: normal; /* 3 */
+  font-size: 1em; /* 4 */
+}
+
+/*
+Add the correct font size in all browsers.
+*/
+
+small {
+  font-size: 80%;
+}
+
+/*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/
+
+table {
+  text-indent: 0; /* 1 */
+  border-color: inherit; /* 2 */
+  border-collapse: collapse; /* 3 */
+}
+
+/*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit; /* 1 */
+  font-feature-settings: inherit; /* 1 */
+  font-variation-settings: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  font-weight: inherit; /* 1 */
+  line-height: inherit; /* 1 */
+  letter-spacing: inherit; /* 1 */
+  color: inherit; /* 1 */
+  margin: 0; /* 2 */
+  padding: 0; /* 3 */
+}
+
+/*
+Remove the inheritance of text transform in Edge and Firefox.
+*/
+
+button,
+select {
+  text-transform: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/
+
+button,
+input:where([type='button']),
+input:where([type='reset']),
+input:where([type='submit']) {
+  -webkit-appearance: button; /* 1 */
+  background-color: transparent; /* 2 */
+  background-image: none; /* 2 */
+}
+
+/*
+Use the modern Firefox focus style for all focusable elements.
+*/
+
+:-moz-focusring {
+  outline: auto;
+}
+
+/*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+/*
+Add the correct vertical alignment in Chrome and Firefox.
+*/
+
+progress {
+  vertical-align: baseline;
+}
+
+/*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/
+
+[type='search'] {
+  -webkit-appearance: textfield; /* 1 */
+  outline-offset: -2px; /* 2 */
+}
+
+/*
+Remove the inner padding in Chrome and Safari on macOS.
+*/
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button; /* 1 */
+  font: inherit; /* 2 */
+}
+
+/*
+Add the correct display in Chrome and Safari.
+*/
+
+summary {
+  display: list-item;
+}
+
+/*
+Removes the default spacing and border for appropriate elements.
+*/
+
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+Reset default styling for dialogs.
+*/
+dialog {
+  padding: 0;
+}
+
+/*
+Prevent resizing textareas horizontally by default.
+*/
+
+textarea {
+  resize: vertical;
+}
+
+/*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}
+
+/*
+Set the default cursor for buttons.
+*/
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+:disabled {
+  cursor: default;
+}
+
+/*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block; /* 1 */
+  vertical-align: middle; /* 2 */
+}
+
+/*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Make elements with the HTML hidden attribute stay hidden by default */
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none;
+}
+.absolute {
+  position: absolute;
+}
+.relative {
+  position: relative;
+}
+.right-0 {
+  right: 0px;
+}
+.top-0 {
+  top: 0px;
+}
+.mb-10 {
+  margin-bottom: 2.5rem;
+}
+.mb-20 {
+  margin-bottom: 5rem;
+}
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+.mb-8 {
+  margin-bottom: 2rem;
+}
+.mt-0\.5 {
+  margin-top: 0.125rem;
+}
+.mt-16 {
+  margin-top: 4rem;
+}
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.mt-4 {
+  margin-top: 1rem;
+}
+.flex {
+  display: flex;
+}
+.grid {
+  display: grid;
+}
+.hidden {
+  display: none;
+}
+.h-full {
+  height: 100%;
+}
+.min-h-screen {
+  min-height: 100vh;
+}
+.w-full {
+  width: 100%;
+}
+.max-w-2xl {
+  max-width: 42rem;
+}
+.max-w-6xl {
+  max-width: 72rem;
+}
+.flex-grow {
+  flex-grow: 1;
+}
+.scale-90 {
+  --tw-scale-x: .9;
+  --tw-scale-y: .9;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.transform {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.flex-col {
+  flex-direction: column;
+}
+.items-start {
+  align-items: flex-start;
+}
+.items-center {
+  align-items: center;
+}
+.items-baseline {
+  align-items: baseline;
+}
+.justify-center {
+  justify-content: center;
+}
+.gap-1 {
+  gap: 0.25rem;
+}
+.gap-2 {
+  gap: 0.5rem;
+}
+.gap-3 {
+  gap: 0.75rem;
+}
+.gap-6 {
+  gap: 1.5rem;
+}
+.gap-8 {
+  gap: 2rem;
+}
+.space-y-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.5rem * var(--tw-space-y-reverse));
+}
+.space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+}
+.overflow-hidden {
+  overflow: hidden;
+}
+.rounded-\[32px\] {
+  border-radius: 32px;
+}
+.rounded-full {
+  border-radius: 9999px;
+}
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+.border {
+  border-width: 1px;
+}
+.border-2 {
+  border-width: 2px;
+}
+.border-\[\#0071e3\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(0 113 227 / var(--tw-border-opacity, 1));
+}
+.bg-\[\#0071e3\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 113 227 / var(--tw-bg-opacity, 1));
+}
+.bg-\[\#1D1D1F\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(29 29 31 / var(--tw-bg-opacity, 1));
+}
+.bg-\[\#FFC439\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 196 57 / var(--tw-bg-opacity, 1));
+}
+.bg-\[\#e8f2ff\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(232 242 255 / var(--tw-bg-opacity, 1));
+}
+.p-10 {
+  padding: 2.5rem;
+}
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.py-20 {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.pr-10 {
+  padding-right: 2.5rem;
+}
+.pt-2 {
+  padding-top: 0.5rem;
+}
+.pt-6 {
+  padding-top: 1.5rem;
+}
+.pt-8 {
+  padding-top: 2rem;
+}
+.text-center {
+  text-align: center;
+}
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+.text-5xl {
+  font-size: 3rem;
+  line-height: 1;
+}
+.text-\[12px\] {
+  font-size: 12px;
+}
+.text-\[15px\] {
+  font-size: 15px;
+}
+.text-\[17px\] {
+  font-size: 17px;
+}
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+.font-bold {
+  font-weight: 700;
+}
+.font-medium {
+  font-weight: 500;
+}
+.font-normal {
+  font-weight: 400;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.uppercase {
+  text-transform: uppercase;
+}
+.leading-relaxed {
+  line-height: 1.625;
+}
+.tracking-tight {
+  letter-spacing: -0.025em;
+}
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+.text-\[\#000000\] {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
+.text-\[\#0071e3\] {
+  --tw-text-opacity: 1;
+  color: rgb(0 113 227 / var(--tw-text-opacity, 1));
+}
+.text-\[\#86868B\] {
+  --tw-text-opacity: 1;
+  color: rgb(134 134 139 / var(--tw-text-opacity, 1));
+}
+.text-white {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+.antialiased {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.opacity-60 {
+  opacity: 0.6;
+}
+.shadow-sm {
+  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+.grayscale {
+  --tw-grayscale: grayscale(100%);
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.transition {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.transition-opacity {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.hover\:bg-\[\#0077ed\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 119 237 / var(--tw-bg-opacity, 1));
+}
+.hover\:bg-black:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
+}
+.hover\:text-\[\#1D1D1F\]:hover {
+  --tw-text-opacity: 1;
+  color: rgb(29 29 31 / var(--tw-text-opacity, 1));
+}
+.hover\:opacity-90:hover {
+  opacity: 0.9;
+}
+@media (min-width: 768px) {
+
+  .md\:block {
+    display: block;
+  }
+
+  .md\:text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .md\:text-6xl {
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+}
+@media (min-width: 1024px) {
+
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}* {
+      -ms-overflow-style: none !important;
+      scrollbar-width: none !important;
+    }
+
+    *::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+  </style></head>
+<body class="w-full min-h-screen flex flex-col items-center py-20 px-6" vid="6">
+
+    
+    <header class="text-center mb-20 max-w-2xl" vid="7">
+        <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-6" vid="8">Pricing</h1>
+        <p class="text-xl md:text-2xl text-[#86868B] font-normal leading-relaxed" vid="9">
+            Simple, transparent, and completely free. <br class="hidden md:block" vid="10">
+            Because security shouldn't cost a fortune.
+        </p>
+    </header>
+
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-6xl" vid="11">
+        
+        
+        <div class="apple-card rounded-[32px] p-10 flex flex-col h-full relative overflow-hidden" vid="12">
+            <div class="mb-8" vid="13">
+                <span class="text-[12px] font-semibold uppercase tracking-wider text-[#86868B]" vid="14">Essential</span>
+                <h2 class="text-3xl font-semibold mt-2" vid="15">Free Forever</h2>
+                <div class="mt-4 flex items-baseline gap-1" vid="16">
+                    <span class="text-5xl font-bold" vid="17">$0</span>
+                    <span class="text-[#86868B] text-lg" vid="18">/forever</span>
+                </div>
+                <p class="mt-4 text-[#86868B] text-[15px] leading-relaxed" vid="19">
+                    The foundation for developers who want core security features without the noise.
+                </p>
+            </div>
+
+            <div class="flex-grow space-y-4 mb-10" vid="20">
+                <div class="flex items-start gap-3" vid="21">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="22"></i>
+                    <span class="text-[15px]" vid="23">Unlimited API key viewing</span>
+                </div>
+                <div class="flex items-start gap-3" vid="24">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="25"></i>
+                    <span class="text-[15px]" vid="26">GitHub issue submission</span>
+                </div>
+                <div class="flex items-start gap-3" vid="27">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="28"></i>
+                    <span class="text-[15px]" vid="29">Leaderboard participation</span>
+                </div>
+                <div class="flex items-start gap-3" vid="30">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="31"></i>
+                    <span class="text-[15px]" vid="32">All supported API types</span>
+                </div>
+                <div class="flex items-start gap-3" vid="33">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="34"></i>
+                    <span class="text-[15px]" vid="35">Real-time statistics</span>
+                </div>
+                <div class="flex items-start gap-3" vid="36">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="37"></i>
+                    <span class="text-[15px]" vid="38">Fair usage (5 requests/hour)*</span>
+                </div>
+            </div>
+
+            <button class="w-full bg-[#1D1D1F] text-white py-4 rounded-full font-medium text-[17px] hover:bg-black transition-colors" vid="39">
+                Get Started
+            </button>
+        </div>
+
+        
+        <div class="apple-card rounded-[32px] p-10 flex flex-col h-full relative overflow-hidden border-[#0071e3] border-2 shadow-sm" vid="40">
+            <div class="absolute top-0 right-0 pt-6 pr-10" vid="41">
+                <span class="bg-[#e8f2ff] text-[#0071e3] text-[12px] font-bold px-3 py-1 rounded-full uppercase tracking-tight" vid="42">Community</span>
+            </div>
+            
+            <div class="mb-8" vid="43">
+                <span class="text-[12px] font-semibold uppercase tracking-wider text-[#0071e3]" vid="44">Proactive</span>
+                <h2 class="text-3xl font-semibold mt-2" vid="45">Discord Member</h2>
+                <div class="mt-4 flex items-baseline gap-1" vid="46">
+                    <span class="text-5xl font-bold" vid="47">$0</span>
+                    <span class="text-[#86868B] text-lg" vid="48">/forever</span>
+                </div>
+                <p class="mt-4 text-[#86868B] text-[15px] leading-relaxed" vid="49">
+                    Designed for developers who like to catch anomalies as they happen.
+                </p>
+            </div>
+
+            <div class="flex-grow space-y-4 mb-10" vid="50">
+                <div class="flex items-start gap-3" vid="51">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="52"></i>
+                    <span class="text-[15px] font-medium text-[#0071e3]" vid="53">Costs literally nothing</span>
+                </div>
+                <div class="flex items-start gap-3" vid="54">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="55"></i>
+                    <span class="text-[15px]" vid="56">Everything in Free tier</span>
+                </div>
+                <div class="flex items-start gap-3" vid="57">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="58"></i>
+                    <span class="text-[15px]" vid="59">20 requests/hour</span>
+                </div>
+                <div class="flex items-start gap-3" vid="60">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="61"></i>
+                    <span class="text-[15px]" vid="62">Live discovery alerts</span>
+                </div>
+                <div class="flex items-start gap-3" vid="63">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="64"></i>
+                    <span class="text-[15px]" vid="65">Priority support sessions</span>
+                </div>
+                <div class="flex items-start gap-3" vid="66">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="67"></i>
+                    <span class="text-[15px]" vid="68">Automatic recognition</span>
+                </div>
+                <div class="flex items-start gap-3" vid="69">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="70"></i>
+                    <span class="text-[15px]" vid="71">Curated community perks</span>
+                </div>
+            </div>
+
+            <button class="w-full bg-[#0071e3] text-white py-4 rounded-full font-medium text-[17px] hover:bg-[#0077ed] transition-colors flex items-center justify-center gap-2" vid="72">
+                <i class="ph ph-discord-logo text-xl" vid="73"></i>
+                Join Discord Server
+            </button>
+        </div>
+
+        
+        <div class="apple-card rounded-[32px] p-10 flex flex-col h-full relative overflow-hidden" vid="74">
+            <div class="mb-8" vid="75">
+                <span class="text-[12px] font-semibold uppercase tracking-wider text-[#86868B]" vid="76">Supporter</span>
+                <h2 class="text-3xl font-semibold mt-2" vid="77">Premium</h2>
+                <div class="mt-4 flex items-baseline gap-1" vid="78">
+                    <span class="text-5xl font-bold" vid="79">$∞</span>
+                    <span class="text-[#86868B] text-lg" vid="80">/forever</span>
+                </div>
+                <p class="mt-4 text-[#86868B] text-[15px] leading-relaxed" vid="81">
+                    For those who wish to support the project and maintain its independence.
+                </p>
+            </div>
+
+            <div class="flex-grow space-y-4 mb-8" vid="82">
+                <div class="flex items-start gap-3" vid="83">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="84"></i>
+                    <span class="text-[15px]" vid="85">Full Free &amp; Discord features</span>
+                </div>
+                <div class="flex items-start gap-3" vid="86">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="87"></i>
+                    <span class="text-[15px]" vid="88">Premium Supporter Badge*</span>
+                </div>
+                <div class="flex items-start gap-3" vid="89">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="90"></i>
+                    <span class="text-[15px]" vid="91">Our eternal gratitude</span>
+                </div>
+                <div class="flex items-start gap-3" vid="92">
+                    <i class="ph ph-check text-[#0071e3] text-xl mt-0.5" vid="93"></i>
+                    <span class="text-[15px]" vid="94">Supporter wall inclusion</span>
+                </div>
+            </div>
+
+            
+            <div class="space-y-4" vid="95">
+                <div class="grid grid-cols-3 gap-2" vid="96">
+                    <button class="donation-btn py-2 rounded-lg text-sm font-medium" vid="97">$5</button>
+                    <button class="donation-btn py-2 rounded-lg text-sm font-medium active" vid="98">$10</button>
+                    <button class="donation-btn py-2 rounded-lg text-sm font-medium" vid="99">$20</button>
+                </div>
+                <button class="donation-btn w-full py-2 rounded-lg text-sm font-medium" vid="100">Custom Amount</button>
+                
+                <div class="pt-2" vid="101">
+                    <button class="w-full bg-[#FFC439] text-[#000000] py-4 rounded-full font-bold text-[17px] hover:opacity-90 transition-opacity flex items-center justify-center gap-2" vid="102">
+                        Donate
+                    </button>
+                    <div class="mt-4 flex justify-center items-center gap-3 opacity-60 grayscale scale-90" vid="103">
+                        <i class="ph ph-brand-visa text-2xl" vid="104"></i>
+                        <i class="ph ph-brand-mastercard text-2xl" vid="105"></i>
+                        <i class="ph ph-brand-apple-pay text-2xl" vid="106"></i>
+                        <i class="ph ph-brand-paypal text-2xl" vid="107"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <footer class="mt-16 text-center text-[#86868B] text-sm space-y-2" vid="108">
+        <p vid="109">*Badge and specific limits subject to community guidelines.</p>
+        <p vid="110">Payments processed securely through PayPal. Final amount confirmed at checkout.</p>
+        <div class="pt-8 flex items-center justify-center gap-6" vid="111">
+            <a href="#" class="hover:text-[#1D1D1F] transition-colors" vid="112">Privacy Policy</a>
+            <a href="#" class="hover:text-[#1D1D1F] transition-colors" vid="113">Terms of Service</a>
+            <a href="#" class="hover:text-[#1D1D1F] transition-colors" vid="114">Support</a>
+        </div>
+    </footer>
+
+    <script vid="115">
+        
+        const btns = document.querySelectorAll('.donation-btn');
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                btns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    </script>
+
+</body></html>

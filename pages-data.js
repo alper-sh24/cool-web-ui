@@ -63,12 +63,40 @@ const pagesData = [
         "title": "Devtool Features"
     },
     {
+        "filename": "Elegant Pricing.html",
+        "title": "Elegant Pricing"
+    },
+    {
+        "filename": "FoxTrove _ Operations Intelligence.html",
+        "title": "FoxTrove | Operations Intelligence"
+    },
+    {
         "filename": "Identity Matrix Visualization.html",
         "title": "Identity Matrix Visualization"
     },
     {
+        "filename": "iframe-export (1).html",
+        "title": "iframe-export (1)"
+    },
+    {
+        "filename": "iframe-export (2).html",
+        "title": "iframe-export (2)"
+    },
+    {
+        "filename": "iframe-export.html",
+        "title": "iframe-export"
+    },
+    {
+        "filename": "Linguist _ Skill Calibration.html",
+        "title": "Linguist / Skill Calibration"
+    },
+    {
         "filename": "MANIFESTO __ KERNEL_PANIC.html",
         "title": "MANIFESTO // KERNEL_PANIC"
+    },
+    {
+        "filename": "Metamorphic Facility Analysis.html",
+        "title": "Metamorphic Facility Analysis"
     },
     {
         "filename": "NatLean _ Precision Metabolite.html",
@@ -87,12 +115,20 @@ const pagesData = [
         "title": "PLANET SYNTHESIS TERMINAL"
     },
     {
+        "filename": "Pok_ball Technical Schematic.html",
+        "title": "Pokéball Technical Schematic"
+    },
+    {
         "filename": "sgnl _ Lightweight Observability.html",
         "title": "sgnl | Lightweight Observability"
     },
     {
         "filename": "Spacecraft Cockpit Wireframe UI.html",
         "title": "Spacecraft Cockpit Wireframe UI"
+    },
+    {
+        "filename": "Syntax _ Void __ Developer Agency.html",
+        "title": "Syntax &amp; Void // Developer Agency"
     },
     {
         "filename": "T E R R A I N _ S Y S.html",

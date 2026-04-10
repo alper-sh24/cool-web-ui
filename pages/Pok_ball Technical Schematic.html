@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">Pokéball Technical Schematic</title>
+    
+    <style vid="6">
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #030303;
+            font-family: 'Share Tech Mono', monospace;
+            color: #FF1A1A;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+        }
+
+        #svg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .hud-label {
+            position: absolute;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(255, 26, 26, 0.4);
+            transition: all 0.1s linear;
+        }
+
+        .hud-label-left {
+            align-items: flex-start;
+        }
+
+        .hud-label-right {
+            align-items: flex-start;
+        }
+
+        .hud-code {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.1rem;
+            letter-spacing: 0.1em;
+        }
+
+        .hud-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .svg-line {
+            fill: none;
+            stroke: #FF1A1A;
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 3px #FF1A1A);
+            transition: stroke 0.3s;
+        }
+
+        .svg-diamond {
+            fill: #030303;
+            stroke: #FF1A1A;
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 3px #FF1A1A);
+        }
+
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 40;
+            opacity: 0.3;
+        }
+
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+            z-index: 41;
+        }
+    </style>
+
+  <style type="text/css">
+*, ::before, ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}
+
+::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}/*
+! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com
+*//*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/
+
+*,
+::before,
+::after {
+  box-sizing: border-box; /* 1 */
+  border-width: 0; /* 2 */
+  border-style: solid; /* 2 */
+  border-color: #e5e7eb; /* 2 */
+}
+
+::before,
+::after {
+  --tw-content: '';
+}
+
+/*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+6. Use the user's configured `sans` font-variation-settings by default.
+7. Disable tap highlights on iOS
+*/
+
+html,
+:host {
+  line-height: 1.5; /* 1 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+  -moz-tab-size: 4; /* 3 */
+  tab-size: 4; /* 3 */
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 4 */
+  font-feature-settings: normal; /* 5 */
+  font-variation-settings: normal; /* 6 */
+  -webkit-tap-highlight-color: transparent; /* 7 */
+}
+
+/*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/
+
+body {
+  margin: 0; /* 1 */
+  line-height: inherit; /* 2 */
+}
+
+/*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/
+
+hr {
+  height: 0; /* 1 */
+  color: inherit; /* 2 */
+  border-top-width: 1px; /* 3 */
+}
+
+/*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/
+
+abbr:where([title]) {
+  text-decoration: underline dotted;
+}
+
+/*
+Remove the default font size and weight for headings.
+*/
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/*
+Add the correct font weight in Edge and Safari.
+*/
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+/*
+1. Use the user's configured `mono` font-family by default.
+2. Use the user's configured `mono` font-feature-settings by default.
+3. Use the user's configured `mono` font-variation-settings by default.
+4. Correct the odd `em` font sizing in all browsers.
+*/
+
+code,
+kbd,
+samp,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* 1 */
+  font-feature-settings: normal; /* 2 */
+  font-variation-settings: normal; /* 3 */
+  font-size: 1em; /* 4 */
+}
+
+/*
+Add the correct font size in all browsers.
+*/
+
+small {
+  font-size: 80%;
+}
+
+/*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/
+
+table {
+  text-indent: 0; /* 1 */
+  border-color: inherit; /* 2 */
+  border-collapse: collapse; /* 3 */
+}
+
+/*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit; /* 1 */
+  font-feature-settings: inherit; /* 1 */
+  font-variation-settings: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  font-weight: inherit; /* 1 */
+  line-height: inherit; /* 1 */
+  letter-spacing: inherit; /* 1 */
+  color: inherit; /* 1 */
+  margin: 0; /* 2 */
+  padding: 0; /* 3 */
+}
+
+/*
+Remove the inheritance of text transform in Edge and Firefox.
+*/
+
+button,
+select {
+  text-transform: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/
+
+button,
+input:where([type='button']),
+input:where([type='reset']),
+input:where([type='submit']) {
+  -webkit-appearance: button; /* 1 */
+  background-color: transparent; /* 2 */
+  background-image: none; /* 2 */
+}
+
+/*
+Use the modern Firefox focus style for all focusable elements.
+*/
+
+:-moz-focusring {
+  outline: auto;
+}
+
+/*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+/*
+Add the correct vertical alignment in Chrome and Firefox.
+*/
+
+progress {
+  vertical-align: baseline;
+}
+
+/*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/
+
+[type='search'] {
+  -webkit-appearance: textfield; /* 1 */
+  outline-offset: -2px; /* 2 */
+}
+
+/*
+Remove the inner padding in Chrome and Safari on macOS.
+*/
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button; /* 1 */
+  font: inherit; /* 2 */
+}
+
+/*
+Add the correct display in Chrome and Safari.
+*/
+
+summary {
+  display: list-item;
+}
+
+/*
+Removes the default spacing and border for appropriate elements.
+*/
+
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+Reset default styling for dialogs.
+*/
+dialog {
+  padding: 0;
+}
+
+/*
+Prevent resizing textareas horizontally by default.
+*/
+
+textarea {
+  resize: vertical;
+}
+
+/*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}
+
+/*
+Set the default cursor for buttons.
+*/
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+:disabled {
+  cursor: default;
+}
+
+/*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block; /* 1 */
+  vertical-align: middle; /* 2 */
+}
+
+/*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Make elements with the HTML hidden attribute stay hidden by default */
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none;
+}
+.absolute {
+  position: absolute;
+}
+.flex {
+  display: flex;
+}
+.hidden {
+  display: none;
+}
+.transform {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.resize {
+  resize: both;
+}
+.uppercase {
+  text-transform: uppercase;
+}
+.antialiased {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.drop-shadow {
+  --tw-drop-shadow: drop-shadow(0 1px 2px rgb(0 0 0 / 0.1)) drop-shadow(0 1px 1px rgb(0 0 0 / 0.06));
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.filter {
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.transition {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.selection\:bg-\[\#FF1A1A\] *::selection {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 26 26 / var(--tw-bg-opacity, 1));
+}
+.selection\:text-black *::selection {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
+.selection\:bg-\[\#FF1A1A\]::selection {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 26 26 / var(--tw-bg-opacity, 1));
+}
+.selection\:text-black::selection {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}* {
+      -ms-overflow-style: none !important;
+      scrollbar-width: none !important;
+    }
+
+    *::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+  </style></head>
+<body class="antialiased selection:bg-[#FF1A1A] selection:text-black" vid="7">
+
+    <div class="scanlines" vid="8"></div>
+    <div class="vignette" vid="9"></div>
+
+    <div id="canvas-container" vid="10">
+        <canvas id="schematic" vid="11" width="1280" height="960"></canvas>
+    </div>
+
+    <svg id="svg-overlay" vid="12"><g><path class="svg-line" d="M 220.609375 271.796875 L 280.609375 271.796875 L 657.1777147394085 296.6315431284378"></path><rect width="6" height="6" class="svg-diamond" transform="translate(217.609375, 268.796875) rotate(45 3 3)"></rect><rect width="6" height="6" class="svg-diamond" transform="translate(654.1777147394085, 293.6315431284378) rotate(45 3 3)"></rect></g><g><path class="svg-line" d="M 244.203125 703.796875 L 304.203125 703.796875 L 605.4453109799491 513.3854291327362"></path><rect width="6" height="6" class="svg-diamond" transform="translate(241.203125, 700.796875) rotate(45 3 3)"></rect><rect width="6" height="6" class="svg-diamond" transform="translate(602.4453109799491, 510.38542913273625) rotate(45 3 3)"></rect></g><g><path class="svg-line" d="M 1024 319.796875 L 964 319.796875 L 625.7900913238922 493.7290744770867"></path><rect width="6" height="6" class="svg-diamond" transform="translate(1021, 316.796875) rotate(45 3 3)"></rect><rect width="6" height="6" class="svg-diamond" transform="translate(622.7900913238922, 490.7290744770867) rotate(45 3 3)"></rect></g><g><path class="svg-line" d="M 1047.59375 655.796875 L 987.59375 655.796875 L 623.9398608920277 651.4385743416366"></path><rect width="6" height="6" class="svg-diamond" transform="translate(1044.59375, 652.796875) rotate(45 3 3)"></rect><rect width="6" height="6" class="svg-diamond" transform="translate(620.9398608920277, 648.4385743416366) rotate(45 3 3)"></rect></g></svg>
+
+    <div id="labels-container" vid="13">
+        <div class="hud-label hud-label-left" id="label-top" style="left: 10%; top: 25%;" vid="14">
+            <div class="hud-code" vid="15">/ CAP_MAT</div>
+            <div class="hud-title" vid="16">CAPTURE<br vid="17">MATRIX</div>
+        </div>
+
+        <div class="hud-label hud-label-left" id="label-seam" style="left: 10%; top: 70%;" vid="18">
+            <div class="hud-code" vid="19">/ REL_MEC</div>
+            <div class="hud-title" vid="20">RELEASE<br vid="21">MECHANISM</div>
+        </div>
+
+        <div class="hud-label hud-label-right" id="label-core" style="right: 10%; top: 30%;" vid="22">
+            <div class="hud-code" vid="23">k CORE_PR</div>
+            <div class="hud-title" vid="24">MASS<br vid="25">CONVERSION</div>
+        </div>
+
+        <div class="hud-label hud-label-right" id="label-bottom" style="right: 10%; top: 65%;" vid="26">
+            <div class="hud-code" vid="27">g STB_RG</div>
+            <div class="hud-title" vid="28">GRAVITY<br vid="29">RETAINER</div>
+        </div>
+    </div>
+
+    <script vid="30">
+        const canvas = document.getElementById('schematic');
+        const ctx = canvas.getContext('2d');
+        const svgOverlay = document.getElementById('svg-overlay');
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        const FOCAL_LENGTH = 800;
+        const RADIUS = 180;
+        
+        let edges = [];
+        let anchors = {};
+
+        function generateGeometry() {
+            edges = [];
+            
+            const numLat = 16;
+            const numLon = 32;
+            const seamWidth = 0.15; 
+
+            const addEdge = (p1, p2, type = 'normal') => {
+                edges.push({ p1: { ...p1 }, p2: { ...p2 }, type });
+            };
+
+            const getSpherePoint = (r, theta, phi) => {
+                return {
+                    x: r * Math.sin(phi) * Math.cos(theta),
+                    y: r * Math.cos(phi),
+                    z: r * Math.sin(phi) * Math.sin(theta)
+                };
+            };
+
+            for (let j = 0; j < numLon; j++) {
+                const theta = (j / numLon) * 2 * Math.PI;
+                
+                for (let i = 0; i < numLat / 2; i++) {
+                    const phi1 = (i / numLat) * Math.PI;
+                    const phi2 = ((i + 1) / numLat) * Math.PI;
+                    
+                    if (phi2 > Math.PI / 2 - seamWidth) continue; 
+                    
+                    addEdge(getSpherePoint(RADIUS, theta, phi1), getSpherePoint(RADIUS, theta, phi2));
+                }
+                
+                for (let i = numLat / 2; i < numLat; i++) {
+                    const phi1 = (i / numLat) * Math.PI;
+                    const phi2 = ((i + 1) / numLat) * Math.PI;
+                    
+                    if (phi1 < Math.PI / 2 + seamWidth) continue; 
+                    
+                    addEdge(getSpherePoint(RADIUS, theta, phi1), getSpherePoint(RADIUS, theta, phi2));
+                }
+            }
+
+            for (let i = 1; i < numLat; i++) {
+                const phi = (i / numLat) * Math.PI;
+                
+                if (Math.abs(phi - Math.PI / 2) < seamWidth + 0.05) continue;
+
+                for (let j = 0; j < numLon; j++) {
+                    const theta1 = (j / numLon) * 2 * Math.PI;
+                    const theta2 = ((j + 1) / numLon) * 2 * Math.PI;
+                    addEdge(getSpherePoint(RADIUS, theta1, phi), getSpherePoint(RADIUS, theta2, phi));
+                }
+            }
+
+            const phiTopSeam = Math.PI / 2 - seamWidth;
+            const phiBotSeam = Math.PI / 2 + seamWidth;
+            const innerRadius = RADIUS * 0.95;
+
+            for (let j = 0; j < numLon; j++) {
+                const theta1 = (j / numLon) * 2 * Math.PI;
+                const theta2 = ((j + 1) / numLon) * 2 * Math.PI;
+                
+                addEdge(getSpherePoint(RADIUS, theta1, phiTopSeam), getSpherePoint(RADIUS, theta2, phiTopSeam), 'heavy');
+                addEdge(getSpherePoint(RADIUS, theta1, phiBotSeam), getSpherePoint(RADIUS, theta2, phiBotSeam), 'heavy');
+                
+                addEdge(getSpherePoint(RADIUS, theta1, phiTopSeam), getSpherePoint(innerRadius, theta1, phiTopSeam));
+                addEdge(getSpherePoint(RADIUS, theta1, phiBotSeam), getSpherePoint(innerRadius, theta1, phiBotSeam));
+                addEdge(getSpherePoint(innerRadius, theta1, phiTopSeam), getSpherePoint(innerRadius, theta1, phiBotSeam));
+                addEdge(getSpherePoint(innerRadius, theta1, phiTopSeam), getSpherePoint(innerRadius, theta2, phiTopSeam));
+                addEdge(getSpherePoint(innerRadius, theta1, phiBotSeam), getSpherePoint(innerRadius, theta2, phiBotSeam));
+            }
+
+            const btnRadiusOuter = RADIUS * 0.25;
+            const btnRadiusInner = RADIUS * 0.15;
+            const btnSegments = 24;
+            
+            const getButtonPoint = (r, angle) => {
+                const x = r * Math.cos(angle);
+                const y = r * Math.sin(angle);
+                
+                const z = Math.sqrt(RADIUS * RADIUS - x * x - y * y);
+                return { x, y, z };
+            };
+
+            for (let i = 0; i < btnSegments; i++) {
+                const a1 = (i / btnSegments) * 2 * Math.PI;
+                const a2 = ((i + 1) / btnSegments) * 2 * Math.PI;
+                
+                addEdge(getButtonPoint(btnRadiusOuter, a1), getButtonPoint(btnRadiusOuter, a2), 'heavy');
+                addEdge(getButtonPoint(btnRadiusInner, a1), getButtonPoint(btnRadiusInner, a2), 'heavy');
+                
+                const pOut = getButtonPoint(btnRadiusOuter, a1);
+                const pDepth = { ...pOut, z: pOut.z - 10 };
+                addEdge(pOut, pDepth);
+                
+                const pOut2 = getButtonPoint(btnRadiusOuter, a2);
+                const pDepth2 = { ...pOut2, z: pOut2.z - 10 };
+                addEdge(pDepth, pDepth2);
+            }
+
+            anchors = {
+                top: { x: 0, y: -RADIUS, z: 0 }, 
+                seam: { x: 0, y: 0, z: RADIUS * 1.05 }, 
+                core: { x: 0, y: 0, z: RADIUS * 0.5 }, 
+                bottom: { x: 0, y: RADIUS, z: 0 } 
+            };
+        }
+
+        function rotate3D(point, pitch, yaw, roll) {
+            let { x, y, z } = point;
+
+            
+            let cosY = Math.cos(yaw), sinY = Math.sin(yaw);
+            let x1 = x * cosY - z * sinY;
+            let z1 = x * sinY + z * cosY;
+            x = x1; z = z1;
+
+            
+            let cosX = Math.cos(pitch), sinX = Math.sin(pitch);
+            let y1 = y * cosX - z * sinX;
+            let z2 = y * sinX + z * cosX;
+            y = y1; z = z2;
+
+            
+            let cosZ = Math.cos(roll), sinZ = Math.sin(roll);
+            let x2 = x * cosZ - y * sinZ;
+            let y2 = x * sinZ + y * cosZ;
+            x = x2; y = y2;
+
+            return { x, y, z };
+        }
+
+        function project3D(point) {
+            const scale = FOCAL_LENGTH / (FOCAL_LENGTH + point.z);
+            return {
+                x: point.x * scale + width / 2,
+                y: point.y * scale + height / 2,
+                scale: scale,
+                z: point.z 
+            };
+        }
+
+        const labelConnections = [
+            { id: 'top', labelId: 'label-top', align: 'left' },
+            { id: 'seam', labelId: 'label-seam', align: 'left' },
+            { id: 'core', labelId: 'label-core', align: 'right' },
+            { id: 'bottom', labelId: 'label-bottom', align: 'right' }
+        ];
+
+        let svgPaths = {};
+        
+        function initSVG() {
+            svgOverlay.innerHTML = ''; 
+            labelConnections.forEach(conn => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("class", "svg-line");
+                g.appendChild(path);
+
+                const d1 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                d1.setAttribute("width", "6");
+                d1.setAttribute("height", "6");
+                d1.setAttribute("class", "svg-diamond");
+                g.appendChild(d1);
+
+                const d2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                d2.setAttribute("width", "6");
+                d2.setAttribute("height", "6");
+                d2.setAttribute("class", "svg-diamond");
+                g.appendChild(d2);
+
+                svgOverlay.appendChild(g);
+                svgPaths[conn.id] = { path, d1, d2 };
+            });
+        }
+
+        function render(time) {
+            ctx.clearRect(0, 0, width, height);
+
+            const t = time * 0.001;
+            
+            
+            const baseYaw = t * 0.5; 
+            
+            const pitch = 0.15; 
+            const roll = Math.sin(t * 0.2) * 0.1;
+
+            const layers = [
+                { offsetY: 60, opacity: 0.05, strokeWidth: 1 },
+                { offsetY: 30, opacity: 0.1, strokeWidth: 1 },
+                { offsetY: 0, opacity: 1.0, strokeWidth: 1.5 } 
+            ];
+
+            let transformedEdges = edges.map(edge => {
+                const p1Rot = rotate3D(edge.p1, pitch, baseYaw, roll);
+                const p2Rot = rotate3D(edge.p2, pitch, baseYaw, roll);
+                const p1Proj = project3D(p1Rot);
+                const p2Proj = project3D(p2Rot);
+                const avgZ = (p1Rot.z + p2Rot.z) / 2;
+                return { p1Proj, p2Proj, avgZ, type: edge.type };
+            });
+
+            transformedEdges.sort((a, b) => b.avgZ - a.avgZ);
+
+            layers.forEach(layer => {
+                ctx.lineWidth = layer.strokeWidth;
+                
+                transformedEdges.forEach(edge => {
+                    let depthAlpha = 1 - (edge.avgZ + RADIUS) / (RADIUS * 2.5);
+                    depthAlpha = Math.max(0.1, Math.min(1, depthAlpha)); 
+                    
+                    if (edge.type === 'heavy') depthAlpha = Math.min(1, depthAlpha * 1.5);
+                    
+                    const finalAlpha = depthAlpha * layer.opacity;
+
+                    ctx.strokeStyle = `rgba(255, 26, 26, ${finalAlpha})`;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(edge.p1Proj.x, edge.p1Proj.y + layer.offsetY);
+                    ctx.lineTo(edge.p2Proj.x, edge.p2Proj.y + layer.offsetY);
+                    ctx.stroke();
+                });
+            });
+
+            labelConnections.forEach(conn => {
+                const anchor3D = anchors[conn.id];
+                const rotatedAnchor = rotate3D(anchor3D, pitch, baseYaw, roll);
+                const projectedAnchor = project3D(rotatedAnchor);
+
+                const labelEl = document.getElementById(conn.labelId);
+                const rect = labelEl.getBoundingClientRect();
+                
+                let startX, startY;
+                if (conn.align === 'left') {
+                    startX = rect.right + 10;
+                    startY = rect.top + rect.height / 2;
+                } else {
+                    startX = rect.left - 10;
+                    startY = rect.top + rect.height / 2;
+                }
+
+                const targetX = projectedAnchor.x;
+                const targetY = projectedAnchor.y;
+                
+                const hDir = conn.align === 'left' ? 1 : -1;
+                const hLength = 60;
+                const midX = startX + (hLength * hDir);
+
+                const d = `M ${startX} ${startY} L ${midX} ${startY} L ${targetX} ${targetY}`;
+                
+                const elements = svgPaths[conn.id];
+                elements.path.setAttribute("d", d);
+
+                const offset = 3; 
+                elements.d1.setAttribute("transform", `translate(${startX - offset}, ${startY - offset}) rotate(45 3 3)`);
+                elements.d2.setAttribute("transform", `translate(${targetX - offset}, ${targetY - offset}) rotate(45 3 3)`);
+            });
+
+            requestAnimationFrame(render);
+        }
+
+        function init() {
+            generateGeometry();
+            initSVG();
+            requestAnimationFrame(render);
+        }
+
+        window.addEventListener('resize', () => {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        });
+
+        init();
+
+    </script>
+
+</body></html>

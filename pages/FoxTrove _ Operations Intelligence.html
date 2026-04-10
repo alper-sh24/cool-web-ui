@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">FoxTrove | Operations Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" vid="5">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" vid="6">
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet" vid="7">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" vid="8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" vid="9"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" vid="10"></script>
+    
+    <style vid="11">
+        :root {
+            --bg: #1D1818;
+            --clay: #FAD9D3;
+            --acid: #FFFFFF;
+            --text-main: #E8E4E3;
+            --text-muted: #959190;
+            --grid-line: rgba(255, 255, 255, 0.05);
+            --grid-line-strong: rgba(255, 255, 255, 0.15);
+            --surface: #332E2D;
+            
+            --font-display: 'DotGothic16', monospace;
+            --font-body: 'Inter', sans-serif;
+            
+            --spacing-base: 1rem;
+            --container-padding: 4vw;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        
+        #loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100vh;
+            background: var(--bg);
+            z-index: 9999;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding: var(--container-padding);
+        }
+        .counter {
+            font-family: var(--font-display);
+            font-size: 15vw;
+            font-weight: 400;
+            line-height: 0.8;
+            color: var(--clay);
+            letter-spacing: -0.05em;
+        }
+
+        
+        .system-grid {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 10;
+            background-size: 24px 24px;
+            background-image: radial-gradient(circle, var(--grid-line-strong) 1px, transparent 1px);
+        }
+
+        
+        #canvas-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 0;
+            opacity: 0.4;
+            pointer-events: none; 
+        }
+
+        
+        h1, h2, h3, h4, .display-text {
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            font-weight: 400;
+            margin: 0;
+        }
+
+        .meta-label {
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .text-acid { color: var(--acid); }
+        .text-clay { color: var(--clay); }
+
+        
+        .star-motif {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+        }
+        .star-motif path {
+            fill: currentColor;
+        }
+
+        
+        main {
+            position: relative;
+            z-index: 20;
+        }
+
+        section {
+            position: relative;
+            padding: 10vh var(--container-padding);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-bottom: 1px solid var(--grid-line);
+        }
+
+        
+        nav {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 2rem var(--container-padding);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            mix-blend-mode: normal;
+        }
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            text-transform: uppercase;
+        }
+        .nav-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .status-dot {
+            width: 6px; height: 6px;
+            background: var(--clay);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        
+        .hero {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2rem;
+            align-items: end;
+            padding-bottom: 5vh;
+            padding-top: 20vh;
+        }
+        .hero-content {
+            grid-column: 1 / 10;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .hero h1 {
+            font-size: clamp(3rem, 7vw, 8rem);
+            line-height: 1.1;
+            letter-spacing: 0;
+            color: var(--text-main);
+        }
+        .hero p {
+            font-size: clamp(1rem, 1.5vw, 1.5rem);
+            line-height: 1.4;
+            max-width: 600px;
+            color: var(--text-muted);
+        }
+        
+        
+        .monumental-vertical {
+            position: absolute;
+            right: var(--container-padding);
+            top: 0;
+            writing-mode: vertical-rl;
+            font-family: var(--font-display);
+            font-size: 15vw;
+            font-weight: 400;
+            text-transform: uppercase;
+            color: transparent;
+            -webkit-text-stroke: 1px var(--grid-line-strong);
+            line-height: 1;
+            letter-spacing: -0.05em;
+            pointer-events: none;
+            z-index: -1;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .btn {
+            padding: 1.25rem 2.5rem;
+            font-family: var(--font-body);
+            text-transform: none;
+            font-size: 1rem;
+            letter-spacing: 0;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border-radius: 50px;
+            border: none;
+        }
+        .btn-primary {
+            background: var(--clay);
+            color: var(--bg);
+        }
+        .btn-primary:hover {
+            background: #FFFFFF;
+            color: var(--bg);
+        }
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-main);
+        }
+        .btn-secondary:hover {
+            background: #4A4443;
+            color: var(--text-main);
+        }
+
+        
+        .section-header {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 5rem;
+            grid-column: 1 / -1;
+        }
+        .section-header h2 {
+            font-size: clamp(2.5rem, 5vw, 5rem);
+            line-height: 1.1;
+            max-width: 800px;
+        }
+
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem; 
+            background: transparent;
+            border: none;
+        }
+        .grid-3 > * {
+            grid-column: span 12;
+            background: var(--surface);
+            border-radius: 32px;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            border: 1px solid var(--grid-line-strong);
+        }
+        @media (min-width: 768px) {
+            .grid-3 > * { grid-column: span 4; }
+        }
+
+        
+        .panel {
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        .panel:hover .star-motif {
+            color: var(--clay);
+            transform: rotate(90deg);
+            transition: all 0.5s ease;
+        }
+        .panel-title {
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+        .panel-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        
+        .method-wrapper {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2rem;
+        }
+        .method-sticky {
+            grid-column: 1 / 5;
+            position: sticky;
+            top: 20vh;
+            height: max-content;
+        }
+        .method-steps {
+            grid-column: 6 / 13;
+            display: flex;
+            flex-direction: column;
+            gap: 10vh;
+        }
+        .step {
+            position: relative;
+            padding-left: 2.5rem;
+            border-left: 1px solid var(--grid-line-strong);
+        }
+        .step-num {
+            position: absolute;
+            left: -1.25rem;
+            top: -1rem;
+            background: var(--bg);
+            padding: 0.5rem;
+            color: var(--clay);
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2rem;
+        }
+        .stat-item {
+            grid-column: span 12;
+            border-top: 1px solid var(--grid-line-strong);
+            padding-top: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .stat-item { grid-column: span 4; }
+        }
+        .stat-num {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 6vw, 6rem);
+            font-weight: 400;
+            color: var(--clay);
+            line-height: 1;
+            margin-bottom: 1rem;
+            letter-spacing: -0.03em;
+        }
+
+        
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            border-top: 1px solid var(--grid-line);
+            border-bottom: 1px solid var(--grid-line);
+            padding: 2rem 0;
+            background: var(--surface);
+        }
+        .marquee {
+            display: flex;
+            white-space: nowrap;
+            gap: 4rem;
+        }
+        .marquee-item {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 400;
+            color: transparent;
+            -webkit-text-stroke: 1px var(--text-muted);
+            text-transform: uppercase;
+        }
+        .marquee-item.solid {
+            color: var(--text-main);
+            -webkit-text-stroke: 0;
+        }
+
+        
+        .tiers {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .tier-card {
+            grid-column: span 12;
+            border: 1px solid var(--grid-line-strong);
+            background: var(--surface);
+            border-radius: 32px;
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        @media (min-width: 768px) {
+            .tier-card { grid-column: span 6; }
+        }
+        @media (min-width: 1024px) {
+            .tier-card { grid-column: span 3; }
+        }
+        .tier-price {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: var(--acid);
+            margin-bottom: 1rem;
+        }
+
+        
+        .footer-cta {
+            min-height: 80vh;
+            align-items: center;
+            text-align: center;
+        }
+        .footer-cta h2 {
+            font-size: clamp(3rem, 7vw, 8rem);
+            color: var(--clay);
+        }
+
+        
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; box-shadow: 0 0 0 0 rgba(250, 217, 211, 0.4); }
+            70% { opacity: 0.5; box-shadow: 0 0 0 10px rgba(250, 217, 211, 0); }
+            100% { opacity: 1; box-shadow: 0 0 0 0 rgba(250, 217, 211, 0); }
+        }
+
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--surface); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--clay); }
+    </style>
+</head>
+<body vid="12" style="">
+
+    
+    
+
+    
+    <div id="loader" vid="13" style="translate: none; rotate: none; scale: none; transform: translate(0%, -100%);">
+        <div class="counter" vid="14">100</div>
+    </div><div id="canvas-container" vid="15"><canvas width="1280" height="960" style="display: block; width: 1280px; height: 960px;"></canvas></div>
+
+    
+    <div class="system-grid" vid="16"></div>
+
+    <nav vid="17">
+        <div class="logo" vid="18">FOXTROVE</div>
+        <div class="nav-status" vid="19">
+            <div class="status-dot" vid="20"></div>
+            <span class="meta-label" vid="21">SYS.ONLINE // OP.READY</span>
+        </div>
+    </nav>
+
+    <main vid="22">
+        
+        <section class="hero" vid="23">
+            <div class="monumental-vertical" vid="24" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">Intelligence</div>
+            
+            <div class="hero-content reveal" vid="25" style="translate: none; rotate: none; scale: none; transform: translate(0px, 0px); opacity: 1;">
+                <div style="display: flex; align-items: center; gap: 1rem;" vid="26">
+                    <svg class="star-motif text-clay" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" vid="27">
+                        <path d="M12 0L13.5 10.5L24 12L13.5 13.5L12 24L10.5 13.5L0 12L10.5 10.5L12 0Z" vid="28"></path>
+                    </svg>
+                    <span class="meta-label" vid="29">For operators, not experimenters</span>
+                </div>
+                
+                <h1 vid="30">Know<br vid="31">Where<br vid="32">To Start.</h1>
+                
+                <p vid="33">We audit your operations, find where AI creates real leverage, and build the systems to capture it.</p>
+                
+                <div class="btn-group" vid="34">
+                    <a href="#cta" class="btn btn-primary" vid="35">Book a Discovery Call</a>
+                    <a href="#methodology" class="btn btn-secondary" vid="36">See How It Works</a>
+                </div>
+            </div>
+        </section>
+
+        
+        <section id="problem" vid="37">
+            <div class="section-header reveal" vid="38" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+                <span class="meta-label" vid="39">[01] System Leakage</span>
+                <h2 vid="40">Every business runs on three resources: Money, Time, and Capacity.</h2>
+                <p class="panel-desc" style="max-width: 600px;" vid="41">Your systems weren't built to reveal where these are leaking. We were.</p>
+            </div>
+
+            <div class="grid-3 reveal" vid="42" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+                <div class="panel" vid="43">
+                    <div style="display: flex; justify-content: space-between;" vid="44">
+                        <span class="meta-label" vid="45">Resource .01</span>
+                        <svg class="star-motif" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" vid="46"><path d="M12 0L13.5 10.5L24 12L13.5 13.5L12 24L10.5 13.5L0 12L10.5 10.5L12 0Z" vid="47"></path></svg>
+                    </div>
+                    <h3 class="panel-title" vid="48">Money</h3>
+                    <p class="panel-desc" vid="49">Margin leakage across disconnected systems. Invisible costs buried in complex workflows. We map the exact dollar value of your operational friction.</p>
+                </div>
+                <div class="panel" vid="50">
+                    <div style="display: flex; justify-content: space-between;" vid="51">
+                        <span class="meta-label" vid="52">Resource .02</span>
+                        <svg class="star-motif" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" vid="53"><path d="M12 0L13.5 10.5L24 12L13.5 13.5L12 24L10.5 13.5L0 12L10.5 10.5L12 0Z" vid="54"></path></svg>
+                    </div>
+                    <h3 class="panel-title" vid="55">Time</h3>
+                    <p class="panel-desc" vid="56">Manual reconciliation. Coordination drag. Status reporting. We identify processes that burn human hours on machine tasks.</p>
+                </div>
+                <div class="panel" vid="57">
+                    <div style="display: flex; justify-content: space-between;" vid="58">
+                        <span class="meta-label" vid="59">Resource .03</span>
+                        <svg class="star-motif" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" vid="60"><path d="M12 0L13.5 10.5L24 12L13.5 13.5L12 24L10.5 13.5L0 12L10.5 10.5L12 0Z" vid="61"></path></svg>
+                    </div>
+                    <h3 class="panel-title text-acid" vid="62">Capacity</h3>
+                    <p class="panel-desc" vid="63">Team bandwidth artificially constrained. High-tier talent misallocated to low-tier routing. We unlock scale without adding headcount.</p>
+                </div>
+            </div>
+        </section>
+
+        
+        <section id="methodology" vid="64">
+            <div class="method-wrapper" vid="65">
+                <div class="method-sticky reveal" vid="66" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+                    <span class="meta-label" vid="67">[02] Operational Protocol</span>
+                    <h2 class="display-text" style="font-size: clamp(3rem, 5vw, 6rem); margin-top: 1rem; line-height: 1.1;" vid="68">How We<br vid="69">Work</h2>
+                </div>
+                
+                <div class="method-steps" vid="70">
+                    <div class="step reveal" vid="71" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+                        <div class="step-num" vid="72">01</div>
+                        <h3 class="panel-title text-clay" style="margin-bottom: 1rem;" vid="73">Audit</h3>
+                        <p class="panel-desc" vid="74">We look at how your business actually runs — not how the org chart says it does. Six dimensions: workflows, data, decision-making, automation, talent readiness, and governance. You get a maturity map, a bottleneck analysis, and an honest picture of where money, time, and capacity are walking out the door.</p>
+                    </div>
+                    <div class="step reveal" vid="75" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+                        <div class="step-num" vid="76">02</div>
+                        <h3 class="panel-title text-clay" style="margin-bottom: 1rem;" vid="77">Playbook</h3>
+                        <p class="panel-desc" vid="78">We turn findings into a plan you can actually execute. What to fix first. What to build. In what order. What it costs. What it gives back. The playbook is yours — you own it, full stop.</p>
+                    </div>
+                    <div class="step reveal" vid="79" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+                        <div class="step-num" vid="80">03</div>
+                        <h3 class="panel-title text-clay" style="margin-bottom: 1rem;" vid="81">Build</h3>
+                        <p class="panel-desc" vid="82">We design and deploy production-ready systems — dashboards, automations, integrations, custom applications — scoped directly from the playbook. Everything ships working. Day one.</p>
+                    </div>
+                    <div class="step reveal" vid="83" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+                        <div class="step-num" vid="84">04</div>
+                        <h3 class="panel-title text-clay" style="margin-bottom: 1rem;" vid="85">Partner</h3>
+                        <p class="panel-desc" vid="86">We stick around. The intelligence layer evolves with your business — quarterly upgrades, new builds as new opportunities surface, continuous optimization.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        <section class="reveal" vid="87" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+            <div class="section-header" style="margin-bottom: 3rem;" vid="88">
+                <span class="meta-label" vid="89">[03] Telemetry</span>
+                <h2 vid="90">What Gets Possible</h2>
+            </div>
+            
+            <div class="stats-grid" vid="91">
+                <div class="stat-item" vid="92">
+                    <div class="meta-label" style="margin-bottom: 1rem;" vid="93">Construction Firm</div>
+                    <div class="stat-num" vid="94">$2.1M</div>
+                    <h4 class="panel-title" style="margin-bottom: 0.5rem;" vid="95">Recoverable Margin</h4>
+                    <p class="panel-desc" vid="96">Audit found margin leakage. Playbook prioritized invoice reconciliation. Build deployed automated matching.</p>
+                </div>
+                <div class="stat-item" vid="97">
+                    <div class="meta-label" style="margin-bottom: 1rem;" vid="98">Multi-Location Services</div>
+                    <div class="stat-num text-clay" vid="99">340<span style="font-size: 0.5em;" vid="100">hrs/mo</span></div>
+                    <h4 class="panel-title" style="margin-bottom: 0.5rem;" vid="101">Time Reduced</h4>
+                    <p class="panel-desc" vid="102">Audit found manual reconciliation. Playbook mapped automation. Build deployed integration. 85% time reduction.</p>
+                </div>
+                <div class="stat-item" vid="103">
+                    <div class="meta-label" style="margin-bottom: 1rem;" vid="104">PE Portfolio Ops</div>
+                    <div class="stat-num" vid="105">3<span style="font-size: 0.5em;" vid="106">Days</span></div>
+                    <h4 class="panel-title" style="margin-bottom: 0.5rem;" vid="107">Reporting Cycle</h4>
+                    <p class="panel-desc" vid="108">Audit found 47-day cycle. Playbook designed unified data layer. Build deployed dashboards. Compressed by 93%.</p>
+                </div>
+            </div>
+        </section>
+
+        
+        <section class="reveal" vid="109" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+             <div class="section-header" style="margin-bottom: 3rem;" vid="110">
+                <span class="meta-label" vid="111">[04] Paradigm Shift</span>
+            </div>
+            <div class="grid-3" style="background: transparent; border: none;" vid="112">
+                <div style="border: 1px solid var(--grid-line-strong); background: var(--bg);" vid="113">
+                    <svg class="star-motif text-acid" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" vid="114"><path d="M12 0L13.5 10.5L24 12L13.5 13.5L12 24L10.5 13.5L0 12L10.5 10.5L12 0Z" vid="115"></path></svg>
+                    <h3 class="panel-title" vid="116">Live, Not Decks</h3>
+                    <p class="panel-desc" vid="117">We don't deliver PDFs of what you *could* do. We deliver working systems that plug into your operations on day one.</p>
+                </div>
+                <div style="border: 1px solid var(--grid-line-strong); background: var(--bg);" vid="118">
+                    <svg class="star-motif text-clay" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" vid="119"><path d="M12 0L13.5 10.5L24 12L13.5 13.5L12 24L10.5 13.5L0 12L10.5 10.5L12 0Z" vid="120"></path></svg>
+                    <h3 class="panel-title" vid="121">Custom, Not SaaS</h3>
+                    <p class="panel-desc" vid="122">You don't need another generic subscription. We build specific tools tailored exactly to your unique workflows and edge cases.</p>
+                </div>
+                <div style="border: 1px solid var(--grid-line-strong); background: var(--bg);" vid="123">
+                    <svg class="star-motif" style="color: var(--text-main);" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" vid="124"><path d="M12 0L13.5 10.5L24 12L13.5 13.5L12 24L10.5 13.5L0 12L10.5 10.5L12 0Z" vid="125"></path></svg>
+                    <h3 class="panel-title" vid="126">Day One, Not Phase 2</h3>
+                    <p class="panel-desc" vid="127">Immediate deployment of high-leverage solutions. We target the bottlenecks that return capital fastest.</p>
+                </div>
+            </div>
+        </section>
+
+        
+        <div class="marquee-container reveal" vid="128" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+            <div class="marquee" id="marquee" vid="129" style="translate: none; rotate: none; scale: none; transform: translate(-14.1625%, 0%) translate3d(0px, 0px, 0px);">
+                <span class="marquee-item solid" vid="130">Construction</span>
+                <span class="marquee-item" vid="131">Private Equity</span>
+                <span class="marquee-item solid" vid="132">Property Management</span>
+                <span class="marquee-item" vid="133">Logistics</span>
+                <span class="marquee-item solid" vid="134">Healthcare</span>
+                <span class="marquee-item" vid="135">Franchise Operations</span>
+                
+                <span class="marquee-item solid" vid="136">Construction</span>
+                <span class="marquee-item" vid="137">Private Equity</span>
+                <span class="marquee-item solid" vid="138">Property Management</span>
+                <span class="marquee-item" vid="139">Logistics</span>
+                <span class="marquee-item solid" vid="140">Healthcare</span>
+                <span class="marquee-item" vid="141">Franchise Operations</span>
+            </div>
+        </div>
+
+        
+        <section class="reveal" vid="142" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+            <div class="section-header" style="margin-bottom: 3rem;" vid="143">
+                <span class="meta-label" vid="144">[05] Engagement Vectors</span>
+                <h2 vid="145">How To Start</h2>
+            </div>
+
+            <div class="tiers" vid="146">
+                <div class="tier-card panel" vid="147">
+                    <span class="meta-label" vid="148">Tier 01</span>
+                    <h3 class="panel-title" vid="149">Assessment</h3>
+                    <div class="tier-price" vid="150">$3-5K</div>
+                    <p class="panel-desc" vid="151">1-2 weeks. Voice agent interview process. Initial bottleneck identification.</p>
+                </div>
+                <div class="tier-card panel" style="border-color: var(--clay);" vid="152">
+                    <span class="meta-label text-clay" vid="153">Tier 02 // Recommended</span>
+                    <h3 class="panel-title" vid="154">Audit + Playbook</h3>
+                    <div class="tier-price" vid="155">$10-25K</div>
+                    <p class="panel-desc" vid="156">3-6 weeks. Comprehensive 6-dimension assessment. Executable blueprint delivered.</p>
+                </div>
+                <div class="tier-card panel" vid="157">
+                    <span class="meta-label" vid="158">Tier 03</span>
+                    <h3 class="panel-title" vid="159">Build</h3>
+                    <div class="tier-price" vid="160">$15-75K<span style="font-size:0.4em; color:var(--text-muted)" vid="161">/build</span></div>
+                    <p class="panel-desc" vid="162">2-14 weeks. Production systems deployed. Scoped directly from playbook.</p>
+                </div>
+                <div class="tier-card panel" vid="163">
+                    <span class="meta-label" vid="164">Tier 04</span>
+                    <h3 class="panel-title" vid="165">Partnership</h3>
+                    <div class="tier-price" vid="166">$150K+<span style="font-size:0.4em; color:var(--text-muted)" vid="167">/yr</span></div>
+                    <p class="panel-desc" vid="168">Continuous cycle. Dedicated operations engineering team. Quarterly upgrades.</p>
+                </div>
+            </div>
+        </section>
+
+        
+        <section id="cta" class="footer-cta reveal" vid="169" style="translate: none; rotate: none; scale: none; transform: translate(0px, 30px); opacity: 0;">
+            <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 2rem;" vid="170">
+                <svg class="star-motif text-acid" style="width: 48px; height: 48px;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" vid="171"><path d="M12 0L13.5 10.5L24 12L13.5 13.5L12 24L10.5 13.5L0 12L10.5 10.5L12 0Z" vid="172"></path></svg>
+                <h2 vid="173">Initiate Protocol.</h2>
+                <p class="panel-desc" style="font-size: 1.2rem; text-align: center;" vid="174">Book a Discovery Call - 30 minutes. We'll talk about your operations, where you think the gaps are, and whether an Assessment makes sense. No pitch. Just a conversation.</p>
+                <a href="#" class="btn btn-primary" style="margin-top: 1rem;" vid="175">Schedule Discovery Matrix</a>
+            </div>
+        </section>
+    </main>
+
+    <script vid="176">
+        
+        const counter = document.querySelector('.counter');
+        let count = 0;
+        
+        function updateLoader() {
+            count += Math.floor(Math.random() * 15) + 1;
+            if (count > 100) count = 100;
+            counter.innerText = count < 10 ? `0${count}` : count;
+            
+            if (count < 100) {
+                requestAnimationFrame(updateLoader);
+            } else {
+                setTimeout(() => {
+                    gsap.to('#loader', {
+                        yPercent: -100,
+                        duration: 1,
+                        ease: "power4.inOut",
+                        onComplete: initInteractions
+                    });
+                }, 200);
+            }
+        }
+        
+        
+        requestAnimationFrame(updateLoader);
+
+        
+        const initWebGL = () => {
+            const container = document.getElementById('canvas-container');
+            const scene = new THREE.Scene();
+            
+            
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 15;
+            camera.position.y = 5;
+            camera.rotation.x = -0.2;
+
+            
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            
+            const geometry = new THREE.PlaneGeometry(60, 60, 64, 64);
+            geometry.rotateX(-Math.PI / 2);
+
+            
+            const positions = geometry.attributes.position;
+            const originalY = new Float32Array(positions.count);
+            for(let i = 0; i < positions.count; i++) {
+                originalY[i] = positions.getY(i);
+            }
+
+            
+            const vertexShader = `
+                varying vec2 vUv;
+                varying float vElevation;
+                uniform float uTime;
+                
+                void main() {
+                    vUv = uv;
+                    vec3 pos = position;
+                    
+                    
+                    float elevation = sin(pos.x * 0.2 + uTime * 0.5) * 
+                                      cos(pos.z * 0.2 + uTime * 0.3) * 2.0;
+                    
+                    
+                    elevation += sin(pos.x * 0.5 - uTime * 0.2) * 
+                                 cos(pos.z * 0.5 + uTime * 0.4) * 0.5;
+
+                    pos.y += elevation;
+                    vElevation = pos.y;
+
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                }
+            `;
+
+            const fragmentShader = `
+                varying float vElevation;
+                
+                void main() {
+                    
+                    float mixStrength = (vElevation + 2.0) / 4.0;
+                    mixStrength = clamp(mixStrength, 0.0, 1.0);
+                    
+                    vec3 pink = vec3(0.98, 0.85, 0.83); 
+                    vec3 darkGrey = vec3(0.2, 0.18, 0.18); 
+                    
+                    vec3 color = mix(darkGrey, pink, mixStrength);
+                    
+                    
+                    float alpha = smoothstep(-1.0, 2.0, vElevation) * 0.7;
+                    
+                    gl_FragColor = vec4(color, alpha);
+                }
+            `;
+
+            const material = new THREE.ShaderMaterial({
+                vertexShader,
+                fragmentShader,
+                uniforms: {
+                    uTime: { value: 0 }
+                },
+                wireframe: true,
+                transparent: true
+            });
+
+            const plane = new THREE.Mesh(geometry, material);
+            scene.add(plane);
+
+            
+            let mouseX = 0;
+            let targetX = 0;
+            const windowHalfX = window.innerWidth / 2;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX - windowHalfX) * 0.001;
+            });
+
+            
+            const clock = new THREE.Clock();
+
+            const animate = () => {
+                requestAnimationFrame(animate);
+                
+                const elapsedTime = clock.getElapsedTime();
+                material.uniforms.uTime.value = elapsedTime;
+
+                
+                targetX = mouseX * 0.5;
+                plane.rotation.y += 0.0015; 
+                camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
+                camera.lookAt(scene.position);
+
+                renderer.render(scene, camera);
+            };
+
+            animate();
+
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        };
+
+        
+        function initInteractions() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            
+            const reveals = document.querySelectorAll('.reveal');
+            reveals.forEach(reveal => {
+                gsap.to(reveal, {
+                    scrollTrigger: {
+                        trigger: reveal,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse"
+                    },
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    ease: "power3.out"
+                });
+            });
+
+            
+            gsap.to('.monumental-vertical', {
+                scrollTrigger: {
+                    trigger: '.hero',
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 1
+                },
+                y: 200,
+                opacity: 0
+            });
+
+            
+            gsap.to('#marquee', {
+                xPercent: -50,
+                ease: "none",
+                duration: 20,
+                repeat: -1
+            });
+
+            
+            initWebGL();
+        }
+    </script>
+
+</body></html>

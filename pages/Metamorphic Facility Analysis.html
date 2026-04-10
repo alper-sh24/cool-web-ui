@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" vid="3">
+    <title vid="4">Metamorphic Facility Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" vid="5">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" vid="6">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet" vid="7">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" vid="8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" vid="9"></script>
+    
+    
+
+    <style vid="10">
+        :root {
+            --bg: #E5E3D8;
+            --ink: #472314;
+            --accent: #E44938;
+            --font-serif: 'Instrument Serif', serif;
+            --font-sans: 'Inter', sans-serif;
+            --grid-pad: 1.5rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--ink);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            
+            border: 8px solid white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        
+        body::after {
+            content: '';
+            position: fixed;
+            top: 8px; left: 8px; right: 8px; bottom: 8px;
+            border: 1px solid rgba(71, 35, 20, 0.1);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        header {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: start;
+            padding: var(--grid-pad);
+            gap: 2rem;
+            border-bottom: 1px solid rgba(71, 35, 20, 0.1);
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-mark {
+            display: inline-block;
+            width: 1.2em;
+            height: 1.2em;
+            border: 2px solid var(--ink);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 1.1em;
+            font-size: 0.9em;
+        }
+
+        .meta-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .meta-item {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.4rem;
+        }
+
+        .meta-item::before {
+            content: '■';
+            font-size: 0.5rem;
+            margin-top: 0.1rem;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero {
+            padding: 2rem var(--grid-pad);
+            padding-bottom: 1rem;
+            max-width: 90%;
+        }
+
+        h1 {
+            font-family: var(--font-serif);
+            font-size: clamp(3.5rem, 12vw, 6rem);
+            line-height: 0.95;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+        }
+
+        .highlight {
+            background-color: var(--accent);
+            color: var(--ink);
+            padding: 0 0.15em;
+            display: inline-block;
+            line-height: 1;
+            
+            transform: translateY(-0.05em);
+        }
+
+        .model-container {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            min-height: 50vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-top: 1px solid rgba(71, 35, 20, 0.1);
+            border-bottom: 1px solid rgba(71, 35, 20, 0.1);
+            cursor: grab;
+        }
+
+        .model-container:active {
+            cursor: grabbing;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        
+        .ui-layer {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 2;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .ui-row {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Space Mono', monospace, var(--font-sans);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(71, 35, 20, 0.6);
+        }
+
+        .crosshair {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px; height: 40px;
+            opacity: 0.3;
+        }
+        
+        .crosshair::before, .crosshair::after {
+            content: '';
+            position: absolute;
+            background-color: var(--ink);
+        }
+        
+        .crosshair::before { top: 50%; left: 0; width: 100%; height: 1px; }
+        .crosshair::after { top: 0; left: 50%; width: 1px; height: 100%; }
+
+        .specs {
+            padding: var(--grid-pad);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .spec-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .spec-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(71, 35, 20, 0.6);
+        }
+
+        .spec-value {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        footer {
+            background-color: var(--ink);
+            color: var(--accent);
+            padding: 1.5rem var(--grid-pad);
+            margin: var(--grid-pad);
+            margin-top: 0;
+        }
+
+        .process-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .arrow {
+            font-family: Arial, sans-serif; 
+            font-weight: 300;
+            font-size: 1.2rem;
+            line-height: 0;
+            position: relative;
+            top: -1px;
+        }
+
+        @media (min-width: 768px) {
+            body { border-width: 16px; }
+            body::after { top: 16px; left: 16px; right: 16px; bottom: 16px; }
+            .hero { max-width: 80%; }
+            .specs { grid-template-columns: repeat(4, 1fr); }
+            header { grid-template-columns: auto 1fr auto auto; }
+        }
+    </style>
+</head>
+<body vid="11">
+
+    <header vid="12">
+        <div class="logo" vid="13" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+            <span class="logo-mark" vid="14">C</span> FM
+        </div>
+        <div class="meta-group" style="margin-left: auto; translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);" vid="15">
+            <span class="meta-item" vid="16">A Structural<br vid="17">Analysis For</span>
+        </div>
+        <div class="meta-group" vid="18" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+            <span class="meta-item" vid="19">Volumetric<br vid="20">Optimization</span>
+        </div>
+    </header>
+
+    <main vid="21">
+        <section class="hero" vid="22">
+            <h1 vid="23" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">Industrial scale <span class="highlight" vid="24">is massing,</span> because output dictates spatial logic.</h1>
+        </section>
+
+        <section class="model-container" vid="25" style="opacity: 1;">
+            <div id="canvas-container" vid="26"><canvas width="369" height="432" style="display: block; width: 369px; height: 432px;"></canvas></div>
+            <div class="ui-layer" vid="27">
+                <div class="ui-row" vid="28">
+                    <span vid="29">ORTHO-PROJ // TOP-ISO</span>
+                    <span vid="30">FIG. 01</span>
+                </div>
+                <div class="crosshair" vid="31"></div>
+                <div class="ui-row" vid="32">
+                    <span vid="33">COORD: 34.0522° N, 118.2437° W</span>
+                    <span vid="34">SCALE: 1:500</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="specs" vid="35">
+            <div class="spec-item" vid="36" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+                <span class="spec-label" vid="37">Gross Floor Area</span>
+                <span class="spec-value" vid="38">24,500 m²</span>
+            </div>
+            <div class="spec-item" vid="39" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+                <span class="spec-label" vid="40">Thermal Efficiency</span>
+                <span class="spec-value" vid="41">92.4%</span>
+            </div>
+            <div class="spec-item" vid="42" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+                <span class="spec-label" vid="43">Structural Core</span>
+                <span class="spec-value" vid="44">Steel / C-14</span>
+            </div>
+            <div class="spec-item" vid="45" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+                <span class="spec-label" vid="46">System Status</span>
+                <span class="spec-value" style="color: var(--accent); font-family: var(--font-sans); font-size: 1rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;" vid="47">Nominal</span>
+            </div>
+        </section>
+    </main>
+
+    <footer vid="48" style="translate: none; rotate: none; scale: none; opacity: 1; transform: translate(0px, 0px);">
+        <div class="process-flow" vid="49">
+            <span vid="50">INGEST</span>
+            <span class="arrow" vid="51">⟶</span>
+            <span vid="52">PROCESS</span>
+            <span class="arrow" vid="53">⟶</span>
+            <span vid="54">YIELD</span>
+        </div>
+    </footer>
+
+    <script vid="55">
+        
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        
+        
+        const bgColor = new THREE.Color('#E5E3D8');
+        const inkColor = new THREE.Color('#472314');
+        const accentColor = new THREE.Color('#E44938');
+        
+        scene.background = bgColor;
+
+        
+        const aspect = container.clientWidth / container.clientHeight;
+        const d = 20; 
+        const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
+        
+        
+        camera.position.set(20, 20, 20);
+        camera.lookAt(scene.position);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        
+        const factory = new THREE.Group();
+        scene.add(factory);
+
+        
+        
+        
+        const baseMaterial = new THREE.MeshBasicMaterial({ 
+            color: bgColor,
+            polygonOffset: true,
+            polygonOffsetFactor: 1, 
+            polygonOffsetUnits: 1
+        });
+        
+        const highlightMaterial = new THREE.MeshBasicMaterial({
+            color: accentColor,
+            polygonOffset: true,
+            polygonOffsetFactor: 1, 
+            polygonOffsetUnits: 1
+        });
+
+        
+        function createBlock(geom, isHighlight = false) {
+            const mesh = new THREE.Mesh(geom, isHighlight ? highlightMaterial : baseMaterial);
+            
+            
+            const edges = new THREE.EdgesGeometry(geom);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ 
+                color: isHighlight ? bgColor : inkColor, 
+                linewidth: 2 
+            }));
+            mesh.add(line);
+            
+            return mesh;
+        }
+
+        
+
+        
+        const mainBaseGeo = new THREE.BoxGeometry(20, 6, 12);
+        const mainBase = createBlock(mainBaseGeo);
+        mainBase.position.y = 3;
+        factory.add(mainBase);
+
+        
+        const wingGeo = new THREE.BoxGeometry(8, 4, 10);
+        const wing = createBlock(wingGeo);
+        wing.position.set(-6, 2, 11);
+        factory.add(wing);
+
+        
+        const towerGeo = new THREE.BoxGeometry(4, 16, 4);
+        const tower = createBlock(towerGeo);
+        tower.position.set(6, 8, 2);
+        factory.add(tower);
+
+        
+        const siloGeo = new THREE.CylinderGeometry(2, 2, 12, 16);
+        const silo1 = createBlock(siloGeo);
+        silo1.position.set(-12, 6, -2);
+        factory.add(silo1);
+
+        const silo2 = createBlock(siloGeo);
+        silo2.position.set(-12, 6, 3);
+        factory.add(silo2);
+
+        
+        const highlightBlockGeo = new THREE.BoxGeometry(3, 3, 3);
+        const highlightBlock = createBlock(highlightBlockGeo, true);
+        highlightBlock.position.set(6, 17.5, 2);
+        factory.add(highlightBlock);
+        
+        
+        const gridHelper = new THREE.GridHelper(40, 20, inkColor, inkColor);
+        gridHelper.material.opacity = 0.1;
+        gridHelper.material.transparent = true;
+        gridHelper.position.y = 0;
+        scene.add(gridHelper);
+
+        
+        new THREE.Box3().setFromObject(factory).getCenter(factory.position).multiplyScalar(-1);
+        
+        factory.position.y += 0;
+
+        
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        
+        container.addEventListener('mousedown', () => isDragging = true);
+        window.addEventListener('mouseup', () => isDragging = false);
+        container.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            previousMousePosition = { x: e.touches[0].pageX, y: e.touches[0].pageY };
+        }, {passive: true});
+        window.addEventListener('touchend', () => isDragging = false);
+
+        const handleMove = (x, y) => {
+            if (isDragging) {
+                const deltaMove = {
+                    x: x - previousMousePosition.x,
+                    y: y - previousMousePosition.y
+                };
+
+                const rotationSpeed = 0.005;
+                factory.rotation.y += deltaMove.x * rotationSpeed;
+                
+                factory.rotation.x += deltaMove.y * rotationSpeed;
+                factory.rotation.x = Math.max(-Math.PI/4, Math.min(Math.PI/4, factory.rotation.x));
+            }
+            previousMousePosition = { x, y };
+        };
+
+        container.addEventListener('mousemove', (e) => handleMove(e.offsetX, e.offsetY));
+        container.addEventListener('touchmove', (e) => handleMove(e.touches[0].pageX, e.touches[0].pageY), {passive: true});
+
+        
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            
+            if (!isDragging) {
+                factory.rotation.y += 0.002;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        
+        window.addEventListener('resize', () => {
+            const aspect = container.clientWidth / container.clientHeight;
+            camera.left = -d * aspect;
+            camera.right = d * aspect;
+            camera.top = d;
+            camera.bottom = -d;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        
+        gsap.from("header > div", {y: -20, opacity: 0, duration: 1, stagger: 0.1, ease: "power3.out"});
+        gsap.from("h1", {y: 30, opacity: 0, duration: 1.2, delay: 0.2, ease: "power4.out"});
+        gsap.from(".model-container", {opacity: 0, duration: 1.5, delay: 0.5});
+        gsap.from(".spec-item", {y: 20, opacity: 0, duration: 0.8, delay: 0.8, stagger: 0.1, ease: "power3.out"});
+        gsap.from("footer", {y: 20, opacity: 0, duration: 1, delay: 1, ease: "power3.out"});
+        
+        
+        factory.scale.set(0,0,0);
+        gsap.to(factory.scale, {x: 1, y: 1, z: 1, duration: 1.5, delay: 0.6, ease: "elastic.out(1, 0.7)"});
+
+    </script>
+
+</body></html>

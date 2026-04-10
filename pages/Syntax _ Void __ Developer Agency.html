@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">Syntax &amp; Void // Developer Agency</title>
+    <style vid="5">
+        :root {
+            
+            --bg-body: #000000;
+            --surface-primary: #ffffff;
+            --surface-secondary: #000000;
+            --text-primary: #000000;
+            --text-inverse: #ffffff;
+            
+            
+            --font-sans: 'Helvetica Neue', Helvetica, Arial, -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-size-xs: 10.5px;
+            --font-size-sm: 12px;
+            --line-height-tight: 1.2;
+            --line-height-base: 1.4;
+            --letter-spacing-tight: -0.01em;
+
+            
+            --radius-window: 14px;
+            --radius-button: 4px;
+            --radius-logo: 6px;
+            --spacing-window-pad: 12px;
+            --spacing-header-pad: 8px 6px 16px 6px;
+            --spacing-footer-pad: 16px 6px 8px 6px;
+            --gap-footer-grid: 32px;
+            
+            
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: var(--font-sans);
+            color: var(--text-primary);
+            overflow: hidden;
+            padding: 24px;
+        }
+
+        
+        .window {
+            background-color: var(--surface-primary);
+            width: 100%;
+            max-width: 1440px;
+            height: 92vh;
+            border-radius: var(--radius-window);
+            padding: var(--spacing-window-pad);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-header-pad);
+        }
+
+        .header-left {
+            display: flex;
+            gap: 80px;
+            font-size: var(--font-size-sm);
+            font-weight: 700;
+            letter-spacing: var(--letter-spacing-tight);
+        }
+
+        .header-left span:nth-child(2) {
+            font-weight: 400;
+        }
+
+        .btn-close {
+            background-color: var(--surface-secondary);
+            color: var(--text-inverse);
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-button);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-close:hover {
+            opacity: 0.8;
+            transform: scale(0.96);
+        }
+
+        .btn-close svg {
+            width: 12px;
+            height: 12px;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        
+        .viewport {
+            flex-grow: 1;
+            background-color: var(--surface-secondary);
+            position: relative;
+            border-radius: 2px; 
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        
+        .viewport-controls {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .ctrl-toggle {
+            background: none;
+            border: none;
+            color: var(--text-inverse);
+            font-family: var(--font-sans);
+            font-size: var(--font-size-xs);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity var(--transition-fast);
+            letter-spacing: var(--letter-spacing-tight);
+        }
+
+        .ctrl-toggle:hover {
+            opacity: 1;
+        }
+
+        .ctrl-toggle svg {
+            width: 10px;
+            height: 10px;
+            fill: currentColor;
+        }
+
+        
+        .footer {
+            padding: var(--spacing-footer-pad);
+            display: grid;
+            grid-template-columns: 56px minmax(280px, 340px) repeat(3, 1fr) auto;
+            gap: var(--gap-footer-grid);
+            font-size: var(--font-size-xs);
+            line-height: var(--line-height-base);
+            letter-spacing: var(--letter-spacing-tight);
+        }
+
+        
+        .logo-block {
+            width: 56px;
+            height: 56px;
+            background-color: var(--surface-secondary);
+            border-radius: var(--radius-logo);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-block svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--surface-primary);
+        }
+
+        
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .footer-heading {
+            font-weight: 700;
+        }
+
+        .footer-desc {
+            font-weight: 400;
+            color: rgba(0,0,0,0.8);
+        }
+
+        
+        .footer-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2px; 
+        }
+
+        .footer-list li {
+            color: var(--text-primary);
+            cursor: default;
+            transition: opacity var(--transition-fast);
+        }
+
+        .footer-list.interactive li {
+            cursor: pointer;
+        }
+        
+        .footer-list.interactive li:hover {
+            opacity: 0.5;
+        }
+
+        
+        .footer-counter {
+            text-align: right;
+            font-weight: 400;
+            color: rgba(0,0,0,0.6);
+        }
+
+        
+        @media (max-width: 1024px) {
+            .footer {
+                grid-template-columns: 56px 1fr 1fr;
+                grid-template-rows: auto auto;
+            }
+            .footer-col:nth-child(4),
+            .footer-col:nth-child(5) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body vid="6">
+
+    <div class="window" vid="7">
+        
+        <header class="header" vid="8">
+            <div class="header-left" vid="9">
+                <span vid="10">Syntax &amp; Void</span>
+                <span vid="11">System Architecture</span>
+            </div>
+            <button class="btn-close" aria-label="Close" vid="12">
+                <svg viewBox="0 0 24 24" fill="none" vid="13">
+                    <line x1="6" y1="6" x2="18" y2="18" vid="14"></line>
+                    <line x1="6" y1="18" x2="18" y2="6" vid="15"></line>
+                </svg>
+            </button>
+        </header>
+
+        
+        <main class="viewport" vid="16">
+            <canvas id="geometryCanvas" vid="17" width="1208" height="687"></canvas>
+            
+            <div class="viewport-controls" vid="18">
+                <button class="ctrl-toggle" id="toggleMotion" vid="19">
+                    <svg viewBox="0 0 24 24" vid="20">
+                        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.5" vid="21"></circle>
+                        <path d="M12 2a10 10 0 0 1 0 20v-20z" fill="currentColor" vid="22"></path>
+                    </svg>
+                    Motion
+                </button>
+                <button class="ctrl-toggle" id="toggleGrid" vid="23">
+                    <svg viewBox="0 0 24 24" vid="24">
+                        <rect x="2" y="2" width="8" height="8" vid="25"></rect>
+                        <rect x="14" y="2" width="8" height="8" vid="26"></rect>
+                        <rect x="2" y="14" width="8" height="8" vid="27"></rect>
+                        <rect x="14" y="14" width="8" height="8" vid="28"></rect>
+                    </svg>
+                    Grid
+                </button>
+            </div>
+        </main>
+
+        
+        <footer class="footer" vid="29">
+            <div class="logo-block" vid="30">
+                
+                <svg viewBox="0 0 24 24" stroke-width="0.75" stroke-linecap="round" vid="31">
+                    <line x1="12" y1="2" x2="12" y2="6" vid="32"></line>
+                    <line x1="12" y1="18" x2="12" y2="22" vid="33"></line>
+                    <line x1="2" y1="12" x2="6" y2="12" vid="34"></line>
+                    <line x1="18" y1="12" x2="22" y2="12" vid="35"></line>
+                    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" vid="36"></line>
+                    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07" vid="37"></line>
+                    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" vid="38"></line>
+                    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93" vid="39"></line>
+                    
+                    <line x1="8" y1="3.5" x2="9.5" y2="6.5" vid="40"></line>
+                    <line x1="16" y1="20.5" x2="14.5" y2="17.5" vid="41"></line>
+                    <line x1="3.5" y1="8" x2="6.5" y2="9.5" vid="42"></line>
+                    <line x1="20.5" y1="16" x2="17.5" y2="14.5" vid="43"></line>
+                    
+                    <line x1="16" y1="3.5" x2="14.5" y2="6.5" vid="44"></line>
+                    <line x1="8" y1="20.5" x2="9.5" y2="17.5" vid="45"></line>
+                    <line x1="20.5" y1="8" x2="17.5" y2="9.5" vid="46"></line>
+                    <line x1="3.5" y1="16" x2="6.5" y2="14.5" vid="47"></line>
+                </svg>
+            </div>
+            
+            <div class="footer-col" vid="48">
+                <div class="footer-heading" vid="49">Syntax &amp; Void</div>
+                <div class="footer-desc" vid="50">We engineer high-performance software systems and minimal viable architectures. Working closely with core teams to build infrastructure that balances absolute clarity, performance, and scale across the entire web stack.</div>
+            </div>
+
+            <ul class="footer-list interactive" vid="51">
+                <li style="font-weight: 700; margin-bottom: 2px;" vid="52">Capabilities</li>
+                <li vid="53">Systems Architecture</li>
+                <li vid="54">Frontend Engineering</li>
+                <li vid="55">WebGL &amp; Graphics</li>
+                <li vid="56">Performance Tuning</li>
+                <li vid="57">Custom Frameworks</li>
+            </ul>
+
+            <ul class="footer-list interactive" vid="58">
+                <li style="font-weight: 700; margin-bottom: 2px;" vid="59">Stack Strategy</li>
+                <li vid="60">TypeScript / Rust</li>
+                <li vid="61">React / SolidJS</li>
+                <li vid="62">WebGPU / Canvas API</li>
+                <li vid="63">Edge Native Deploy</li>
+            </ul>
+
+            <ul class="footer-list" vid="64">
+                <li style="font-weight: 700; margin-bottom: 2px;" vid="65">Sectors</li>
+                <li vid="66">Financial Technology</li>
+                <li vid="67">Advanced E-Commerce</li>
+                <li vid="68">Aviation/Aerospace</li>
+                <li vid="69">Sustainability</li>
+                <li vid="70">2024 — GLOBAL</li>
+            </ul>
+
+            <div class="footer-counter" vid="71">
+                1 of 20
+            </div>
+        </footer>
+    </div>
+
+    <script vid="72">
+        const canvas = document.getElementById('geometryCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false }); 
+
+        
+        let width = 0;
+        let height = 0;
+        let time = 0;
+        let isMotionActive = true;
+        let isGridActive = true;
+        let targetMouseX = 0;
+        let targetMouseY = 0;
+        let currentMouseX = 0;
+        let currentMouseY = 0;
+
+        
+        document.getElementById('toggleMotion').addEventListener('click', (e) => {
+            isMotionActive = !isMotionActive;
+            e.currentTarget.style.opacity = isMotionActive ? '1' : '0.5';
+        });
+
+        document.getElementById('toggleGrid').addEventListener('click', (e) => {
+            isGridActive = !isGridActive;
+            e.currentTarget.style.opacity = isGridActive ? '1' : '0.5';
+        });
+
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            
+            targetMouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            targetMouseY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            targetMouseX = 0;
+            targetMouseY = 0;
+        });
+
+        function resize() {
+            
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            width = rect.width;
+            height = rect.height;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        function draw() {
+            
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, width, height);
+
+            
+            currentMouseX += (targetMouseX - currentMouseX) * 0.05;
+            currentMouseY += (targetMouseY - currentMouseY) * 0.05;
+
+            ctx.save();
+            
+            
+            const centerX = width / 2 + (currentMouseX * 40);
+            const centerY = height / 2 + (currentMouseY * 40);
+            ctx.translate(centerX, centerY);
+
+            
+            const boxSize = Math.min(width, height) * 0.65;
+            const maxRadius = boxSize / 2;
+
+            
+            if (isGridActive) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.lineWidth = 0.5;
+                
+                
+                ctx.strokeRect(-maxRadius, -maxRadius, boxSize, boxSize);
+                
+                
+                ctx.beginPath();
+                ctx.moveTo(-width/2, -height/2);
+                ctx.lineTo(width/2, height/2);
+                ctx.moveTo(width/2, -height/2);
+                ctx.lineTo(-width/2, height/2);
+                ctx.stroke();
+            }
+
+            
+            ctx.beginPath();
+            ctx.rect(-maxRadius, -maxRadius, boxSize, boxSize);
+            ctx.clip();
+
+            
+            if (isMotionActive) {
+                time += 0.002;
+            }
+            ctx.rotate(time);
+
+            
+            const numLines = 36; 
+            const angleStep = (Math.PI * 2) / numLines;
+            
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            ctx.lineWidth = 0.5;
+            for(let i = 0; i < numLines; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                const x = Math.cos(i * angleStep) * maxRadius * 2; 
+                const y = Math.sin(i * angleStep) * maxRadius * 2;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+
+            
+            const rings = 6;
+            const startRadius = boxSize * 0.12;
+            const radiusStep = (maxRadius - startRadius) / (rings - 1) * 0.8;
+
+            ctx.fillStyle = '#FFFFFF';
+            for (let r = 0; r < rings; r++) {
+                const radius = startRadius + r * radiusStep;
+                
+                for (let i = 0; i < numLines; i++) {
+                    
+                    
+                    if ((i + r) % 2 === 0) {
+                        ctx.save();
+                        ctx.rotate(i * angleStep);
+                        ctx.translate(radius, 0);
+                        
+                        
+                        const blockLength = 10 + (r * 2.5);
+                        const blockWidth = 5;
+                        
+                        
+                        ctx.fillRect(0, -blockWidth/2, blockLength, blockWidth);
+                        ctx.restore();
+                    }
+                }
+            }
+
+            
+            
+            ctx.beginPath();
+            ctx.arc(0, 0, boxSize * 0.025, 0, Math.PI * 2);
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = '#000000';
+            ctx.fill();
+
+            
+            ctx.beginPath();
+            ctx.arc(0, 0, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fill();
+
+            ctx.restore();
+            requestAnimationFrame(draw);
+        }
+
+        
+        requestAnimationFrame(draw);
+    </script>
+
+</body></html>

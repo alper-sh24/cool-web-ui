@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">Linguist / Skill Calibration</title>
+    
+    <style vid="5">
+        :root {
+            --bg: #EAEBE9;
+            --mint: #1A1A1A;
+            --emerald: #1A1A1A;
+            --muted: #A0A0A0;
+            --text: #1A1A1A;
+            --text-dim: #737373;
+            --hairline: #D0D0D0;
+            
+            --scale-native: #064e3b; 
+            --scale-fluent: #4ade80;
+            --scale-conv: #fbbf24;
+            --scale-novice: #ef4444; 
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            height: 844px;
+            width: 390px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px 24px 40px 24px;
+            position: relative;
+        }
+
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .header {
+            width: 100%;
+            z-index: 10;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 1px;
+            background: var(--hairline);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .progress-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 40%;
+            background: var(--text);
+            box-shadow: none;
+        }
+
+        .pagination {
+            font-size: 20px;
+            font-weight: 400;
+            font-family: 'Times New Roman', Times, serif;
+            letter-spacing: -0.01em;
+            color: var(--text-dim);
+        }
+
+        .pagination span {
+            color: var(--text);
+        }
+
+        .content {
+            margin-top: 40px;
+            z-index: 10;
+        }
+
+        .headline {
+            font-size: 36px;
+            line-height: 1.1;
+            font-weight: 400;
+            font-family: 'Times New Roman', Times, serif;
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+        }
+
+        .sub-headline {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-dim);
+            font-weight: 400;
+            max-width: 90%;
+        }
+
+        .stage {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .display-value {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 32px;
+            font-weight: 400;
+            color: var(--text);
+            border: 1px solid var(--text);
+            border-radius: 50px;
+            padding: 16px 40px;
+            margin-bottom: 24px;
+            text-transform: lowercase;
+            position: relative;
+            z-index: 20;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .label-caps {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--text);
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 20;
+        }
+
+        .vertical-slider-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .frequency-labels {
+            position: absolute;
+            left: 20px;
+            height: 240px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: right;
+            padding-right: 20px;
+            z-index: 20;
+        }
+
+        .freq-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-transform: lowercase;
+            letter-spacing: 0.02em;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 4px 8px;
+        }
+
+        
+        #label-3 { --halo: var(--scale-native); }
+        #label-2 { --halo: var(--scale-fluent); }
+        #label-1 { --halo: var(--scale-conv); }
+        #label-0 { --halo: var(--scale-novice); }
+
+        .freq-label::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            height: 120%;
+            background: var(--halo);
+            filter: blur(8px);
+            opacity: 0.05;
+            border-radius: 12px;
+            z-index: -1;
+        }
+
+        .freq-label.active {
+            color: var(--text);
+            font-weight: 600;
+        }
+        
+        .freq-label.active::after {
+            opacity: 0.2;
+        }
+
+        .slider-track-visual {
+            position: relative;
+            height: 240px;
+            width: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            z-index: 20;
+        }
+
+        .slider-track-visual::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0; bottom: 0;
+            width: 1px;
+            background: var(--text);
+            z-index: -1;
+        }
+
+        .v-tick {
+            height: 1px;
+            background: rgba(26, 26, 26, 0.2);
+            width: 12px !important;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        .v-tick.major {
+            width: 24px !important;
+            background: rgba(26, 26, 26, 0.5);
+        }
+
+        .v-tick.active {
+            background: var(--text);
+            width: 36px !important;
+            box-shadow: none !important;
+        }
+
+        .slider-input {
+            position: absolute;
+            height: 240px;
+            width: 80px;
+            appearance: none;
+            background: transparent;
+            outline: none;
+            cursor: pointer;
+            writing-mode: bt-lr; 
+            -webkit-appearance: slider-vertical;
+            opacity: 0;
+            z-index: 30;
+        }
+
+        .footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            z-index: 10;
+        }
+
+        .btn {
+            height: 64px;
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back {
+            width: 80px;
+            border: 1px solid var(--text);
+            background: transparent;
+        }
+
+        .btn-back svg {
+            stroke: var(--text) !important;
+        }
+
+        .btn-next {
+            flex-grow: 1;
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--text);
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 22px;
+            text-transform: lowercase;
+        }
+
+        .phonetic-pattern {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140%;
+            height: auto;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .phonetic-pattern * {
+            stroke: var(--text) !important;
+        }
+
+        .frequency-glow {
+            position: absolute;
+            width: 60px;
+            height: 140%;
+            top: -20%;
+            
+            background: linear-gradient(180deg, var(--scale-native) 0%, var(--scale-fluent) 33%, var(--scale-conv) 66%, var(--scale-novice) 100%);
+            filter: blur(18px);
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.7;
+            z-index: 5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body vid="6">
+
+    <svg class="phonetic-pattern" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" vid="7">
+        <circle cx="200" cy="200" r="150" stroke="white" stroke-width="0.5" fill="none" vid="8"></circle>
+        <circle cx="200" cy="200" r="100" stroke="white" stroke-width="0.5" fill="none" stroke-dasharray="2 4" vid="9"></circle>
+        <path d="M50,200 Q200,50 350,200" stroke="white" stroke-width="0.5" fill="none" vid="10"></path>
+        <path d="M50,200 Q200,350 350,200" stroke="white" stroke-width="0.5" fill="none" vid="11"></path>
+    </svg>
+
+    <div class="header" vid="12">
+        <div class="progress-track" vid="13">
+            <div class="progress-fill" vid="14"></div>
+        </div>
+        <div class="pagination" vid="15"><span vid="16">02</span> / 05</div>
+    </div>
+
+    <div class="content" vid="17">
+        <h1 class="headline" vid="18">Calibrate your <br vid="19">current resonance</h1>
+        <p class="sub-headline" vid="20">Adjust the frequency to match your existing proficiency in Spanish. Precision ensures optimal immersion.</p>
+    </div>
+
+    <div class="stage" vid="21">
+        <div class="display-value" id="level-display" vid="22">Conversational</div>
+        <div class="label-caps" vid="23">Frequency Range</div>
+
+        <div class="vertical-slider-container" vid="24">
+            <div class="frequency-labels" vid="25">
+                <span class="freq-label" id="label-3" vid="26">Native</span>
+                <span class="freq-label active" id="label-2" vid="27">Fluent</span>
+                <span class="freq-label" id="label-1" vid="28">Conversational</span>
+                <span class="freq-label" id="label-0" vid="29">Novice</span>
+            </div>
+
+            <div class="frequency-glow" vid="30"></div>
+            
+            <div class="slider-track-visual" id="v-track" vid="31"><div class="v-tick major" id="tick-30" style="width: 40px;"></div><div class="v-tick" id="tick-29" style="width: 20px;"></div><div class="v-tick" id="tick-28" style="width: 20px;"></div><div class="v-tick" id="tick-27" style="width: 20px;"></div><div class="v-tick" id="tick-26" style="width: 20px;"></div><div class="v-tick" id="tick-25" style="width: 20px;"></div><div class="v-tick" id="tick-24" style="width: 20px;"></div><div class="v-tick" id="tick-23" style="width: 20px;"></div><div class="v-tick" id="tick-22" style="width: 20px;"></div><div class="v-tick" id="tick-21" style="width: 20px;"></div><div class="v-tick major" id="tick-20" style="width: 40px;"></div><div class="v-tick" id="tick-19" style="width: 20px;"></div><div class="v-tick" id="tick-18" style="width: 20px;"></div><div class="v-tick" id="tick-17" style="width: 20px;"></div><div class="v-tick" id="tick-16" style="width: 20px;"></div><div class="v-tick" id="tick-15" style="width: 20px;"></div><div class="v-tick" id="tick-14" style="width: 20px;"></div><div class="v-tick" id="tick-13" style="width: 20px;"></div><div class="v-tick" id="tick-12" style="width: 20px;"></div><div class="v-tick" id="tick-11" style="width: 20px;"></div><div class="v-tick major active" id="tick-10" style="width: 55px;"></div><div class="v-tick" id="tick-9" style="width: 20px;"></div><div class="v-tick" id="tick-8" style="width: 20px;"></div><div class="v-tick" id="tick-7" style="width: 20px;"></div><div class="v-tick" id="tick-6" style="width: 20px;"></div><div class="v-tick" id="tick-5" style="width: 20px;"></div><div class="v-tick" id="tick-4" style="width: 20px;"></div><div class="v-tick" id="tick-3" style="width: 20px;"></div><div class="v-tick" id="tick-2" style="width: 20px;"></div><div class="v-tick" id="tick-1" style="width: 20px;"></div><div class="v-tick major" id="tick-0" style="width: 40px;"></div></div>
+
+            <input type="range" min="0" max="30" value="10" class="slider-input" id="skill-slider" vid="32">
+        </div>
+    </div>
+
+    <div class="footer" vid="33">
+        <button class="btn btn-back" vid="34">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" vid="35">
+                <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke-linecap="round" stroke-linejoin="round" vid="36"></path>
+            </svg>
+        </button>
+        <button class="btn btn-next" vid="37">Next</button>
+    </div>
+
+    <script vid="38">
+        const track = document.getElementById('v-track');
+        const slider = document.getElementById('skill-slider');
+        const display = document.getElementById('level-display');
+        const labels = ['Novice', 'Conversational', 'Fluent', 'Native'];
+        
+        const numTicks = 31;
+        for (let i = 30; i >= 0; i--) {
+            const tick = document.createElement('div');
+            tick.className = 'v-tick';
+            if (i % 10 === 0) tick.classList.add('major');
+            tick.id = `tick-${i}`;
+            track.appendChild(tick);
+        }
+
+        function updateSlider(val) {
+            const index = Math.round(val / 10);
+            display.innerText = labels[index];
+            
+            document.querySelectorAll('.freq-label').forEach((l, i) => {
+                l.classList.toggle('active', i === index);
+            });
+
+            document.querySelectorAll('.v-tick').forEach((t, i) => {
+                const tickIdx = 30 - i;
+                t.classList.toggle('active', tickIdx === parseInt(val));
+                if (tickIdx === parseInt(val)) {
+                    t.style.width = '55px';
+                } else if (tickIdx % 10 === 0) {
+                    t.style.width = '40px';
+                } else {
+                    t.style.width = '20px';
+                }
+            });
+        }
+
+        slider.addEventListener('input', (e) => {
+            updateSlider(e.target.value);
+        });
+        
+        updateSlider(10);
+    </script>
+</body></html>
