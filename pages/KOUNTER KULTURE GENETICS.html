@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">KOUNTER KULTURE GENETICS</title>
+    
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" vid="5">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" vid="6">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@100;300;400&amp;display=swap" rel="stylesheet" vid="7">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" vid="8"></script>
+
+    <style vid="9">
+        :root {
+            --bg: #020202;
+            --fg: #F4F4F5;
+            --muted: #666666;
+            --border: #1a1a1c;
+            --border-hover: #333336;
+            --accent: #a3a3a3;
+            
+            --font-sans: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --space-xs: 4px;
+            --space-sm: 12px;
+            --space-md: 24px;
+            --space-lg: 48px;
+            --space-xl: 96px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: crosshair;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: var(--font-sans);
+            font-weight: 300;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            line-height: 1.4;
+        }
+
+        
+        h1, h2, h3, h4 { font-weight: 400; letter-spacing: -0.02em; }
+        
+        .t-hero {
+            font-size: clamp(4rem, 10vw, 12rem);
+            line-height: 0.85;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+        }
+        
+        .t-hero-sub {
+            font-size: clamp(1.5rem, 3vw, 4rem);
+            font-weight: 300;
+            letter-spacing: -0.02em;
+        }
+
+        .t-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+        }
+
+        .t-body {
+            font-size: 14px;
+            color: var(--accent);
+            max-width: 400px;
+        }
+
+        .t-data {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--fg);
+        }
+
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--space-sm);
+        }
+
+        .line-h { width: 100%; height: 1px; background: var(--border); }
+        .line-v { width: 1px; height: 100%; background: var(--border); }
+
+        
+        .bracket-box {
+            position: relative;
+            padding: var(--space-md);
+            border: 1px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        .bracket-box:hover {
+            border-color: var(--border-hover);
+        }
+
+        .bracket-box::before, .bracket-box::after,
+        .bracket-box .bb-inner::before, .bracket-box .bb-inner::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-color: var(--muted);
+            border-style: solid;
+            pointer-events: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .bracket-box:hover::before, .bracket-box:hover::after,
+        .bracket-box:hover .bb-inner::before, .bracket-box:hover .bb-inner::after {
+            border-color: var(--fg);
+        }
+
+        .bracket-box::before { top: 0; left: 0; border-width: 1px 0 0 1px; }
+        .bracket-box::after { top: 0; right: 0; border-width: 1px 1px 0 0; }
+        .bracket-box .bb-inner::before { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+        .bracket-box .bb-inner::after { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+        .bb-inner { position: absolute; inset: 0; pointer-events: none; }
+
+        
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: var(--space-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 100;
+            mix-blend-mode: difference;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--space-lg);
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--fg);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-link span:first-child { color: var(--muted); font-size: 9px; font-family: var(--font-mono); }
+
+        
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        
+        section {
+            position: relative;
+            padding-top: var(--space-xl);
+            padding-bottom: var(--space-xl);
+        }
+
+        
+        #landing {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 0;
+        }
+
+        .hero-title-wrapper {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            mix-blend-mode: difference;
+        }
+
+        .hero-data-corners {
+            position: absolute;
+            inset: var(--space-md);
+            pointer-events: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-bottom: var(--space-md);
+        }
+
+        .data-block {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+        }
+
+        
+        .system-banner {
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: var(--space-md) 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sys-item { display: flex; gap: var(--space-lg); }
+        .sys-label { width: 100px; }
+
+        
+        #drops .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: var(--space-sm);
+        }
+
+        .drop-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        @media (max-width: 768px) {
+            .drop-cards { grid-template-columns: 1fr; }
+        }
+
+        .drop-card {
+            background: #050505;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.4s;
+        }
+
+        .drop-card:hover { border-color: #444; }
+
+        .drop-visual {
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .drop-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.2) brightness(0.7);
+            transition: filter 0.5s, transform 0.5s;
+        }
+
+        .drop-card:hover .drop-visual img {
+            filter: grayscale(0%) contrast(1.1) brightness(0.9);
+            transform: scale(1.02);
+        }
+
+        .drop-ui-overlay {
+            position: absolute;
+            inset: 0;
+            padding: var(--space-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .drop-info {
+            padding: var(--space-md);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+        }
+
+        .info-col { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .info-row { display: flex; justify-content: space-between; border-bottom: 1px solid #111; padding-bottom: 4px;}
+
+        
+        #catalog .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: var(--space-sm) 0;
+            margin-bottom: var(--space-md);
+        }
+
+        .filter-group { display: flex; gap: var(--space-md); }
+        .filter-btn { 
+            background: none; 
+            border: none; 
+            color: var(--muted); 
+            font-family: var(--font-mono); 
+            font-size: 10px; 
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+        .filter-btn:hover, .filter-btn.active { color: var(--fg); }
+
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+        }
+
+        .catalog-item {
+            background: var(--bg);
+            padding: var(--space-md);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            transition: background 0.3s;
+        }
+
+        .catalog-item:hover { background: #080808; }
+
+        .item-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .item-name { font-size: 1.2rem; letter-spacing: -0.01em; }
+        .item-img-container {
+            width: 100%;
+            height: 180px;
+            background: #050505;
+            margin: var(--space-sm) 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .item-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5;
+            mix-blend-mode: luminosity;
+            transition: opacity 0.3s, mix-blend-mode 0.3s;
+        }
+
+        .catalog-item:hover .item-img-container img {
+            opacity: 0.9;
+            mix-blend-mode: normal;
+        }
+
+        .item-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .stat-box {
+            border: 1px solid #111;
+            padding: 4px 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        
+        footer {
+            border-top: 1px solid var(--border);
+            padding: var(--space-xl) 0 var(--space-md);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-md);
+        }
+
+        .f-col { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .f-col input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            padding: var(--space-xs) 0;
+            color: var(--fg);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            outline: none;
+        }
+        .f-col input:focus { border-bottom-color: var(--fg); }
+        .f-col button {
+            background: var(--fg);
+            color: var(--bg);
+            border: none;
+            padding: 8px;
+            font-family: var(--font-sans);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: var(--space-sm);
+            transition: opacity 0.2s;
+        }
+        .f-col button:hover { opacity: 0.8; }
+
+        
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .uppercase { text-transform: uppercase; }
+        .text-right { text-align: right; }
+        .w-100 { width: 100%; }
+        
+        
+        .crosshair {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            pointer-events: none;
+        }
+        .crosshair::before { content:''; position:absolute; top:5px; left:0; width:100%; height:1px; background:var(--muted); opacity:0.5;}
+        .crosshair::after { content:''; position:absolute; top:0; left:5px; width:1px; height:100%; background:var(--muted); opacity:0.5;}
+
+    </style>
+</head>
+<body vid="10">
+
+    <div id="canvas-container" vid="11"><canvas width="1280" height="960" style="display: block; width: 1280px; height: 960px;"></canvas></div>
+
+    <nav vid="12">
+        <div class="nav-link" vid="13">
+            <span vid="14">SYS.ID</span>
+            <div vid="15">KKG—CORE</div>
+        </div>
+        <div class="nav-links" vid="16">
+            <a href="#landing" class="nav-link" vid="17"><span vid="18">01</span>Home</a>
+            <a href="#drops" class="nav-link" vid="19"><span vid="20">02</span>Drops</a>
+            <a href="#catalog" class="nav-link" vid="21"><span vid="22">03</span>Catalog</a>
+            <a href="#" class="nav-link" vid="23"><span vid="24">04</span>Terminal (0)</a>
+        </div>
+    </nav>
+
+    <div class="container" vid="25">
+        
+        <section id="landing" vid="26">
+            <div class="hero-data-corners" vid="27">
+                <div class="data-block" vid="28">
+                    <span class="t-label" vid="29">Protocol</span>
+                    <span class="t-data" vid="30">GEN-SEQ-902</span>
+                    <span class="t-data" vid="31">TCTAGCATGC</span>
+                </div>
+                <div class="data-block text-right" vid="32">
+                    <span class="t-label" vid="33">Status</span>
+                    <span class="t-data" vid="34">CULTIVATING</span>
+                    <span class="t-data text-right" id="clock" vid="35">07:21:52</span>
+                </div>
+            </div>
+
+            <div class="hero-title-wrapper" vid="36">
+                <h1 class="t-hero" vid="37">Kounter</h1>
+                <h1 class="t-hero" vid="38">Kulture</h1>
+                <h2 class="t-hero-sub" vid="39">Genetics</h2>
+            </div>
+            
+            <div style="position:absolute; bottom: var(--space-xl); width: calc(100% - var(--space-md)*2);" vid="40">
+                <div class="system-banner" vid="41">
+                    <div class="sys-item" vid="42">
+                        <span class="t-label sys-label" vid="43">Objective</span>
+                        <span class="t-body" vid="44">Engineering profound botanical experiences through rigorous genetic selection, isolation, and stabilization. We operate at the intersection of illicit art and clinical science.</span>
+                    </div>
+                    <div class="sys-item" vid="45">
+                        <span class="t-label" vid="46">Scroll to initiate</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        <section id="drops" vid="47">
+            <div class="section-header" vid="48">
+                <div vid="49">
+                    <div class="t-label" vid="50">Section_02</div>
+                    <h2 class="t-hero-sub" style="font-size: 2rem;" vid="51">Newest Isolations</h2>
+                </div>
+                <div class="t-label" vid="52">Batch: Omega-7</div>
+            </div>
+
+            <div class="drop-cards" vid="53">
+                
+                <div class="bracket-box drop-card" vid="54">
+                    <div class="bb-inner" vid="55"></div>
+                    <div class="drop-visual" vid="56">
+                        
+                        <img src="https://images.pexels.com/photos/808510/pexels-photo-808510.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1260&amp;h=750&amp;dpr=2" alt="Macro texture" vid="57">
+                        <div class="drop-ui-overlay" vid="58">
+                            <div class="flex-between w-100" vid="59">
+                                <span class="t-label" vid="60">Subject: V-01</span>
+                                <div class="crosshair" style="top:10px; right:10px;" vid="61"></div>
+                            </div>
+                            <div class="flex-between w-100" vid="62">
+                                <span class="t-data" style="background:var(--bg); padding:2px 4px;" vid="63">LIVE_RESIN_FOCUS</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="drop-info" vid="64">
+                        <div class="info-col" vid="65">
+                            <h3 style="font-size: 1.5rem;" vid="66">Neon Tombstone</h3>
+                            <span class="t-label" vid="67">Lineage: (Ghost Train x GMO) x Carbon Fiber</span>
+                            <p class="t-body" style="font-size: 12px; margin-top: 8px;" vid="68">Extremely volatile terpene profile expressing industrial chemical, burnt rubber, and synthetic grape. High structural integrity in flower development.</p>
+                        </div>
+                        <div class="info-col" vid="69">
+                            <div class="info-row" vid="70"><span class="t-label" vid="71">Type</span><span class="t-data" vid="72">Indica Dom. 70/30</span></div>
+                            <div class="info-row" vid="73"><span class="t-label" vid="74">Flowering</span><span class="t-data" vid="75">63-68 Days</span></div>
+                            <div class="info-row" vid="76"><span class="t-label" vid="77">Yield</span><span class="t-data" vid="78">Heavy / Commercial</span></div>
+                            <div class="info-row" vid="79"><span class="t-label" vid="80">THC Est.</span><span class="t-data" vid="81">28-32%</span></div>
+                            <button style="margin-top:auto; background:transparent; border:1px solid var(--border); color:var(--fg); padding:8px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase; cursor:pointer;" vid="82">Acquire Genetics -&gt;</button>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="bracket-box drop-card" vid="83">
+                    <div class="bb-inner" vid="84"></div>
+                    <div class="drop-visual" vid="85">
+                        
+                        <img src="https://images.pexels.com/photos/1083822/pexels-photo-1083822.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1260&amp;h=750&amp;dpr=2" alt="Dark botanical texture" vid="86">
+                        <div class="drop-ui-overlay" vid="87">
+                            <div class="flex-between w-100" vid="88">
+                                <span class="t-label" vid="89">Subject: V-02</span>
+                                <div class="crosshair" style="top:10px; right:10px;" vid="90"></div>
+                            </div>
+                            <div class="flex-between w-100" vid="91">
+                                <span class="t-data" style="background:var(--bg); padding:2px 4px;" vid="92">ANTHOCYANIN_RICH</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="drop-info" vid="93">
+                        <div class="info-col" vid="94">
+                            <h3 style="font-size: 1.5rem;" vid="95">Obsidian Breath</h3>
+                            <span class="t-label" vid="96">Lineage: Mendo Breath x (Blackwater x Platinum)</span>
+                            <p class="t-body" style="font-size: 12px; margin-top: 8px;" vid="97">Near-black phenotype expression in late flower. Earthy, decaying organic matter overlaid with sharp anise and mint. A highly medicinal structural variant.</p>
+                        </div>
+                        <div class="info-col" vid="98">
+                            <div class="info-row" vid="99"><span class="t-label" vid="100">Type</span><span class="t-data" vid="101">Indica 90/10</span></div>
+                            <div class="info-row" vid="102"><span class="t-label" vid="103">Flowering</span><span class="t-data" vid="104">55-60 Days</span></div>
+                            <div class="info-row" vid="105"><span class="t-label" vid="106">Yield</span><span class="t-data" vid="107">Moderate</span></div>
+                            <div class="info-row" vid="108"><span class="t-label" vid="109">THC Est.</span><span class="t-data" vid="110">24-26%</span></div>
+                            <button style="margin-top:auto; background:transparent; border:1px solid var(--border); color:var(--fg); padding:8px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase; cursor:pointer;" vid="111">Acquire Genetics -&gt;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        <section id="catalog" vid="112">
+             <div class="section-header" style="margin-bottom:0; border-bottom:none;" vid="113">
+                <div vid="114">
+                    <div class="t-label" vid="115">Section_03</div>
+                    <h2 class="t-hero-sub" style="font-size: 2rem;" vid="116">Master Archive</h2>
+                </div>
+                <div class="t-label" vid="117">Items: 104</div>
+            </div>
+
+            <div class="controls" vid="118">
+                <div class="filter-group" vid="119">
+                    <button class="filter-btn active" vid="120">All</button>
+                    <button class="filter-btn" vid="121">Feminized</button>
+                    <button class="filter-btn" vid="122">Regular</button>
+                    <button class="filter-btn" vid="123">Autoflower</button>
+                </div>
+                <div class="filter-group" vid="124">
+                    <button class="filter-btn" vid="125">Sort: THC (Desc)</button>
+                    <div class="crosshair" style="position:relative; width:10px; height:10px;" vid="126"></div>
+                </div>
+            </div>
+
+            <div class="catalog-grid" vid="127">
+                
+                <script vid="128">
+                    const strainNames = ["Alloy", "Carbon", "Circuit", "Datum", "Ether", "Flux", "Gamma", "Hex", "Ion", "Joule", "Kinetic", "Logic"];
+                    const phenotypes = ["Sativa", "Indica", "Hybrid"];
+                    const grid = document.querySelector('.catalog-grid');
+                    
+                    for(let i=1; i<=12; i++) {
+                        const name = strainNames[i-1];
+                        const type = phenotypes[Math.floor(Math.random()*phenotypes.length)];
+                        const thc = Math.floor(Math.random() * (32 - 18) + 18);
+                        const days = Math.floor(Math.random() * (75 - 55) + 55);
+                        
+                        const imgId = [2586073, 2802613, 2886368, 3290074, 381156, 3073010][i%6];
+                        
+                        document.write(`
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-${i.toString().padStart(3, '0')}</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">${name} Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/${imgId}/pexels-photo-${imgId}.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">${type}</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">${days}d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">${thc}%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        `);
+                    }
+                </script>
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-001</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Alloy Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/2802613/pexels-photo-2802613.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Sativa</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">55d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">30%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-002</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Carbon Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/2886368/pexels-photo-2886368.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Indica</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">70d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">22%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-003</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Circuit Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/3290074/pexels-photo-3290074.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Hybrid</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">68d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">24%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-004</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Datum Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/381156/pexels-photo-381156.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Sativa</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">61d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">25%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-005</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Ether Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/3073010/pexels-photo-3073010.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Indica</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">69d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">24%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-006</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Flux Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/2586073/pexels-photo-2586073.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Sativa</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">63d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">27%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-007</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Gamma Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/2802613/pexels-photo-2802613.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Hybrid</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">73d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">23%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-008</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Hex Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/2886368/pexels-photo-2886368.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Sativa</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">62d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">24%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-009</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Ion Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/3290074/pexels-photo-3290074.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Hybrid</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">64d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">29%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-010</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Joule Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/381156/pexels-photo-381156.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Sativa</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">60d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">27%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-011</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Kinetic Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/3073010/pexels-photo-3073010.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Indica</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">59d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">19%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="catalog-item">
+                            <div class="item-header">
+                                <span class="t-label">ID-012</span>
+                                <span class="t-data" style="color:var(--muted)">[Stock: OK]</span>
+                            </div>
+                            <h4 class="item-name">Logic Protocol</h4>
+                            <div class="item-img-container">
+                                <img src="https://images.pexels.com/photos/2586073/pexels-photo-2586073.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=400&amp;h=300&amp;dpr=1" alt="Strain representation">
+                            </div>
+                            <div class="item-stats">
+                                <div class="stat-box"><span class="t-label">Type</span><span class="t-data">Hybrid</span></div>
+                                <div class="stat-box"><span class="t-label">Flowering</span><span class="t-data">65d</span></div>
+                                <div class="stat-box"><span class="t-label">THC</span><span class="t-data">22%</span></div>
+                                <div class="stat-box" style="justify-content:center; cursor:pointer; background:#111;"><span class="t-label" style="color:var(--fg)">ADD +</span></div>
+                            </div>
+                        </div>
+                        
+            </div>
+            
+            <div style="text-align:center; margin-top:var(--space-lg);" vid="129">
+                 <button style="background:transparent; border:none; color:var(--muted); font-family:var(--font-mono); font-size:10px; text-transform:uppercase; cursor:pointer; letter-spacing:0.1em; border-bottom:1px solid var(--border); padding-bottom:4px;" vid="130">Load Next Sequence ...</button>
+            </div>
+        </section>
+
+        <footer vid="131">
+            <div class="footer-grid" vid="132">
+                <div class="f-col" style="grid-column: span 2;" vid="133">
+                    <h2 class="t-hero-sub" style="font-size: 1.5rem; margin-bottom:var(--space-sm);" vid="134">Kounter Kulture</h2>
+                    <p class="t-body" style="font-size:12px;" vid="135">Operating strictly within legal jurisdictions. Genetic material is sold as novelty souvenirs. Germination is governed by local laws.</p>
+                </div>
+                <div class="f-col" vid="136">
+                    <span class="t-label" vid="137">Network</span>
+                    <a href="#" class="t-data" style="text-decoration:none; color:var(--accent);" vid="138">Instagram</a>
+                    <a href="#" class="t-data" style="text-decoration:none; color:var(--accent);" vid="139">Discord Terminal</a>
+                    <a href="#" class="t-data" style="text-decoration:none; color:var(--accent);" vid="140">Wholesale Desk</a>
+                </div>
+                <div class="f-col" vid="141">
+                    <span class="t-label" vid="142">Initialize Comms</span>
+                    <input type="email" placeholder="ENTER_EMAIL_ADDRESS" vid="143">
+                    <button vid="144">Subscribe</button>
+                </div>
+            </div>
+            <div class="flex-between w-100" style="margin-top:var(--space-xl); border-top:1px solid var(--border); padding-top:var(--space-sm);" vid="145">
+                <span class="t-label" vid="146">© 2024 KKG. ALL RIGHTS RESERVED.</span>
+                <span class="t-label" vid="147">SYSTEM V.1.0.4</span>
+            </div>
+        </footer>
+    </div>
+
+    
+    <script vid="148">
+        
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toISOString().substr(11, 8);
+        }, 1000);
+
+        
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        
+        scene.fog = new THREE.Fog('#020202', 3, 10);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        
+        camera.position.set(0, 0, 5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        
+        const vertexShader = `
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            varying vec2 vUv;
+            uniform float time;
+            
+            // Simplex noise function for organic morphing
+            vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+            vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+            float snoise(vec3 v) {
+                const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+                const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+                vec3 i  = floor(v + dot(v, C.yyy) );
+                vec3 x0 = v - i + dot(i, C.xxx) ;
+                vec3 g = step(x0.yzx, x0.xyz);
+                vec3 l = 1.0 - g;
+                vec3 i1 = min( g.xyz, l.zxy );
+                vec3 i2 = max( g.xyz, l.zxy );
+                vec3 x1 = x0 - i1 + C.xxx;
+                vec3 x2 = x0 - i2 + C.yyy;
+                vec3 x3 = x0 - D.yyy;
+                i = mod289(i);
+                vec4 p = permute( permute( permute( i.z + vec4(0.0, i1.z, i2.z, 1.0 )) + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+                float n_ = 0.142857142857;
+                vec3  ns = n_ * D.wyz - D.xzx;
+                vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                vec4 x_ = floor(j * ns.z);
+                vec4 y_ = floor(j - 7.0 * x_ );
+                vec4 x = x_ *ns.x + ns.yyyy;
+                vec4 y = y_ *ns.x + ns.yyyy;
+                vec4 h = 1.0 - abs(x) - abs(y);
+                vec4 b0 = vec4( x.xy, y.xy );
+                vec4 b1 = vec4( x.zw, y.zw );
+                vec4 s0 = floor(b0)*2.0 + 1.0;
+                vec4 s1 = floor(b1)*2.0 + 1.0;
+                vec4 sh = -step(h, vec4(0.0));
+                vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+                vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+                vec3 p0 = vec3(a0.xy,h.x);
+                vec3 p1 = vec3(a0.zw,h.y);
+                vec3 p2 = vec3(a1.xy,h.z);
+                vec3 p3 = vec3(a1.zw,h.w);
+                vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+                p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                m = m * m;
+                return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+            }
+
+            void main() {
+                vUv = uv;
+                vNormal = normalize(normalMatrix * normal);
+                
+                // Displacement based on noise
+                float noise = snoise(vec3(position.x * 2.0 + time * 0.2, position.y * 2.0, position.z * 2.0));
+                vec3 newPosition = position + normal * (noise * 0.15);
+                
+                vPosition = (modelViewMatrix * vec4(newPosition, 1.0)).xyz;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+            }
+        `;
+
+        const fragmentShader = `
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            
+            // Palette generation for iridescence
+            vec3 palette( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ) {
+                return a + b*cos( 6.28318*(c*t+d) );
+            }
+
+            void main() {
+                vec3 viewDirection = normalize(-vPosition);
+                
+                // Fresnel effect for glassy edge highlighting
+                float fresnel = dot(viewDirection, vNormal);
+                fresnel = clamp(1.0 - fresnel, 0.0, 1.0);
+                fresnel = pow(fresnel, 3.0);
+                
+                // Chromatic aberration / Iridescence mapping based on normals
+                float colorFactor = vNormal.x * 0.5 + vNormal.y * 0.5 + 0.5;
+                
+                // Dark, deep blues/purples/cyans palette
+                vec3 a = vec3(0.5, 0.5, 0.5);
+                vec3 b = vec3(0.5, 0.5, 0.5);
+                vec3 c = vec3(1.0, 1.0, 1.0);
+                vec3 d = vec3(0.263, 0.416, 0.557); // Blueish shift
+                
+                vec3 baseColor = palette(colorFactor + fresnel, a, b, c, d);
+                
+                // Darken the core, brighten edges
+                vec3 finalColor = mix(vec3(0.01, 0.01, 0.05), baseColor, fresnel * 1.5);
+                
+                // Add a sharp rim light
+                finalColor += vec3(0.5, 0.8, 1.0) * pow(fresnel, 5.0);
+                
+                gl_FragColor = vec4(finalColor, 0.85); // slight transparency
+            }
+        `;
+
+        
+        const geometry = new THREE.SphereGeometry(1.2, 128, 128);
+        geometry.scale(0.6, 1.2, 0.6); 
+
+        const material = new THREE.ShaderMaterial({
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            uniforms: {
+                time: { value: 0.0 }
+            },
+            transparent: true,
+            wireframe: false
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        
+        mesh.position.y = 0.5; 
+        scene.add(mesh);
+
+        
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - windowHalfX) * 0.001;
+            mouseY = (event.clientY - windowHalfY) * 0.001;
+        });
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const elapsedTime = clock.getElapsedTime();
+            material.uniforms.time.value = elapsedTime;
+
+            targetX = mouseX * 0.5;
+            targetY = mouseY * 0.5;
+            
+            
+            mesh.rotation.y += 0.01 + (targetX - mesh.rotation.y) * 0.05;
+            mesh.rotation.x += 0.005 + (targetY - mesh.rotation.x) * 0.05;
+
+            
+            mesh.position.y = 0.5 + Math.sin(elapsedTime * 0.5) * 0.1;
+
+            
+            const scrollY = window.scrollY;
+            mesh.position.z = -scrollY * 0.005;
+            
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+
+</body></html>

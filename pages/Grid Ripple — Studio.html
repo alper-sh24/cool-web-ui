@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grid Ripple — Studio</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0c; }
+
+#ripple-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+/* ── Control panel ── */
+#ctrl-wrap {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+#ctrl-toggle {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(20,20,24,0.7);
+    backdrop-filter: blur(8px);
+    color: rgba(255,255,255,0.5);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+}
+#ctrl-toggle:hover { background: rgba(30,30,36,0.85); color: #fff; }
+
+#ctrl-panel {
+    width: 220px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(16,16,20,0.82);
+    backdrop-filter: blur(12px);
+    padding: 14px 16px 12px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+#ctrl-wrap.is-open #ctrl-panel { display: flex; }
+
+#ctrl-panel::-webkit-scrollbar { width: 3px; }
+#ctrl-panel::-webkit-scrollbar-track { background: transparent; }
+#ctrl-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+.ctrl-group { display: flex; flex-direction: column; gap: 3px; }
+.ctrl-label {
+    display: flex;
+    justify-content: space-between;
+    font: 10px/1.3 system-ui, -apple-system, sans-serif;
+    letter-spacing: 0.03em;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+}
+.ctrl-label span:last-child {
+    font-variant-numeric: tabular-nums;
+    color: rgba(255,255,255,0.55);
+}
+
+/* slider */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 1px;
+    outline: none;
+    cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.7);
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+input[type="range"]::-webkit-slider-thumb:hover { background: #fff; }
+input[type="range"]::-moz-range-thumb {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,0.7); border: none; cursor: pointer;
+}
+
+/* Color swatches */
+.swatch-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.swatch-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+    flex-shrink: 0;
+}
+.swatch-btn:hover { transform: scale(1.15); }
+.swatch-btn.is-active { border-color: rgba(255,255,255,0.6); }
+
+/* BG toggle */
+.bg-toggle {
+    display: flex;
+    gap: 0;
+    border-radius: 5px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+.bg-btn {
+    flex: 1;
+    padding: 4px 0;
+    font: 10px/1.3 system-ui, -apple-system, sans-serif;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.bg-btn.is-active { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+.bg-btn:hover { color: rgba(255,255,255,0.5); }
+
+/* Presets */
+.preset-row {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+.preset-btn {
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.04);
+    font: 9.5px/1.4 system-ui, -apple-system, sans-serif;
+    letter-spacing: 0.02em;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.preset-btn:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.65); }
+.preset-btn.is-active { border-color: rgba(255,255,255,0.15); color: #fff; background: rgba(255,255,255,0.08); }
+
+/* divider */
+.ctrl-divider { height: 1px; background: rgba(255,255,255,0.04); margin: 2px 0; }
+</style>
+</head>
+<body>
+
+<canvas id="ripple-canvas"></canvas>
+
+<div id="ctrl-wrap">
+    <button id="ctrl-toggle" type="button" title="Toggle controls">⚙</button>
+    <div id="ctrl-panel">
+        <!-- Gap -->
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Gap</span><span id="val-gap">16</span></div>
+            <input type="range" id="ctrl-gap" min="8" max="48" value="16" step="1">
+        </div>
+        <!-- Max Scale -->
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Max Scale</span><span id="val-maxScale">1.0</span></div>
+            <input type="range" id="ctrl-maxScale" min="0.3" max="3.0" value="1.0" step="0.05">
+        </div>
+        <!-- Radius % -->
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Radius %</span><span id="val-radiusPct">40</span></div>
+            <input type="range" id="ctrl-radiusPct" min="10" max="80" value="40" step="1">
+        </div>
+        <!-- Speed In -->
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Speed In</span><span id="val-speedIn">0.50</span></div>
+            <input type="range" id="ctrl-speedIn" min="0.05" max="1.50" value="0.50" step="0.05">
+        </div>
+        <!-- Speed Out -->
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Speed Out</span><span id="val-speedOut">0.60</span></div>
+            <input type="range" id="ctrl-speedOut" min="0.05" max="1.50" value="0.60" step="0.05">
+        </div>
+        <!-- Wave Speed -->
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Wave Speed</span><span id="val-waveSpeed">1100</span></div>
+            <input type="range" id="ctrl-waveSpeed" min="200" max="3000" value="1100" step="20">
+        </div>
+        <!-- Wave Width -->
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Wave Width</span><span id="val-waveWidth">160</span></div>
+            <input type="range" id="ctrl-waveWidth" min="30" max="400" value="160" step="5">
+        </div>
+
+        <div class="ctrl-divider"></div>
+
+        <!-- Color -->
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Color</span></div>
+            <div class="swatch-row" id="ctrl-color">
+                <button class="swatch-btn is-active" data-color="239,110,0"   style="background:#ef6e00" title="Orange"></button>
+                <button class="swatch-btn"              data-color="79,70,229"   style="background:#4f46e5" title="Indigo"></button>
+                <button class="swatch-btn"              data-color="13,148,136"  style="background:#0d9488" title="Teal"></button>
+                <button class="swatch-btn"              data-color="220,38,38"   style="background:#dc2626" title="Red"></button>
+                <button class="swatch-btn"              data-color="200,200,210" style="background:#c8c8d2" title="Silver"></button>
+                <button class="swatch-btn"              data-color="255,255,255" style="background:#ffffff" title="White"></button>
+            </div>
+        </div>
+
+        <!-- BG -->
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Background</span></div>
+            <div class="bg-toggle" id="ctrl-bg">
+                <button class="bg-btn is-active" data-bg="dark">Dark</button>
+                <button class="bg-btn" data-bg="light">Light</button>
+            </div>
+        </div>
+
+        <div class="ctrl-divider"></div>
+
+        <!-- Presets -->
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Presets</span></div>
+            <div class="preset-row" id="ctrl-presets">
+                <button class="preset-btn is-active" data-preset="core">Core</button>
+                <button class="preset-btn" data-preset="ice">Ice</button>
+                <button class="preset-btn" data-preset="lava">Lava</button>
+                <button class="preset-btn" data-preset="aurora">Aurora</button>
+                <button class="preset-btn" data-preset="noir">Noir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    var canvas = document.getElementById('ripple-canvas');
+    var ctx = canvas.getContext('2d');
+
+    // ── Config ──────────────────────────────────────────────
+    var config = {
+        gap: 16,
+        maxScale: 1.0,
+        radiusPct: 40,
+        speedIn: 0.50,
+        speedOut: 0.60,
+        waveSpeed: 1100,
+        waveWidth: 160,
+        color: [239, 110, 0],   // RGB triplet
+        bgDark: true,
+    };
+
+    var PRESETS = {
+        core:   { gap: 16, maxScale: 1.0, radiusPct: 40, speedIn: 0.50, speedOut: 0.60, waveSpeed: 1100, waveWidth: 160, color: [239,110,0],   bgDark: true  },
+        ice:    { gap: 22, maxScale: 1.2, radiusPct: 45, speedIn: 0.40, speedOut: 0.50, waveSpeed: 900,  waveWidth: 140, color: [79,70,229],   bgDark: false },
+        lava:   { gap: 20, maxScale: 1.6, radiusPct: 50, speedIn: 0.60, speedOut: 0.70, waveSpeed: 1400, waveWidth: 180, color: [220,38,38],   bgDark: true  },
+        aurora: { gap: 14, maxScale: 0.9, radiusPct: 35, speedIn: 0.35, speedOut: 0.45, waveSpeed: 800,  waveWidth: 120, color: [13,148,136],  bgDark: true  },
+        noir:   { gap: 10, maxScale: 0.7, radiusPct: 30, speedIn: 0.30, speedOut: 0.40, waveSpeed: 600,  waveWidth: 100, color: [60,60,70],    bgDark: false },
+    };
+
+    // ── State ───────────────────────────────────────────────
+    var dpr = 1;
+    var W = 0, H = 0;
+    var dots = [];
+    var pointer = null;
+    var activity = 0;
+    var waves = [];
+    var frameId = null;
+    var running = false;
+
+    // ── Math helpers ────────────────────────────────────────
+    function smoothstep(t) {
+        var c = Math.max(0, Math.min(1, t));
+        return c * c * (3 - 2 * c);
+    }
+
+    // ── Grid ────────────────────────────────────────────────
+    function buildGrid() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        var gap = config.gap;
+        var cols = Math.floor(w / gap) || 1;
+        var rows = Math.floor(h / gap) || 1;
+        var ox = (w - (cols - 1) * gap) / 2;
+        var oy = (h - (rows - 1) * gap) / 2;
+        var arr = [];
+        var dotSize = gap * 0.42;
+        for (var r = 0; r < rows; r++) {
+            for (var c = 0; c < cols; c++) {
+                arr.push({
+                    x: ox + c * gap,
+                    y: oy + r * gap,
+                    size: dotSize,
+                    scale: 0,
+                });
+            }
+        }
+        return arr;
+    }
+
+    // ── Resize ──────────────────────────────────────────────
+    function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        dots = buildGrid();
+        pointer = null;
+        activity = 0;
+        waves = [];
+    }
+
+    // ── Tick ────────────────────────────────────────────────
+    function tick() {
+        if (dots.length === 0) { frameId = requestAnimationFrame(tick); return; }
+
+        var gap = config.gap;
+        var maxScale = config.maxScale;
+        var radiusPct = config.radiusPct;
+        var easeIn = 1 - Math.pow(0.05, 1 / (60 * config.speedIn));
+        var easeOut = 1 - Math.pow(0.05, 1 / (60 * config.speedOut));
+        var waveSpeed = config.waveSpeed;
+        var waveWidth = config.waveWidth;
+        var cr = config.color;
+        var bgColor = config.bgDark ? '#0a0a0c' : '#ecedef';
+        var now = performance.now();
+
+        activity *= 0.93;
+        var hasActivity = activity > 0.01;
+
+        // Clip expired waves
+        var maxDist = Math.sqrt(W * W + H * H);
+        waves = waves.filter(function (w) {
+            return (now - w.startTime) / 1000 * waveSpeed < maxDist + waveWidth;
+        });
+        if (waves.length > 0) hasActivity = true;
+
+        // Clear
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, W, H);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        var radius = Math.min(W, H) * (radiusPct / 100);
+        var pad = gap / 2;
+
+        for (var i = 0; i < dots.length; i++) {
+            var s = dots[i];
+            var pInfl = 0;
+            if (pointer && activity > 0.001) {
+                var dx = s.x - pointer.x, dy = s.y - pointer.y;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+                var t = 1 - dist / radius;
+                if (t > 0) {
+                    pInfl = smoothstep(t) * activity;
+                }
+            }
+            if (pInfl > 0.001) hasActivity = true;
+
+            var wInfl = 0;
+            for (var j = 0; j < waves.length; j++) {
+                var wv = waves[j];
+                var wRad = (now - wv.startTime) / 1000 * waveSpeed;
+                var wdx = s.x - wv.x, wdy = s.y - wv.y;
+                var wDist = Math.sqrt(wdx * wdx + wdy * wdy);
+                var t2 = 1 - Math.abs(wDist - wRad) / waveWidth;
+                if (t2 > 0) wInfl = Math.max(wInfl, Math.sin(Math.PI * t2));
+            }
+            if (wInfl > 0.001) hasActivity = true;
+
+            var target = Math.max(pInfl, wInfl) * maxScale;
+            var f = target > s.scale ? easeIn : easeOut;
+            s.scale += (target - s.scale) * f;
+            if (s.scale > 0.001) hasActivity = true;
+            if (s.scale < 0.01) continue;
+
+            ctx.fillStyle = 'rgba(' + cr[0] + ',' + cr[1] + ',' + cr[2] + ',' + (Math.min(1, s.scale * 0.5 + 0.08)) + ')';
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.size * s.scale, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        if (hasActivity) {
+            frameId = requestAnimationFrame(tick);
+            running = true;
+        } else {
+            running = false;
+        }
+    }
+
+    function start() { if (!running) { running = true; frameId = requestAnimationFrame(tick); } }
+    function stop() { if (frameId) { cancelAnimationFrame(frameId); frameId = null; } running = false; }
+
+    // ── Wave trigger ────────────────────────────────────────
+    function triggerWave(x, y) {
+        waves.push({ x: x, y: y, startTime: performance.now() });
+        start();
+    }
+
+    // ── Rebuild on gap change ───────────────────────────────
+    function rebuildIfGapChanged(newGap) {
+        if (newGap !== config.gap) {
+            config.gap = newGap;
+            dots = buildGrid();
+            pointer = null;
+            activity = 0;
+            waves = [];
+        }
+    }
+
+    // ── Events ──────────────────────────────────────────────
+    canvas.addEventListener('pointermove', function (e) {
+        var r = canvas.getBoundingClientRect();
+        pointer = { x: e.clientX - r.left, y: e.clientY - r.top };
+        activity = 1;
+        start();
+    });
+    canvas.addEventListener('pointerleave', function () { pointer = null; });
+    canvas.addEventListener('click', function (e) {
+        var r = canvas.getBoundingClientRect();
+        triggerWave(e.clientX - r.left, e.clientY - r.top);
+    });
+
+    window.addEventListener('resize', function () {
+        resize();
+        start();
+    });
+
+    // ── Init ────────────────────────────────────────────────
+    resize();
+    start();
+
+    // ── Control panel wiring ─────────────────────────────────
+    var ctrlWrap = document.getElementById('ctrl-wrap');
+    var toggleBtn = document.getElementById('ctrl-toggle');
+    toggleBtn.addEventListener('click', function () {
+        ctrlWrap.classList.toggle('is-open');
+    });
+
+    // Slider helper
+    function bindSlider(id, key, decimals) {
+        var el = document.getElementById(id);
+        var valEl = document.getElementById('val-' + key);
+        el.addEventListener('input', function () {
+            var v = parseFloat(this.value);
+            if (key === 'gap') {
+                rebuildIfGapChanged(v);
+            } else {
+                config[key] = v;
+            }
+            config[key] = v;
+            if (valEl) valEl.textContent = decimals ? v.toFixed(decimals) : v;
+            start();
+        });
+    }
+    bindSlider('ctrl-gap', 'gap', 0);
+    bindSlider('ctrl-maxScale', 'maxScale', 1);
+    bindSlider('ctrl-radiusPct', 'radiusPct', 0);
+    bindSlider('ctrl-speedIn', 'speedIn', 2);
+    bindSlider('ctrl-speedOut', 'speedOut', 2);
+    bindSlider('ctrl-waveSpeed', 'waveSpeed', 0);
+    bindSlider('ctrl-waveWidth', 'waveWidth', 0);
+
+    // Color swatches
+    var swatchContainer = document.getElementById('ctrl-color');
+    swatchContainer.addEventListener('click', function (e) {
+        var btn = e.target.closest('.swatch-btn');
+        if (!btn) return;
+        swatchContainer.querySelectorAll('.swatch-btn').forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        var parts = btn.getAttribute('data-color').split(',').map(Number);
+        if (parts.length === 3) { config.color = parts; start(); }
+    });
+
+    // BG toggle
+    var bgContainer = document.getElementById('ctrl-bg');
+    bgContainer.addEventListener('click', function (e) {
+        var btn = e.target.closest('.bg-btn');
+        if (!btn) return;
+        bgContainer.querySelectorAll('.bg-btn').forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        config.bgDark = btn.getAttribute('data-bg') === 'dark';
+        start();
+    });
+
+    // Presets
+    var presetContainer = document.getElementById('ctrl-presets');
+    presetContainer.addEventListener('click', function (e) {
+        var btn = e.target.closest('.preset-btn');
+        if (!btn) return;
+        var name = btn.getAttribute('data-preset');
+        var p = PRESETS[name];
+        if (!p) return;
+
+        presetContainer.querySelectorAll('.preset-btn').forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+
+        // Apply preset values to sliders, swatches, bg
+        var gapChanged = p.gap !== config.gap;
+        config.gap = p.gap;
+        config.maxScale = p.maxScale;
+        config.radiusPct = p.radiusPct;
+        config.speedIn = p.speedIn;
+        config.speedOut = p.speedOut;
+        config.waveSpeed = p.waveSpeed;
+        config.waveWidth = p.waveWidth;
+        config.color = p.color.slice();
+        config.bgDark = p.bgDark;
+
+        document.getElementById('ctrl-gap').value = p.gap;
+        document.getElementById('val-gap').textContent = p.gap;
+        document.getElementById('ctrl-maxScale').value = p.maxScale;
+        document.getElementById('val-maxScale').textContent = p.maxScale.toFixed(1);
+        document.getElementById('ctrl-radiusPct').value = p.radiusPct;
+        document.getElementById('val-radiusPct').textContent = p.radiusPct;
+        document.getElementById('ctrl-speedIn').value = p.speedIn;
+        document.getElementById('val-speedIn').textContent = p.speedIn.toFixed(2);
+        document.getElementById('ctrl-speedOut').value = p.speedOut;
+        document.getElementById('val-speedOut').textContent = p.speedOut.toFixed(2);
+        document.getElementById('ctrl-waveSpeed').value = p.waveSpeed;
+        document.getElementById('val-waveSpeed').textContent = p.waveSpeed;
+        document.getElementById('ctrl-waveWidth').value = p.waveWidth;
+        document.getElementById('val-waveWidth').textContent = p.waveWidth;
+
+        // Color swatch
+        swatchContainer.querySelectorAll('.swatch-btn').forEach(function (b) {
+            b.classList.remove('is-active');
+            var parts = b.getAttribute('data-color').split(',').map(Number);
+            if (parts[0] === p.color[0] && parts[1] === p.color[1] && parts[2] === p.color[2]) {
+                b.classList.add('is-active');
+            }
+        });
+
+        // BG
+        bgContainer.querySelectorAll('.bg-btn').forEach(function (b) {
+            b.classList.remove('is-active');
+            if ((b.getAttribute('data-bg') === 'dark') === p.bgDark) b.classList.add('is-active');
+        });
+
+        if (gapChanged) {
+            dots = buildGrid();
+            pointer = null;
+            activity = 0;
+            waves = [];
+        }
+        start();
+    });
+})();
+</script>
+</body>
+</html>
