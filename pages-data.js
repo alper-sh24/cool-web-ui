@@ -3,6 +3,10 @@
 
 const pagesData = [
     {
+        "filename": "Aura _ AI Synthesis.html",
+        "title": "Aura | AI Synthesis"
+    },
+    {
         "filename": "design-0e6b1628-b9ba-4ba9-8ebb-ca9793b72b49.html",
         "title": "BIO-LINK // NEURAL INTERFACE v4.0.2"
     },
@@ -71,6 +75,10 @@ const pagesData = [
         "title": "FoxTrove | Operations Intelligence"
     },
     {
+        "filename": "Grid Ripple — Studio.html",
+        "title": "Grid Ripple — Studio"
+    },
+    {
         "filename": "Identity Matrix Visualization.html",
         "title": "Identity Matrix Visualization"
     },
@@ -85,6 +93,10 @@ const pagesData = [
     {
         "filename": "iframe-export.html",
         "title": "iframe-export"
+    },
+    {
+        "filename": "KOUNTER KULTURE GENETICS.html",
+        "title": "KOUNTER KULTURE GENETICS"
     },
     {
         "filename": "Linguist _ Skill Calibration.html",
@@ -117,6 +129,10 @@ const pagesData = [
     {
         "filename": "Pok_ball Technical Schematic.html",
         "title": "Pokéball Technical Schematic"
+    },
+    {
+        "filename": "Project Detail_ AX-01 _ Spoormaker _ Partners.html",
+        "title": "Project Detail: AX-01 | Spoormaker &amp; Partners"
     },
     {
         "filename": "sgnl _ Lightweight Observability.html",
