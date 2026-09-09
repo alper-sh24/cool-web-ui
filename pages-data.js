@@ -67,6 +67,10 @@ const pagesData = [
         "title": "Devtool Features"
     },
     {
+        "filename": "DitherLab.html",
+        "title": "DitherLab"
+    },
+    {
         "filename": "Elegant Pricing.html",
         "title": "Elegant Pricing"
     },

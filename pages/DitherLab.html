@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DitherLab</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+#lab { display: block; width: 100%; height: 100%; cursor: crosshair; }
+
+/* ── Header overlay ── */
+#hdr {
+    position: fixed; top: 0; left: 0; z-index: 50;
+    padding: 22px 26px;
+    pointer-events: none;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    user-select: none;
+}
+#hdr .title {
+    font-size: 2.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 0.9;
+}
+#hdr .sub {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 8px;
+    opacity: 0.65;
+}
+
+/* ── Drop overlay ── */
+#drop {
+    position: fixed; inset: 0; z-index: 90;
+    display: none;
+    align-items: center; justify-content: center;
+    background: transparent;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-align: center;
+}
+#drop.is-over { display: flex; }
+#drop .box {
+    padding: 34px 60px;
+    border: 2px dashed currentColor;
+    text-transform: uppercase;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+}
+#drop .box small {
+    display: block;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 400;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    margin-top: 10px;
+    text-transform: uppercase;
+}
+
+/* ── Control panel (grid-ripple pattern) ── */
+#ctrl-wrap {
+    position: fixed; bottom: 16px; right: 16px;
+    z-index: 100;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+}
+#ctrl-toggle {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid rgba(128,128,128,0.35);
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px);
+    color: inherit;
+    font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+    user-select: none;
+}
+#ctrl-wrap:hover #ctrl-toggle { background: rgba(255,255,255,0.22); }
+body.dark #ctrl-toggle { background: rgba(16,16,20,0.55); border-color: rgba(255,255,255,0.16); }
+body.dark #ctrl-wrap:hover #ctrl-toggle { background: rgba(30,30,38,0.8); }
+
+#ctrl-panel {
+    width: 232px; max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(128,128,128,0.3);
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(14px);
+    padding: 14px 16px 12px;
+    display: none;
+    flex-direction: column; gap: 11px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+body.dark #ctrl-panel { background: rgba(16,16,20,0.62); border-color: rgba(255,255,255,0.14); }
+#ctrl-wrap.is-open #ctrl-panel { display: flex; }
+
+#ctrl-panel::-webkit-scrollbar { width: 3px; }
+#ctrl-panel::-webkit-scrollbar-track { background: transparent; }
+#ctrl-panel::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.35); border-radius: 2px; }
+
+.ctrl-group { display: flex; flex-direction: column; gap: 3px; }
+.ctrl-label {
+    display: flex; justify-content: space-between;
+    font: 10px/1.3 "Courier New", Courier, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+.ctrl-label span:last-child { font-variant-numeric: tabular-nums; }
+
+input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 2px;
+    background: rgba(128,128,128,0.45);
+    border-radius: 1px; outline: none; cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%;
+    background: currentColor; border: none; cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: currentColor; border: none; cursor: pointer;
+}
+
+.chip-row { display: flex; gap: 4px; flex-wrap: wrap; }
+.chip {
+    padding: 4px 9px;
+    border-radius: 4px;
+    border: 1px solid rgba(128,128,128,0.4);
+    background: transparent;
+    font: 9.5px/1.4 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.15s, background 0.15s;
+}
+.chip:hover { opacity: 0.8; }
+.chip.is-active { opacity: 1; background: rgba(128,128,128,0.25); }
+
+.chip-row.pal .chip {
+    width: 100%; text-align: left;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 9px;
+}
+.pal .dotpair { display: inline-flex; }
+.pal .dotpair i {
+    width: 12px; height: 12px; border-radius: 50%;
+    display: inline-block;
+}
+.pal .dotpair i:first-child { border: 1px solid rgba(128,128,128,0.5); }
+
+.btn {
+    padding: 6px 0;
+    border-radius: 4px;
+    border: 1px solid rgba(128,128,128,0.4);
+    background: transparent;
+    font: 10px/1.4 "Courier New", Courier, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: inherit;
+    cursor: pointer;
+}
+.btn:hover { background: rgba(128,128,128,0.18); }
+#load-input { display: none; }
+#file-msg { font: 9px/1.4 "Courier New", Courier, monospace; opacity: 0.55; letter-spacing: 0.04em; }
+
+.ctrl-divider { height: 1px; background: rgba(128,128,128,0.25); margin: 2px 0; }
+</style>
+</head>
+<body>
+
+<canvas id="lab"></canvas>
+
+<div id="hdr">
+    <div class="title">Dither<span>Lab</span></div>
+    <div class="sub" id="hdr-sub">DROP AN IMAGE · HOVER · CLICK FOR RIPPLE</div>
+</div>
+
+<div id="drop">
+    <div class="box">Drop an image to dither it
+        <small>PNG · JPG · WEBP — or pick a sample below</small>
+    </div>
+</div>
+
+<div id="ctrl-wrap">
+    <button id="ctrl-toggle" type="button" title="Toggle controls">⚙</button>
+    <div id="ctrl-panel">
+
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Mode</span></div>
+            <div class="chip-row" id="row-mode">
+                <button class="chip is-active" data-mode="halftone">Halftone</button>
+                <button class="chip" data-mode="dither">Dither</button>
+            </div>
+        </div>
+
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Shape</span></div>
+            <div class="chip-row" id="row-shape">
+                <button class="chip is-active" data-shape="circle">Circle</button>
+                <button class="chip" data-shape="square">Square</button>
+                <button class="chip" data-shape="diamond">Diamond</button>
+            </div>
+        </div>
+
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Cell</span><span id="val-cell">7px</span></div>
+            <input type="range" id="ctrl-cell" min="3" max="22" value="7" step="1">
+        </div>
+
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Level</span><span id="val-level">1.00</span></div>
+            <input type="range" id="ctrl-level" min="0.30" max="2.20" value="1.00" step="0.05">
+        </div>
+
+        <div class="ctrl-divider"></div>
+
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Hover Effects</span></div>
+            <div class="chip-row" id="row-effects">
+                <button class="chip is-active" data-effect="magnet">Magnet</button>
+                <button class="chip is-active" data-effect="scatter">Scatter</button>
+                <button class="chip is-active" data-effect="ripple">Ripple</button>
+            </div>
+        </div>
+
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Reach</span><span id="val-radius">160</span></div>
+            <input type="range" id="ctrl-radius" min="60" max="400" value="160" step="5">
+        </div>
+
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Push</span><span id="val-strength">1.00</span></div>
+            <input type="range" id="ctrl-strength" min="0.20" max="2.60" value="1.00" step="0.05">
+        </div>
+
+        <div class="ctrl-divider"></div>
+
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Duotone</span></div>
+            <div class="chip-row pal" id="row-pal"></div>
+        </div>
+
+        <div class="ctrl-divider"></div>
+
+        <div class="ctrl-group">
+            <div class="ctrl-label"><span>Sample</span></div>
+            <div class="chip-row" id="row-samples">
+                <button class="chip" data-sample="orb">Orb</button>
+                <button class="chip" data-sample="rings">Rings</button>
+                <button class="chip" data-sample="noise">Noise</button>
+                <button class="chip" data-sample="wave">Wave</button>
+            </div>
+            <button class="btn" id="btn-load">Load image…</button>
+            <div id="file-msg"></div>
+            <input type="file" id="load-input" accept="image/*">
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    var canvas = document.getElementById('lab');
+    var ctx = canvas.getContext('2d');
+
+    // ── Config ──────────────────────────────────────────────
+    var cfg = {
+        mode: 'halftone',
+        shape: 'circle',
+        cell: 7,
+        level: 1.0,
+        effects: { magnet: true, scatter: true, ripple: true },
+        radius: 160,
+        strength: 1.0
+    };
+
+    var PALETTES = {
+        noir:  { paper: '#e6e5e0', ink: '#141418' },
+        carbon:{ paper: '#0c0c10', ink: '#f2f1ec' },
+        ember: { paper: '#0b0b10', ink: '#ff5a1f' },
+        acid:  { paper: '#0d110b', ink: '#b6f327' },
+        ocean: { paper: '#081226', ink: '#37e6f7' },
+        wine:  { paper: '#f1e7de', ink: '#a4163a' }
+    };
+    var palette = PALETTES.noir;
+
+    // ── State ───────────────────────────────────────────────
+    var dpr = 1, W = 0, H = 0;
+    var srcW = 0, srcH = 0;      // source image size
+    var luma = null;             // Float32Array of grayscale (0..1)
+    var hasImage = false;
+
+    // dot grid (parallel float arrays)
+    var cols = 0, rows = 0, N = 0;
+    var dX = null, dY = null, dR = null;   // rest center + rest radius
+    var dS = null, dOx = null, dOy = null; // animated scale + offset
+    var cellPx = 7;
+
+    var pointer = null;          // {x,y} css px, null when not over
+    var waves = [];
+    var frameId = null, running = false;
+    var lastEvent = 0;
+    var MAXDOTS = 60000;         // ponytail: hard cap, keeps full-field redraw ~60fps on canvas
+
+    var BAYER = [0,8,2,10, 12,4,14,6, 3,11,1,9, 15,7,13,5]; // 4x4 ordered
+
+    // ── Colors ──────────────────────────────────────────────
+    var inkCSS = palette.ink, paperCSS = palette.paper;
+    function applyPalette(name) {
+        palette = PALETTES[name];
+        inkCSS = palette.ink; paperCSS = palette.paper;
+        document.body.style.color = inkCSS;
+        document.body.style.background = paperCSS;
+        // translucent control panel picks a dark glass style on dark paper
+        document.body.classList.toggle('dark', lum(paperCSS) < 0.5);
+
+        function lum(hex) {
+            var n = parseInt(hex.slice(1), 16);
+            var r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+            return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        }
+        // header text color follows ink; dark bg => keep header readable on paper too
+        var swatchRow = document.getElementById('row-pal');
+        var chips = swatchRow.querySelectorAll('.chip');
+        for (var i = 0; i < chips.length; i++) {
+            var ch = chips[i];
+            ch.classList.toggle('is-active', ch.getAttribute('data-pal') === name);
+        }
+        repaint();
+    }
+
+    // ── Scene generation ────────────────────────────────────
+    function makeScene(kind) {
+        var w = 420, h = 300;
+        var c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        var g = c.getContext('2d');
+        var img = g.createImageData(w, h);
+        var d = img.data;
+        for (var y = 0; y < h; y++) {
+            for (var x = 0; x < w; x++) {
+                var v;
+                var nx = x / w, ny = y / h;
+                switch (kind) {
+                    case 'orb':
+                        var dx = (x - w * 0.5) / (w * 0.5);
+                        var dy = (y - h * 0.5) / (h * 0.5);
+                        var dd = Math.sqrt(dx * dx + dy * dy) / Math.SQRT2;
+                        v = 255 * (1 - Math.pow(Math.min(1, dd), 1.7));
+                        v += 26 * Math.cos(dd * 22) * (1 - dd);
+                        break;
+                    case 'rings':
+                        var rx = (x - w * 0.5) / (w * 0.6);
+                        var ry = (y - h * 0.5) / (h * 0.6);
+                        var rr = Math.sqrt(rx * rx + ry * ry);
+                        v = (0.5 + 0.5 * Math.cos(rr * 11)) * 255;
+                        v *= (1 - Math.min(1, rr * 0.85)) * 0.8 + 0.2;
+                        break;
+                    case 'noise':
+                        v = Math.random() * 255;
+                        break;
+                    case 'wave':
+                        v = 235 - 200 * ny;
+                        v -= 46 * Math.sin(nx * 22 + Math.sin(ny * 9) * 3);
+                        v = Math.max(0, Math.min(255, v));
+                        break;
+                }
+                var i = (y * w + x) * 4;
+                d[i] = d[i + 1] = d[i + 2] = v;
+                d[i + 3] = 255;
+            }
+        }
+        g.putImageData(img, 0, 0);
+        return c;
+    }
+
+    // ── Image ingestion ─────────────────────────────────────
+    function ingest(sourceCanvas) {
+        srcW = sourceCanvas.width; srcH = sourceCanvas.height;
+        var px = sourceCanvas.getContext('2d').getImageData(0, 0, srcW, srcH).data;
+        luma = new Float32Array(srcW * srcH);
+        for (var i = 0, n = srcW * srcH; i < n; i++) {
+            var r = px[i * 4], g = px[i * 4 + 1], b = px[i * 4 + 2];
+            luma[i] = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+        }
+        hasImage = true;
+        rebuild();
+    }
+
+    function loadURL(url) {
+        var img = new Image();
+        img.onload = function () {
+            var maxDim = 1600;
+            var sc = Math.min(1, maxDim / Math.max(img.width, img.height));
+            var c = document.createElement('canvas');
+            c.width = Math.round(img.width * sc);
+            c.height = Math.round(img.height * sc);
+            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+            ingest(c);
+            setMsg('SOURCE ' + c.width + ' × ' + c.height);
+        };
+        img.onerror = function () { setMsg('COULD NOT DECODE IMAGE'); };
+        img.src = url;
+    }
+
+    // ── Geometry / grid rebuild ─────────────────────────────
+    function rebuild() {
+        if (!hasImage || W === 0) return;
+        cellPx = cfg.cell;
+        // fit image box in viewport
+        var scale = Math.min(W / srcW, H / srcH);
+        var fw = srcW * scale, fh = srcH * scale;
+        cols = Math.floor(fw / cellPx); rows = Math.floor(fh / cellPx);
+        // cap dot count by coarsening the cell only when needed
+        while (cols * rows > MAXDOTS && cellPx < Math.max(W, H)) {
+            cellPx *= 1.15; cols = Math.floor(fw / cellPx); rows = Math.floor(fh / cellPx);
+        }
+        if (cols < 1) cols = 1; if (rows < 1) rows = 1;
+        N = cols * rows;
+        var ox = (W - cols * cellPx) / 2;
+        var oy = (H - rows * cellPx) / 2;
+
+        dX = new Float32Array(N); dY = new Float32Array(N); dR = new Float32Array(N);
+        dS = new Float32Array(N); dOx = new Float32Array(N); dOy = new Float32Array(N);
+        for (var i = 0; i < N; i++) dS[i] = 1;
+
+        var maxR = cfg.cell * 0.8;
+        var lvl = cfg.level;
+        var k = 0;
+        for (var r = 0; r < rows; r++) {
+            for (var c = 0; c < cols; c++, k++) {
+                var nx = (c + 0.5) / cols, ny = (r + 0.5) / rows;
+                var sx = Math.min(srcW - 1, (nx * srcW) | 0);
+                var sy = Math.min(srcH - 1, (ny * srcH) | 0);
+                var gray = luma[sy * srcW + sx];
+                var sh = Math.pow(Math.max(0, 1 - gray), lvl); // shadow 0..1
+                var rad = 0;
+                if (cfg.mode === 'halftone') {
+                    rad = sh > 0.03 ? maxR * Math.sqrt(sh) : 0;
+                } else { // ordered bayer dither
+                    var thr = (BAYER[(c & 3) + ((r & 3) << 2)] + 0.5) / 16;
+                    rad = sh > thr ? cfg.cell * 0.5 : 0;
+                }
+                dX[k] = ox + c * cellPx + cellPx / 2;
+                dY[k] = oy + r * cellPx + cellPx / 2;
+                dR[k] = rad;
+            }
+        }
+        pointer = null; waves = [];
+        repaint();
+    }
+
+    // ── Drawing ─────────────────────────────────────────────
+    function paint() {
+        ctx.fillStyle = paperCSS;
+        ctx.fillRect(0, 0, W, H);
+        if (!hasImage) return;
+        ctx.fillStyle = inkCSS;
+        var i;
+        for (i = 0; i < N; i++) {
+            var r = dR[i] * dS[i];
+            if (r < 0.25) continue;
+            var x = dX[i] + dOx[i], y = dY[i] + dOy[i];
+            drawShape(x, y, r);
+        }
+    }
+
+    function drawShape(x, y, r) {
+        var s = cfg.shape;
+        if (s === 'circle') {
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        } else if (s === 'square') {
+            ctx.fillRect(x - r, y - r, r * 2, r * 2);
+        } else { // diamond
+            ctx.beginPath();
+            ctx.moveTo(x, y - r); ctx.lineTo(x + r, y);
+            ctx.lineTo(x, y + r); ctx.lineTo(x - r, y);
+            ctx.closePath(); ctx.fill();
+        }
+    }
+
+    function repaint() {
+        if (!running) paint();
+    }
+
+    // ── Animation loop ──────────────────────────────────────
+    function smooth(t) {
+        t = Math.max(0, Math.min(1, t));
+        return t * t * (3 - 2 * t);
+    }
+
+    function tick(now) {
+        var dt = Math.min(0.05, (now - (tick._last || now)) / 1000);
+        tick._last = now;
+
+        var hasActive = pointer !== null || waves.length > 0;
+        var motion = 0;
+
+        // prune finished waves
+        var maxDist = Math.sqrt(W * W + H * H);
+        for (var w = waves.length - 1; w >= 0; w--) {
+            if ((now - waves[w].t) / 1000 * 700 > maxDist + 140) waves.splice(w, 1);
+        }
+
+        var rad = cfg.radius, strength = cfg.strength;
+        var kS = 1 - Math.exp(-dt * 16);   // scale spring
+        var kO = 1 - Math.exp(-dt * 9);    // offset spring
+
+        for (var i = 0; i < N; i++) {
+            var mag = 0;
+            var px = 0, py = 0;
+
+            if (pointer) {
+                var dx = dX[i] - pointer.x, dy = dY[i] - pointer.y;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < rad) {
+                    var f = smooth(1 - dist / rad);
+                    if (cfg.effects.magnet) mag += f * strength;
+                    if (cfg.effects.scatter) {
+                        var push = f * strength * 30;
+                        px = (dx / (dist || 1)) * push;
+                        py = (dy / (dist || 1)) * push;
+                    }
+                }
+            }
+
+            var wave = 0;
+            for (var j = 0; j < waves.length; j++) {
+                var wv = waves[j];
+                var wRad = (now - wv.t) / 1000 * 700;
+                var wx = dX[i] - wv.x, wy = dY[i] - wv.y;
+                var wd = Math.sqrt(wx * wx + wy * wy);
+                var t2 = 1 - Math.abs(wd - wRad) / 140;
+                if (t2 > 0) wave = Math.max(wave, Math.sin(Math.PI * t2) * 0.9);
+            }
+            if (wave > 0.01) hasActive = true;
+
+            var tScale = 1 + mag * 1.6 + wave;
+            var cd = Math.abs(tScale - dS[i]);
+            dS[i] += (tScale - dS[i]) * kS;
+            dOx[i] += (px - dOx[i]) * kO;
+            dOy[i] += (py - dOy[i]) * kO;
+            cd += Math.abs(px - dOx[i]) + Math.abs(py - dOy[i]);
+            if (cd > motion) motion = cd;
+        }
+
+        paint();
+
+        if (hasActive || (now - lastEvent < 400)) {
+            frameId = requestAnimationFrame(tick);
+        } else if (motion > 0.02) {
+            frameId = requestAnimationFrame(tick);
+        } else {
+            running = false;
+            frameId = null;
+        }
+    }
+
+    function start() {
+        lastEvent = performance.now();
+        if (!running) { running = true; tick._last = performance.now(); frameId = requestAnimationFrame(tick); }
+    }
+
+    function spawnWave(x, y) {
+        if (cfg.effects.ripple && waves.length < 12) {
+            waves.push({ x: x, y: y, t: performance.now() });
+            start();
+        }
+    }
+
+    // ── Canvas sizing ───────────────────────────────────────
+    function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = window.innerWidth; H = window.innerHeight;
+        canvas.width = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        pointer = null; waves = [];
+        rebuild();
+    }
+    var resizeT = null;
+    window.addEventListener('resize', function () {
+        clearTimeout(resizeT);
+        resizeT = setTimeout(resize, 200);
+    });
+
+    // ── Pointer events ──────────────────────────────────────
+    canvas.addEventListener('pointermove', function (e) {
+        var r = canvas.getBoundingClientRect();
+        pointer = { x: e.clientX - r.left, y: e.clientY - r.top };
+        start();
+    });
+    canvas.addEventListener('pointerdown', function (e) {
+        var r = canvas.getBoundingClientRect();
+        spawnWave(e.clientX - r.left, e.clientY - r.top);
+    });
+    canvas.addEventListener('pointerleave', function () {
+        pointer = null;
+        start(); // tail anim: dots ease back to rest
+    });
+
+    // ── UI wiring ────────────────────────────────────────────
+    function setMsg(t) {
+        document.getElementById('file-msg').textContent = t || '';
+    }
+
+    var ctrlWrap = document.getElementById('ctrl-wrap');
+    document.getElementById('ctrl-toggle').addEventListener('click', function () {
+        ctrlWrap.classList.toggle('is-open');
+    });
+
+    // chips that rebuild the grid (or repaint only)
+    function bindChip(rowId, attr, map, apply) {
+        var row = document.getElementById(rowId);
+        row.addEventListener('click', function (e) {
+            var btn = e.target.closest('.chip');
+            if (!btn) return;
+            row.querySelectorAll('.chip').forEach(function (b) { b.classList.remove('is-active'); });
+            btn.classList.add('is-active');
+            apply(map[btn.getAttribute(attr)]);
+        });
+    }
+
+    bindChip('row-mode', 'data-mode', { halftone: 'halftone', dither: 'dither' }, function (m) {
+        cfg.mode = m; rebuild();
+    });
+    bindChip('row-shape', 'data-shape', { circle: 'circle', square: 'square', diamond: 'diamond' }, function (s) {
+        cfg.shape = s; repaint();
+    });
+
+    // effect toggles (independent)
+    var effRow = document.getElementById('row-effects');
+    effRow.addEventListener('click', function (e) {
+        var btn = e.target.closest('.chip');
+        if (!btn) return;
+        btn.classList.toggle('is-active');
+        cfg.effects[btn.getAttribute('data-effect')] = btn.classList.contains('is-active');
+    });
+
+    // palettes
+    var palRow = document.getElementById('row-pal');
+    Object.keys(PALETTES).forEach(function (name) {
+        var p = PALETTES[name];
+        var b = document.createElement('button');
+        b.className = 'chip' + (name === 'noir' ? ' is-active' : '');
+        b.setAttribute('data-pal', name);
+        b.innerHTML = '<span class="dotpair"><i style="background:' + p.ink + '"></i><i style="background:' + p.paper + ';border:1px solid rgba(128,128,128,0.5)"></i></span>' +
+            name.charAt(0).toUpperCase() + name.slice(1);
+        palRow.appendChild(b);
+    });
+    palRow.addEventListener('click', function (e) {
+        var btn = e.target.closest('.chip');
+        if (btn) applyPalette(btn.getAttribute('data-pal'));
+    });
+
+    function bindSlider(id, valId, key, fmt, rebuildOnChange) {
+        var el = document.getElementById(id);
+        var out = document.getElementById(valId);
+        function apply() {
+            var v = parseFloat(el.value);
+            cfg[key] = v;
+            out.textContent = fmt(v);
+            if (rebuildOnChange) rebuild(); else repaint();
+        }
+        el.addEventListener('input', apply);
+    }
+    bindSlider('ctrl-cell', 'val-cell', 'cell', function (v) { return v + 'px'; }, true);
+    bindSlider('ctrl-level', 'val-level', 'level', function (v) { return v.toFixed(2); }, true);
+    bindSlider('ctrl-radius', 'val-radius', 'radius', function (v) { return v; }, false);
+    bindSlider('ctrl-strength', 'val-strength', 'strength', function (v) { return v.toFixed(2); }, false);
+
+    // samples
+    var sampleRow = document.getElementById('row-samples');
+    sampleRow.addEventListener('click', function (e) {
+        var btn = e.target.closest('.chip');
+        if (!btn) return;
+        sampleRow.querySelectorAll('.chip').forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        setMsg('SAMPLE · ' + btn.getAttribute('data-sample').toUpperCase());
+        ingest(makeScene(btn.getAttribute('data-sample')));
+    });
+
+    // file load
+    var loadBtn = document.getElementById('btn-load');
+    var loadInput = document.getElementById('load-input');
+    loadBtn.addEventListener('click', function () { loadInput.click(); });
+    loadInput.addEventListener('change', function () {
+        if (loadInput.files && loadInput.files[0]) handleFile(loadInput.files[0]);
+        loadInput.value = '';
+    });
+
+    function handleFile(file) {
+        if (!/^image\//.test(file.type)) { setMsg('NOT AN IMAGE FILE'); return; }
+        setMsg('LOADING…');
+        loadURL(URL.createObjectURL(file));
+    }
+
+    // ── Drag & drop overlay ─────────────────────────────────
+    var dropEl = document.getElementById('drop');
+    var dragDepth = 0;
+    document.addEventListener('dragenter', function (e) {
+        if (!e.dataTransfer) return;
+        e.preventDefault(); dragDepth++;
+        dropEl.classList.add('is-over');
+    });
+    document.addEventListener('dragover', function (e) { if (e.dataTransfer) e.preventDefault(); });
+    document.addEventListener('dragleave', function () {
+        dragDepth--;
+        if (dragDepth <= 0) { dragDepth = 0; dropEl.classList.remove('is-over'); }
+    });
+    document.addEventListener('drop', function (e) {
+        e.preventDefault();
+        dragDepth = 0;
+        dropEl.classList.remove('is-over');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    });
+
+    // ── Init ────────────────────────────────────────────────
+    document.body.style.background = paperCSS;
+    document.body.style.color = inkCSS;
+    applyPalette('noir');
+    resize();
+    ingest(makeScene('orb'));
+    start();
+})();
+</script>
+</body>
+</html>
