@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Design Gallery</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
     <style>
         :root {
             --ds-bg-base: #e6e5e0;
@@ -16,7 +16,13 @@
             --ds-accent-white: #ffffff;
             --ds-font-primary: "Helvetica Neue", Helvetica, Arial, sans-serif;
             --ds-font-mono: "Courier New", Courier, monospace;
+
+            /* Virtual viewport every preview is rendered at before being scaled down */
+            --preview-w: 1440px;
+            --preview-h: 900px;
         }
+
+        [x-cloak] { display: none !important; }
 
         * {
             box-sizing: border-box;
@@ -25,27 +31,35 @@
         }
 
         body {
-            background-color: #1a1a1a;
+            background-color: var(--ds-bg-base);
             color: var(--ds-text);
             font-family: var(--ds-font-primary);
             -webkit-font-smoothing: antialiased;
             min-height: 100vh;
         }
 
-        .gallery-module {
-            background-color: var(--ds-bg-base);
-            min-height: 100vh;
-            border: 1px solid var(--ds-border);
-            display: flex;
-            flex-direction: column;
+        body.is-previewing {
+            overflow: hidden;
         }
 
+        .mono {
+            font-family: var(--ds-font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* ---------- Header ---------- */
+
         .module-header {
-            padding: 30px 30px;
-            border-bottom: 1px solid var(--ds-border);
             display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
             justify-content: space-between;
-            align-items: center;
+            gap: 20px;
+            padding: 30px;
+            background: var(--ds-bg-base);
+            border-bottom: 1px solid var(--ds-border);
         }
 
         .module-title {
@@ -57,374 +71,564 @@
         }
 
         .header-subtitle {
-            font-family: var(--ds-font-mono);
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            margin-top: 10px;
             opacity: 0.6;
         }
+
+        .header-controls {
+            display: flex;
+            align-items: stretch;
+            border: 1px solid var(--ds-border);
+        }
+
+        .search-input {
+            width: 260px;
+            padding: 12px 14px;
+            border: none;
+            border-right: 1px solid var(--ds-border);
+            background: var(--ds-accent-white);
+            font-family: var(--ds-font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            outline: none;
+        }
+
+        .search-input:focus {
+            background: var(--ds-accent-yellow);
+        }
+
+        .toggle-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 14px;
+            border: none;
+            background: var(--ds-bg-base);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .toggle-btn .dot {
+            width: 10px;
+            height: 10px;
+            border: 1px solid var(--ds-border);
+        }
+
+        .toggle-btn[aria-pressed="true"] {
+            background: var(--ds-accent-green);
+        }
+
+        .toggle-btn[aria-pressed="true"] .dot {
+            background: var(--ds-border);
+        }
+
+        /* ---------- Grid ---------- */
 
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            background-color: var(--ds-border);
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
             gap: 1px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .gallery-grid.preview-mode {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 0;
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(0.95);
-        }
-
-        .gallery-grid:not(.preview-mode) {
-            position: relative;
-            opacity: 1;
-            pointer-events: auto;
-            transform: scale(1);
+            background-color: var(--ds-border);
+            border-bottom: 1px solid var(--ds-border);
         }
 
         .page-card {
-            background-color: var(--ds-bg-base);
             display: flex;
             flex-direction: column;
-            cursor: pointer;
+            background-color: var(--ds-bg-base);
+            color: inherit;
+            text-decoration: none;
             transition: background-color 0.2s;
-            min-height: 200px;
         }
 
-        .page-card:hover {
+        .page-card:hover,
+        .page-card:focus-visible {
             background-color: var(--ds-accent-white);
+            outline: none;
         }
 
         .card-label-band {
-            padding: 12px 20px;
-            font-family: var(--ds-font-primary);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 16px;
             border-bottom: 1px solid var(--ds-border);
         }
 
-        .card-title-band {
-            padding: 25px 20px;
-            border-bottom: 1px solid var(--ds-border);
-        }
-
-        .card-title-band h3 {
-            font-size: 2.2rem;
-            font-weight: 400;
-            line-height: 1.05;
-            text-transform: uppercase;
-        }
-
-        .card-footer-band {
-            display: flex;
-            flex-grow: 1;
-            min-height: 160px;
-        }
-
-        .visual-texture {
-            width: 50%;
-            border-right: 1px solid var(--ds-border);
-            background-color: #222;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .pattern-target {
-            width: 150%;
-            height: 150%;
-            background-image: repeating-radial-gradient(
-                circle at center,
-                transparent 0,
-                transparent 10px,
-                var(--ds-accent-yellow) 10px,
-                var(--ds-accent-yellow) 11px
-            );
-            opacity: 0.8;
-        }
-
-        .visual-texture.cyan-target .pattern-target {
-            background-image: repeating-radial-gradient(
-                circle at center, transparent 0, transparent 15px, var(--ds-accent-cyan) 15px, var(--ds-accent-cyan) 16px
-            );
-        }
-
-        .visual-texture.green-target .pattern-target {
-            background-image: repeating-radial-gradient(
-                circle at center, transparent 0, transparent 8px, var(--ds-accent-green) 8px, var(--ds-accent-green) 9px
-            );
-        }
-
-        .visual-texture.white-target .pattern-target {
-            background-image: repeating-radial-gradient(
-                circle at center, transparent 0, transparent 12px, var(--ds-accent-white) 12px, var(--ds-accent-white) 13px
-            );
-        }
-
-        .metrics-stack {
-            width: 50%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .metric-block {
-            height: 50%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-        }
-
-        .metric-block.top {
-            border-bottom: 1px solid var(--ds-border);
-        }
-
-        .bg-green { background-color: var(--ds-accent-green); }
-        .bg-cyan { background-color: var(--ds-accent-cyan); }
-        .bg-yellow { background-color: var(--ds-accent-yellow); }
-        .bg-white { background-color: var(--ds-accent-white); }
-
-        .metric-value {
-            font-size: 2.8rem;
-            font-weight: 400;
-            line-height: 0.9;
-        }
-
-        .metric-unit {
-            font-size: 1rem;
-            vertical-align: super;
-            margin-left: 2px;
-        }
-
-        .metric-label {
-            font-family: var(--ds-font-primary);
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 4px;
-            font-weight: 600;
-        }
-
-        .card-color-index {
-            font-family: var(--ds-font-mono);
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            opacity: 0.6;
-            margin-top: auto;
-            padding: 15px 20px;
-            border-top: 1px solid var(--ds-border);
-        }
-
-        .preview-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--ds-bg-base);
-            border: 1px solid var(--ds-border);
-            display: none;
-            z-index: 10;
-        }
-
-        .preview-container.active {
-            display: block;
-        }
-
-        .preview-header {
-            height: 100px;
-            border-bottom: 1px solid var(--ds-border);
-            display: flex;
-            align-items: center;
-            padding: 0 30px;
-            background: var(--ds-bg-base);
-            gap: 20px;
-        }
-
-        .preview-header .current-title {
-            font-family: var(--ds-font-mono);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            max-width: 400px;
+        .card-label-band .file {
+            opacity: 0.55;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .preview-header .back-btn {
-            background: var(--ds-border);
-            color: var(--ds-bg-base);
-            border: none;
-            padding: 12px 20px;
-            font-family: var(--ds-font-mono);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            cursor: pointer;
+        .preview-frame {
+            position: relative;
+            aspect-ratio: 1440 / 900;
+            overflow: hidden;
+            background:
+                repeating-linear-gradient(45deg, transparent 0 10px, rgba(0,0,0,0.05) 10px 11px),
+                #d8d7d1;
+            border-bottom: 1px solid var(--ds-border);
+        }
+
+        .preview-frame iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: var(--preview-w);
+            height: var(--preview-h);
+            border: 0;
+            background: white;
+            transform-origin: 0 0;
+            transform: scale(var(--scale, 0.25));
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+
+        .preview-frame.is-ready iframe {
+            opacity: 1;
+        }
+
+        .preview-status {
+            position: absolute;
+            left: 12px;
+            bottom: 10px;
+            padding: 4px 8px;
+            background: var(--ds-bg-base);
+            border: 1px solid var(--ds-border);
             transition: opacity 0.2s;
         }
 
-        .preview-header .back-btn:hover {
-            opacity: 0.8;
+        .preview-frame.is-ready .preview-status {
+            opacity: 0;
         }
 
-        .preview-content {
-            position: absolute;
-            top: 100px;
-            left: 0;
-            right: 0;
-            bottom: 0;
+        .preview-frame.is-loading .preview-status::after {
+            content: "";
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            margin-left: 8px;
+            background: var(--ds-border);
+            animation: blink 0.8s steps(2) infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .card-title-band {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 16px 20px;
+            flex-grow: 1;
+        }
+
+        .card-title-band h3 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            line-height: 1.05;
+            text-transform: uppercase;
+            overflow-wrap: anywhere;
+        }
+
+        .card-arrow {
+            flex-shrink: 0;
+            font-size: 1.4rem;
+            transition: transform 0.2s;
+        }
+
+        .page-card:hover .card-arrow {
+            transform: translateX(4px);
+        }
+
+        .empty-state {
+            padding: 60px 30px;
+            border-bottom: 1px solid var(--ds-border);
+        }
+
+        /* ---------- Full preview ---------- */
+
+        .preview-container {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            background: var(--ds-bg-base);
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: stretch;
+            height: 56px;
+            border-bottom: 1px solid var(--ds-border);
+            flex-shrink: 0;
+        }
+
+        .preview-header > * {
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            border-right: 1px solid var(--ds-border);
+        }
+
+        .preview-header button,
+        .preview-header a {
+            border-top: 0;
+            border-bottom: 0;
+            border-left: 0;
+            background: transparent;
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .preview-header button:hover,
+        .preview-header a:hover {
+            background: var(--ds-accent-yellow);
+        }
+
+        .preview-header .back-btn {
+            background: var(--ds-border);
+            color: var(--ds-bg-base);
+        }
+
+        .preview-header .back-btn:hover {
+            background: var(--ds-border);
+            opacity: 0.85;
+        }
+
+        .preview-header .current-title {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            line-height: 56px;
+        }
+
+        .preview-header > :last-child {
+            border-right: 0;
         }
 
         .preview-iframe {
+            flex: 1;
             width: 100%;
-            height: 100%;
             border: none;
             background: white;
         }
 
-        @media (max-width: 900px) {
-            .gallery-grid {
-                grid-template-columns: 1fr;
+        @media (max-width: 700px) {
+            .module-header {
+                padding: 20px 16px;
             }
             .module-title {
                 font-size: 2rem;
             }
-            .module-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
+            .header-controls {
+                width: 100%;
+            }
+            .search-input {
+                flex: 1;
+                width: auto;
+                min-width: 0;
+            }
+            .preview-header > * {
+                padding: 0 12px;
+            }
+            .preview-header .hide-sm {
+                display: none;
             }
         }
     </style>
 </head>
-<body>
-    <main class="gallery-module" x-data="galleryApp()">
-        <header class="module-header">
-            <div>
-                <h2 class="module-title">Design<br>Gallery</h2>
-                <p class="header-subtitle" x-text="`${pagesData.length} PAGES AVAILABLE`"></p>
-            </div>
-        </header>
-
-        <div class="gallery-grid" :class="{ 'preview-mode': activePage }">
-            <template x-for="(page, index) in pagesData" :key="page.filename">
-                <article class="page-card" @click="openPreview(page)">
-                    <div class="card-label-band">
-                        <span x-text="`PAGE ${index + 1}`"></span>
-                    </div>
-                    <div class="card-title-band">
-                        <h3 x-text="page.title"></h3>
-                    </div>
-                    <div class="card-footer-band">
-                        <div class="visual-texture" :class="getTextureClass(index)">
-                            <div class="pattern-target"></div>
-                        </div>
-                        <div class="metrics-stack">
-                            <div class="metric-block top" :class="getBgClass(index, 0)">
-                                <span class="metric-label" style="font-size: 1.2rem; margin-top:0;" x-text="getMetric1(index)"></span>
-                                <span class="metric-label" x-text="getMetricLabel1(index)"></span>
-                            </div>
-                            <div class="metric-block" :class="getBgClass(index, 1)">
-                                <div><span class="metric-value" x-text="getMetricValue(index)"></span><span class="metric-unit" x-text="getMetricUnit(index)"></span></div>
-                                <span class="metric-label" x-text="getMetricLabel2(index)"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-color-index">CLICK TO PREVIEW</div>
-                </article>
-            </template>
+<body :class="{ 'is-previewing': activePage }" x-data="galleryApp()" @keydown.window="onKey($event)">
+    <header class="module-header">
+        <div>
+            <h1 class="module-title">Design<br>Gallery</h1>
+            <p class="header-subtitle mono" x-text="filtered.length === pages.length
+                ? `${pages.length} pages`
+                : `${filtered.length} / ${pages.length} pages`"></p>
         </div>
-
-        <div class="preview-container" :class="{ 'active': activePage }">
-            <div class="preview-header">
-                <span class="current-title visible" x-text="activePage?.title || ''"></span>
-                <button class="back-btn visible" @click="closePreview()">
-                    ← Back to Gallery
-                </button>
-            </div>
-            <div class="preview-content">
-                <iframe 
-                    class="preview-iframe"
-                    :src="activePage ? 'pages/' + activePage.filename : ''"
-                    loading="lazy"
-                    :title="activePage?.title"
-                ></iframe>
-            </div>
+        <div class="header-controls">
+            <input class="search-input" type="search" placeholder="Filter…" aria-label="Filter pages"
+                   x-model.debounce.150ms="query" x-ref="search">
+            <button class="toggle-btn mono" type="button" :aria-pressed="livePreviews.toString()"
+                    @click="setLivePreviews(!livePreviews)" title="Render live iframe previews of each page">
+                <span class="dot"></span> Live previews
+            </button>
         </div>
+    </header>
+
+    <main class="gallery-grid">
+        <template x-for="page in filtered" :key="page.filename">
+            <a class="page-card" :href="pageUrl(page)" @click.prevent="openPreview(page)">
+                <div class="card-label-band mono">
+                    <span x-text="String(pages.indexOf(page) + 1).padStart(2, '0')"></span>
+                    <span class="file" x-text="page.filename"></span>
+                </div>
+                <div class="preview-frame" x-preview="pageUrl(page)">
+                    <span class="preview-status mono" x-text="livePreviews ? 'Waiting' : 'Preview off'"></span>
+                </div>
+                <div class="card-title-band">
+                    <h3 x-text="page.title"></h3>
+                    <span class="card-arrow" aria-hidden="true">→</span>
+                </div>
+            </a>
+        </template>
     </main>
+
+    <p class="empty-state mono" x-cloak x-show="filtered.length === 0">No pages match “<span x-text="query"></span>”</p>
+
+    <div class="preview-container" x-cloak x-show="activePage" role="dialog" aria-modal="true" :aria-label="activePage?.title">
+        <nav class="preview-header mono">
+            <button class="back-btn" type="button" @click="closePreview()">← Gallery</button>
+            <span class="current-title" x-text="activePage?.title || ''"></span>
+            <button type="button" @click="step(-1)" title="Previous (←)">←<span class="hide-sm">&nbsp;Prev</span></button>
+            <button type="button" @click="step(1)" title="Next (→)"><span class="hide-sm">Next&nbsp;</span>→</button>
+            <a class="hide-sm" :href="activePage ? pageUrl(activePage) : '#'" target="_blank" rel="noopener">Open ↗</a>
+        </nav>
+        <template x-if="activePage">
+            <iframe class="preview-iframe" :src="pageUrl(activePage)" :title="activePage.title"></iframe>
+        </template>
+    </div>
 
     <script src="pages-data.js"></script>
     <script>
-        function galleryApp() {
+        /*
+         * Visibility-driven iframe thumbnails.
+         *
+         * Each card renders its page at a fixed desktop viewport and scales it down.
+         * To keep 40+ live pages (many with WebGL / rAF loops) from melting the tab:
+         *  - an iframe is only created once its card is near the viewport,
+         *  - loads go through a small queue so fast scrolling doesn't start dozens at once,
+         *  - iframes that drift far off-screen are destroyed (with a grace period),
+         *  - everything is torn down while the full-screen preview is open.
+         */
+        const PreviewManager = (() => {
+            const MAX_CONCURRENT_LOADS = 3;
+            const LOAD_DELAY_MS = 120;      // card must stay near the viewport this long before loading
+            const UNLOAD_DELAY_MS = 1500;   // grace period before destroying an off-screen iframe
+            const LOAD_TIMEOUT_MS = 8000;   // don't let a slow page block the queue forever
+
+            const entries = new Map();      // frame element -> state
+            const queue = [];
+            let inFlight = 0;
+            let enabled = true;
+            let paused = false;
+
+            const resizeObserver = new ResizeObserver(records => {
+                for (const r of records) {
+                    const w = r.contentBoxSize?.[0]?.inlineSize ?? r.contentRect.width;
+                    r.target.style.setProperty('--scale', (w / 1440).toFixed(4));
+                }
+            });
+
+            // Load zone: the viewport plus roughly one screen above and below.
+            const nearObserver = new IntersectionObserver(records => {
+                for (const r of records) {
+                    const state = entries.get(r.target);
+                    if (!state) continue;
+                    state.near = r.isIntersecting;
+                    r.isIntersecting ? scheduleLoad(state) : scheduleUnload(state);
+                }
+            }, { rootMargin: '100% 0px 100% 0px' });
+
+            function setStatus(state, cls, text) {
+                state.el.classList.remove('is-loading', 'is-ready');
+                if (cls) state.el.classList.add(cls);
+                const label = state.el.querySelector('.preview-status');
+                if (label) label.textContent = text;
+            }
+
+            function scheduleLoad(state) {
+                clearTimeout(state.unloadTimer);
+                if (!enabled || paused || state.iframe || state.queued) return;
+                clearTimeout(state.loadTimer);
+                state.loadTimer = setTimeout(() => {
+                    if (!state.near || state.iframe || state.queued) return;
+                    state.queued = true;
+                    queue.push(state);
+                    pump();
+                }, LOAD_DELAY_MS);
+            }
+
+            function scheduleUnload(state) {
+                clearTimeout(state.loadTimer);
+                clearTimeout(state.unloadTimer);
+                state.unloadTimer = setTimeout(() => unload(state), UNLOAD_DELAY_MS);
+            }
+
+            function pump() {
+                while (inFlight < MAX_CONCURRENT_LOADS && queue.length) {
+                    const state = queue.shift();
+                    state.queued = false;
+                    if (!state.near || !enabled || paused || !entries.has(state.el)) continue;
+                    load(state);
+                }
+            }
+
+            function load(state) {
+                inFlight++;
+                setStatus(state, 'is-loading', 'Loading');
+
+                const iframe = document.createElement('iframe');
+                iframe.tabIndex = -1;
+                iframe.setAttribute('aria-hidden', 'true');
+                iframe.setAttribute('scrolling', 'no');
+                iframe.title = '';
+
+                let settled = false;
+                const done = () => {
+                    if (settled) return;
+                    settled = true;
+                    clearTimeout(timeout);
+                    inFlight--;
+                    if (state.iframe === iframe) setStatus(state, 'is-ready', '');
+                    pump();
+                };
+                const timeout = setTimeout(done, LOAD_TIMEOUT_MS);
+                iframe.addEventListener('load', done, { once: true });
+                state.release = done;
+
+                iframe.src = state.src;
+                state.iframe = iframe;
+                state.el.prepend(iframe);
+            }
+
+            function unload(state) {
+                clearTimeout(state.loadTimer);
+                clearTimeout(state.unloadTimer);
+                if (state.queued) {
+                    const i = queue.indexOf(state);
+                    if (i !== -1) queue.splice(i, 1);
+                    state.queued = false;
+                }
+                if (state.iframe) {
+                    // Blank it first so the page's timers/animation loops stop immediately.
+                    try { state.iframe.src = 'about:blank'; } catch (e) {}
+                    state.iframe.remove();
+                    state.iframe = null;
+                    state.release?.();
+                    state.release = null;
+                }
+                setStatus(state, null, enabled ? 'Waiting' : 'Preview off');
+            }
+
+            function refresh() {
+                for (const state of entries.values()) {
+                    if (enabled && !paused && state.near) scheduleLoad(state);
+                    else unload(state);
+                }
+            }
+
             return {
-                pagesData: typeof pagesData !== 'undefined' ? pagesData : [],
+                register(el, src) {
+                    const state = { el, src, near: false, iframe: null, queued: false };
+                    entries.set(el, state);
+                    resizeObserver.observe(el);
+                    nearObserver.observe(el);
+                },
+                unregister(el) {
+                    const state = entries.get(el);
+                    if (!state) return;
+                    unload(state);
+                    entries.delete(el);
+                    resizeObserver.unobserve(el);
+                    nearObserver.unobserve(el);
+                },
+                setEnabled(value) { enabled = value; refresh(); },
+                setPaused(value) { paused = value; refresh(); },
+            };
+        })();
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.directive('preview', (el, { expression }, { evaluate, cleanup }) => {
+                PreviewManager.register(el, evaluate(expression));
+                cleanup(() => PreviewManager.unregister(el));
+            });
+        });
+
+        function readPref(key, fallback) {
+            try {
+                const v = localStorage.getItem(key);
+                return v === null ? fallback : v === '1';
+            } catch (e) { return fallback; }
+        }
+
+        function writePref(key, value) {
+            try { localStorage.setItem(key, value ? '1' : '0'); } catch (e) {}
+        }
+
+        function galleryApp() {
+            const pages = typeof pagesData !== 'undefined' ? pagesData : [];
+            const saveData = navigator.connection?.saveData === true;
+
+            return {
+                pages,
+                query: '',
                 activePage: null,
+                livePreviews: readPref('gallery.livePreviews', !saveData),
+
+                init() {
+                    this.$watch('activePage', page => PreviewManager.setPaused(!!page));
+                    PreviewManager.setEnabled(this.livePreviews);
+                    this.syncFromHash();
+                    PreviewManager.setPaused(!!this.activePage);
+                    window.addEventListener('hashchange', () => this.syncFromHash());
+                },
+
+                get filtered() {
+                    const q = this.query.trim().toLowerCase();
+                    if (!q) return this.pages;
+                    return this.pages.filter(p =>
+                        p.title.toLowerCase().includes(q) || p.filename.toLowerCase().includes(q));
+                },
+
+                pageUrl(page) {
+                    return 'pages/' + encodeURIComponent(page.filename);
+                },
+
+                setLivePreviews(value) {
+                    this.livePreviews = value;
+                    writePref('gallery.livePreviews', value);
+                    PreviewManager.setEnabled(value);
+                },
 
                 openPreview(page) {
-                    this.activePage = page;
-                    document.body.style.overflow = 'hidden';
+                    location.hash = encodeURIComponent(page.filename);
                 },
 
                 closePreview() {
+                    if (location.hash) history.pushState('', document.title, location.pathname + location.search);
                     this.activePage = null;
-                    document.body.style.overflow = '';
                 },
 
-                getTextureClass(index) {
-                    const classes = ['', 'cyan-target', 'green-target', 'white-target'];
-                    return classes[index % 4];
+                syncFromHash() {
+                    const name = decodeURIComponent(location.hash.slice(1));
+                    this.activePage = this.pages.find(p => p.filename === name) || null;
                 },
 
-                getBgClass(index, pos) {
-                    const combos = [
-                        ['bg-cyan', 'bg-white'],
-                        ['bg-white', 'bg-green'],
-                        ['bg-yellow', 'bg-white'],
-                        ['bg-white', 'bg-cyan']
-                    ];
-                    return combos[index % 4][pos];
+                step(delta) {
+                    const list = this.filtered.includes(this.activePage) ? this.filtered : this.pages;
+                    const i = list.indexOf(this.activePage);
+                    this.openPreview(list[(i + delta + list.length) % list.length]);
                 },
 
-                getMetric1(index) {
-                    const vals = ['FULL', 'GRAPH', 'DEEP', 'EXACT'];
-                    return vals[index % 4];
+                onKey(e) {
+                    if (this.activePage) {
+                        if (e.key === 'Escape') this.closePreview();
+                        else if (e.key === 'ArrowLeft') this.step(-1);
+                        else if (e.key === 'ArrowRight') this.step(1);
+                    } else if (e.key === '/' && document.activeElement !== this.$refs.search) {
+                        e.preventDefault();
+                        this.$refs.search.focus();
+                    }
                 },
-
-                getMetricLabel1(index) {
-                    const vals = ['VISIBILITY', 'GENERATION', 'INSPECTION', 'PRECISION'];
-                    return vals[index % 4];
-                },
-
-                getMetricValue(index) {
-                    const vals = ['0', '100', '60', '1'];
-                    return vals[index % 4];
-                },
-
-                getMetricUnit(index) {
-                    const vals = ['MS', '%', 'FPS', 'MS'];
-                    return vals[index % 4];
-                },
-
-                getMetricLabel2(index) {
-                    const vals = ['LATENCY', 'MAPPED', 'STABILITY', 'RESOLUTION'];
-                    return vals[index % 4];
-                }
             };
         }
     </script>
