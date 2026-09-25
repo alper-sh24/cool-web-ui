@@ -1,0 +1,13 @@
+{
+  "name": "cool-web-ui",
+  "private": true,
+  "description": "A gallery of UI design experiments and prototypes.",
+  "scripts": {
+    "pages": "node generate-pages.js",
+    "thumbnails": "node generate-thumbnails.js",
+    "build": "node generate-thumbnails.js && node generate-pages.js"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

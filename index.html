@@ -85,7 +85,6 @@
             width: 260px;
             padding: 12px 14px;
             border: none;
-            border-right: 1px solid var(--ds-border);
             background: var(--ds-accent-white);
             font-family: var(--ds-font-mono);
             font-size: 0.8rem;
@@ -95,31 +94,6 @@
 
         .search-input:focus {
             background: var(--ds-accent-yellow);
-        }
-
-        .toggle-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 14px;
-            border: none;
-            background: var(--ds-bg-base);
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .toggle-btn .dot {
-            width: 10px;
-            height: 10px;
-            border: 1px solid var(--ds-border);
-        }
-
-        .toggle-btn[aria-pressed="true"] {
-            background: var(--ds-accent-green);
-        }
-
-        .toggle-btn[aria-pressed="true"] .dot {
-            background: var(--ds-border);
         }
 
         /* ---------- Grid ---------- */
@@ -172,6 +146,16 @@
             border-bottom: 1px solid var(--ds-border);
         }
 
+        .preview-frame img {
+            position: absolute;
+            inset: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top left;
+        }
+
         .preview-frame iframe {
             position: absolute;
             top: 0;
@@ -184,35 +168,58 @@
             transform: scale(var(--scale, 0.25));
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.35s ease;
+            transition: opacity 0.3s ease;
         }
 
-        .preview-frame.is-ready iframe {
+        .preview-frame.is-live iframe {
             opacity: 1;
         }
 
         .preview-status {
             position: absolute;
-            left: 12px;
-            bottom: 10px;
+            z-index: 1;
+            right: 10px;
+            top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             padding: 4px 8px;
             background: var(--ds-bg-base);
             border: 1px solid var(--ds-border);
+            opacity: 0;
             transition: opacity 0.2s;
         }
 
-        .preview-frame.is-ready .preview-status {
-            opacity: 0;
-        }
-
-        .preview-frame.is-loading .preview-status::after {
+        .preview-status::before {
             content: "";
-            display: inline-block;
             width: 6px;
             height: 6px;
-            margin-left: 8px;
             background: var(--ds-border);
+        }
+
+        .preview-frame.no-snapshot .preview-status,
+        .preview-frame.is-loading .preview-status,
+        .preview-frame.is-live .preview-status {
+            opacity: 1;
+        }
+
+        .preview-frame.no-snapshot .preview-status {
+            top: auto;
+            right: auto;
+            left: 12px;
+            bottom: 10px;
+        }
+
+        .preview-frame.no-snapshot .preview-status::before {
+            display: none;
+        }
+
+        .preview-frame.is-loading .preview-status::before {
             animation: blink 0.8s steps(2) infinite;
+        }
+
+        .preview-frame.is-live .preview-status {
+            background: var(--ds-accent-green);
         }
 
         @keyframes blink { 50% { opacity: 0; } }
@@ -357,22 +364,23 @@
         <div class="header-controls">
             <input class="search-input" type="search" placeholder="Filter…" aria-label="Filter pages"
                    x-model.debounce.150ms="query" x-ref="search">
-            <button class="toggle-btn mono" type="button" :aria-pressed="livePreviews.toString()"
-                    @click="setLivePreviews(!livePreviews)" title="Render live iframe previews of each page">
-                <span class="dot"></span> Live previews
-            </button>
         </div>
     </header>
 
     <main class="gallery-grid">
         <template x-for="page in filtered" :key="page.filename">
-            <a class="page-card" :href="pageUrl(page)" @click.prevent="openPreview(page)">
+            <a class="page-card" :href="pageUrl(page)" @click.prevent="openPreview(page)"
+               @mouseenter="LivePreview.hover($el)" @mouseleave="LivePreview.stop($el)"
+               @focus="LivePreview.focus($el)" @blur="LivePreview.stop($el)">
                 <div class="card-label-band mono">
                     <span x-text="String(pages.indexOf(page) + 1).padStart(2, '0')"></span>
                     <span class="file" x-text="page.filename"></span>
                 </div>
-                <div class="preview-frame" x-preview="pageUrl(page)">
-                    <span class="preview-status mono" x-text="livePreviews ? 'Waiting' : 'Preview off'"></span>
+                <div class="preview-frame" :class="{ 'no-snapshot': !page.thumbnail }" x-live-preview="pageUrl(page)">
+                    <template x-if="page.thumbnail">
+                        <img :src="page.thumbnail" alt="" loading="lazy" decoding="async" width="960" height="600">
+                    </template>
+                    <span class="preview-status mono" x-text="page.thumbnail ? 'Live' : 'No snapshot yet'"></span>
                 </div>
                 <div class="card-title-band">
                     <h3 x-text="page.title"></h3>
@@ -400,185 +408,111 @@
     <script src="pages-data.js"></script>
     <script>
         /*
-         * Visibility-driven iframe thumbnails.
-         *
-         * Each card renders its page at a fixed desktop viewport and scales it down.
-         * To keep 40+ live pages (many with WebGL / rAF loops) from melting the tab:
-         *  - an iframe is only created once its card is near the viewport,
-         *  - loads go through a small queue so fast scrolling doesn't start dozens at once,
-         *  - iframes that drift far off-screen are destroyed (with a grace period),
-         *  - everything is torn down while the full-screen preview is open.
+         * Cards show a static snapshot (see generate-thumbnails.js). Hovering or
+         * focusing a card swaps in a live iframe of the page, scaled down to the
+         * card. At most one live preview exists at a time, and it is destroyed as
+         * soon as the pointer leaves, so idle cards cost nothing.
          */
-        const PreviewManager = (() => {
-            const MAX_CONCURRENT_LOADS = 3;
-            const LOAD_DELAY_MS = 120;      // card must stay near the viewport this long before loading
-            const UNLOAD_DELAY_MS = 1500;   // grace period before destroying an off-screen iframe
-            const LOAD_TIMEOUT_MS = 8000;   // don't let a slow page block the queue forever
+        const LivePreview = (() => {
+            const HOVER_INTENT_MS = 250;   // ignore the pointer just passing over a card
+            const PREVIEW_WIDTH = 1440;    // matches --preview-w
+            const canHover = matchMedia('(hover: hover) and (pointer: fine)');
 
-            const entries = new Map();      // frame element -> state
-            const queue = [];
-            let inFlight = 0;
-            let enabled = true;
-            let paused = false;
+            let current = null;            // { card, frame, iframe }
+            let pendingCard = null;
+            let timer = null;
 
-            const resizeObserver = new ResizeObserver(records => {
-                for (const r of records) {
-                    const w = r.contentBoxSize?.[0]?.inlineSize ?? r.contentRect.width;
-                    r.target.style.setProperty('--scale', (w / 1440).toFixed(4));
-                }
-            });
-
-            // Load zone: the viewport plus roughly one screen above and below.
-            const nearObserver = new IntersectionObserver(records => {
-                for (const r of records) {
-                    const state = entries.get(r.target);
-                    if (!state) continue;
-                    state.near = r.isIntersecting;
-                    r.isIntersecting ? scheduleLoad(state) : scheduleUnload(state);
-                }
-            }, { rootMargin: '100% 0px 100% 0px' });
-
-            function setStatus(state, cls, text) {
-                state.el.classList.remove('is-loading', 'is-ready');
-                if (cls) state.el.classList.add(cls);
-                const label = state.el.querySelector('.preview-status');
-                if (label) label.textContent = text;
+            function destroy() {
+                if (!current) return;
+                const { frame, iframe } = current;
+                // Blank it first so the page's timers/animation loops stop immediately.
+                try { iframe.src = 'about:blank'; } catch (e) {}
+                iframe.remove();
+                frame.classList.remove('is-loading', 'is-live');
+                current = null;
             }
 
-            function scheduleLoad(state) {
-                clearTimeout(state.unloadTimer);
-                if (!enabled || paused || state.iframe || state.queued) return;
-                clearTimeout(state.loadTimer);
-                state.loadTimer = setTimeout(() => {
-                    if (!state.near || state.iframe || state.queued) return;
-                    state.queued = true;
-                    queue.push(state);
-                    pump();
-                }, LOAD_DELAY_MS);
-            }
-
-            function scheduleUnload(state) {
-                clearTimeout(state.loadTimer);
-                clearTimeout(state.unloadTimer);
-                state.unloadTimer = setTimeout(() => unload(state), UNLOAD_DELAY_MS);
-            }
-
-            function pump() {
-                while (inFlight < MAX_CONCURRENT_LOADS && queue.length) {
-                    const state = queue.shift();
-                    state.queued = false;
-                    if (!state.near || !enabled || paused || !entries.has(state.el)) continue;
-                    load(state);
-                }
-            }
-
-            function load(state) {
-                inFlight++;
-                setStatus(state, 'is-loading', 'Loading');
+            function mount(card) {
+                const frame = card.querySelector('[data-live-src]');
+                if (!frame) return;
+                destroy();
 
                 const iframe = document.createElement('iframe');
                 iframe.tabIndex = -1;
                 iframe.setAttribute('aria-hidden', 'true');
                 iframe.setAttribute('scrolling', 'no');
                 iframe.title = '';
-
-                let settled = false;
-                const done = () => {
-                    if (settled) return;
-                    settled = true;
-                    clearTimeout(timeout);
-                    inFlight--;
-                    if (state.iframe === iframe) setStatus(state, 'is-ready', '');
-                    pump();
-                };
-                const timeout = setTimeout(done, LOAD_TIMEOUT_MS);
-                iframe.addEventListener('load', done, { once: true });
-                state.release = done;
-
-                iframe.src = state.src;
-                state.iframe = iframe;
-                state.el.prepend(iframe);
-            }
-
-            function unload(state) {
-                clearTimeout(state.loadTimer);
-                clearTimeout(state.unloadTimer);
-                if (state.queued) {
-                    const i = queue.indexOf(state);
-                    if (i !== -1) queue.splice(i, 1);
-                    state.queued = false;
-                }
-                if (state.iframe) {
-                    // Blank it first so the page's timers/animation loops stop immediately.
-                    try { state.iframe.src = 'about:blank'; } catch (e) {}
-                    state.iframe.remove();
-                    state.iframe = null;
-                    state.release?.();
-                    state.release = null;
-                }
-                setStatus(state, null, enabled ? 'Waiting' : 'Preview off');
-            }
-
-            function refresh() {
-                for (const state of entries.values()) {
-                    if (enabled && !paused && state.near) scheduleLoad(state);
-                    else unload(state);
-                }
+                frame.style.setProperty('--scale', (frame.clientWidth / PREVIEW_WIDTH).toFixed(4));
+                frame.classList.add('is-loading');
+                iframe.addEventListener('load', () => {
+                    if (current?.iframe !== iframe) return;
+                    // Give the page a moment to paint before covering the snapshot.
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        if (current?.iframe !== iframe) return;
+                        frame.classList.remove('is-loading');
+                        frame.classList.add('is-live');
+                    }));
+                }, { once: true });
+                iframe.src = frame.dataset.liveSrc;
+                frame.append(iframe);
+                current = { card, frame, iframe };
             }
 
             return {
-                register(el, src) {
-                    const state = { el, src, near: false, iframe: null, queued: false };
-                    entries.set(el, state);
-                    resizeObserver.observe(el);
-                    nearObserver.observe(el);
+                // Mouse hover on devices that have one; touch taps just open the page.
+                hover(card) {
+                    if (canHover.matches) this.start(card);
                 },
-                unregister(el) {
-                    const state = entries.get(el);
-                    if (!state) return;
-                    unload(state);
-                    entries.delete(el);
-                    resizeObserver.unobserve(el);
-                    nearObserver.unobserve(el);
+                // Keyboard focus, but not the focus a tap/click gives the link.
+                focus(card) {
+                    if (card.matches(':focus-visible')) this.start(card);
                 },
-                setEnabled(value) { enabled = value; refresh(); },
-                setPaused(value) { paused = value; refresh(); },
+                start(card) {
+                    if (current?.card === card) return;
+                    clearTimeout(timer);
+                    pendingCard = card;
+                    timer = setTimeout(() => {
+                        if (pendingCard === card) mount(card);
+                    }, HOVER_INTENT_MS);
+                },
+                stop(card) {
+                    if (pendingCard === card) {
+                        clearTimeout(timer);
+                        pendingCard = null;
+                    }
+                    // Still hovered or focused (e.g. focus left but pointer is over it)?
+                    if (card.matches(':hover') || document.activeElement === card) return;
+                    if (current?.card === card) destroy();
+                },
+                stopAll() {
+                    clearTimeout(timer);
+                    pendingCard = null;
+                    destroy();
+                },
             };
         })();
 
         document.addEventListener('alpine:init', () => {
-            Alpine.directive('preview', (el, { expression }, { evaluate, cleanup }) => {
-                PreviewManager.register(el, evaluate(expression));
-                cleanup(() => PreviewManager.unregister(el));
+            Alpine.directive('live-preview', (el, { expression }, { evaluate, cleanup }) => {
+                el.dataset.liveSrc = evaluate(expression);
+                cleanup(() => {
+                    const card = el.closest('.page-card');
+                    if (card) LivePreview.stop(card);
+                });
             });
         });
 
-        function readPref(key, fallback) {
-            try {
-                const v = localStorage.getItem(key);
-                return v === null ? fallback : v === '1';
-            } catch (e) { return fallback; }
-        }
-
-        function writePref(key, value) {
-            try { localStorage.setItem(key, value ? '1' : '0'); } catch (e) {}
-        }
-
         function galleryApp() {
             const pages = typeof pagesData !== 'undefined' ? pagesData : [];
-            const saveData = navigator.connection?.saveData === true;
 
             return {
                 pages,
                 query: '',
                 activePage: null,
-                livePreviews: readPref('gallery.livePreviews', !saveData),
 
                 init() {
-                    this.$watch('activePage', page => PreviewManager.setPaused(!!page));
-                    PreviewManager.setEnabled(this.livePreviews);
+                    this.$watch('activePage', page => page && LivePreview.stopAll());
                     this.syncFromHash();
-                    PreviewManager.setPaused(!!this.activePage);
                     window.addEventListener('hashchange', () => this.syncFromHash());
                 },
 
@@ -591,12 +525,6 @@
 
                 pageUrl(page) {
                     return 'pages/' + encodeURIComponent(page.filename);
-                },
-
-                setLivePreviews(value) {
-                    this.livePreviews = value;
-                    writePref('gallery.livePreviews', value);
-                    PreviewManager.setEnabled(value);
                 },
 
                 openPreview(page) {
