@@ -4,9 +4,21 @@ const path = require('path');
 const PAGES_DIR = path.join(__dirname, 'pages');
 const OUTPUT_FILE = path.join(__dirname, 'pages-data.js');
 
+const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+
+function decodeEntities(text) {
+    return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, code) => {
+        if (code[0] === '#') {
+            const n = code[1].toLowerCase() === 'x' ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
+            return Number.isFinite(n) ? String.fromCodePoint(n) : m;
+        }
+        return ENTITIES[code.toLowerCase()] ?? m;
+    });
+}
+
 function extractTitle(htmlContent) {
     const match = htmlContent.match(/<title[^>]*>([^<]+)<\/title>/i);
-    return match ? match[1].trim() : null;
+    return match ? decodeEntities(match[1].trim()) : null;
 }
 
 function getPagesData() {

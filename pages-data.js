@@ -28,7 +28,7 @@ const pagesData = [
     },
     {
         "filename": "design-500863c7-8bd0-4ead-961b-d25a50b7e8ba.html",
-        "title": "Sandro Kozmanishvili — Visual &amp; Digital"
+        "title": "Sandro Kozmanishvili — Visual & Digital"
     },
     {
         "filename": "design-6bfea31f-c861-42c9-bc90-5d2fcd1424a4.html",
@@ -136,7 +136,7 @@ const pagesData = [
     },
     {
         "filename": "Project Detail_ AX-01 _ Spoormaker _ Partners.html",
-        "title": "Project Detail: AX-01 | Spoormaker &amp; Partners"
+        "title": "Project Detail: AX-01 | Spoormaker & Partners"
     },
     {
         "filename": "sgnl _ Lightweight Observability.html",
@@ -148,7 +148,7 @@ const pagesData = [
     },
     {
         "filename": "Syntax _ Void __ Developer Agency.html",
-        "title": "Syntax &amp; Void // Developer Agency"
+        "title": "Syntax & Void // Developer Agency"
     },
     {
         "filename": "T E R R A I N _ S Y S.html",

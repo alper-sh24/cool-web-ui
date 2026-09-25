@@ -34,3 +34,23 @@ The gallery is ready for GitHub Pages deployment:
 ## Development
 
 The gallery uses Alpine.js for interactivity and follows the "blocky" design language from the source pages.
+
+### Live previews
+
+Each card shows a live, scaled-down iframe of its page (rendered at a 1440×900 viewport).
+To keep the gallery light, previews are driven by visibility:
+
+- an iframe is only created when its card is within ~1 screen of the viewport,
+- loads are queued (max 3 at a time) so fast scrolling doesn't start dozens of pages,
+- iframes that scroll far away are destroyed after a short grace period,
+- all thumbnails are torn down while a page is open full-screen.
+
+Previews can be switched off with the **Live previews** toggle (remembered per browser, and off by default when the browser requests data saving).
+
+### Shortcuts
+
+- `/` focus the filter
+- `←` / `→` previous / next page while previewing
+- `Esc` back to the gallery
+
+Pages are deep-linkable via the URL hash, e.g. `index.html#DitherLab.html`.
