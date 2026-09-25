@@ -1,0 +1,80 @@
+name: Thumbnails
+
+# Renders a static snapshot of every page in /pages and commits it to /thumbnails,
+# then regenerates pages-data.js so the gallery picks the snapshots up.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pages/**'
+      - 'generate-thumbnails.js'
+      - 'generate-pages.js'
+      - 'package-lock.json'
+      - '.github/workflows/thumbnails.yml'
+  pull_request:
+    paths:
+      - 'pages/**'
+      - 'generate-thumbnails.js'
+      - 'generate-pages.js'
+      - 'package-lock.json'
+      - '.github/workflows/thumbnails.yml'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Re-render every page, not just new or changed ones'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thumbnails-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  thumbnails:
+    runs-on: ubuntu-latest
+    # Commits can only be pushed back to branches in this repository, not forks.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - name: Render snapshots
+        id: render
+        # Still commit the pages that did render; the job is failed at the end.
+        continue-on-error: true
+        run: npm run thumbnails -- ${{ inputs.force && '--force' || '' }}
+
+      - name: Regenerate pages-data.js
+        run: npm run pages
+
+      - name: Commit changes
+        run: |
+          git add thumbnails pages-data.js
+          if git diff --cached --quiet; then
+            echo "Snapshots are up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update page thumbnails"
+          git push
+
+      - name: Fail if any page could not be rendered
+        if: steps.render.outcome == 'failure'
+        run: |
+          echo "::error::Some pages failed to render, see the 'Render snapshots' step."
+          exit 1

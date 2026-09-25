@@ -7,8 +7,10 @@ A gallery of UI design experiments and prototypes.
 ```
 /
 ├── index.html              # Main gallery (works with GitHub Pages)
-├── generate-pages.js       # Build script - run after adding new pages
+├── generate-pages.js       # Builds pages-data.js from /pages (+ thumbnails)
+├── generate-thumbnails.js  # Renders a static snapshot of each page (Playwright)
 ├── pages-data.js           # Auto-generated page metadata
+├── thumbnails/             # Auto-generated page snapshots + manifest.json
 └── pages/                  # Individual design HTML files
     ├── Devtool Features.html
     ├── Identity Matrix Visualization.html
@@ -18,11 +20,23 @@ A gallery of UI design experiments and prototypes.
 ## Adding New Pages
 
 1. Add your HTML file to the `/pages/` directory
-2. Run the build script:
-   ```bash
-   node generate-pages.js
-   ```
-3. Commit and push
+2. Commit and push (or open a PR)
+
+The **Thumbnails** GitHub Action renders snapshots for new or changed pages,
+regenerates `pages-data.js`, and commits both back to the branch.
+Run it manually from the Actions tab with **force** to re-render every page.
+
+To build locally instead:
+
+```bash
+npm install
+npx playwright install chromium
+npm run build          # snapshots for new/changed pages + pages-data.js
+npm run thumbnails -- --force            # re-render everything
+npm run thumbnails -- "DitherLab.html"   # re-render specific pages
+```
+
+If you only want to refresh titles without snapshots, `node generate-pages.js` needs no dependencies.
 
 ## GitHub Pages
 
@@ -35,17 +49,12 @@ The gallery is ready for GitHub Pages deployment:
 
 The gallery uses Alpine.js for interactivity and follows the "blocky" design language from the source pages.
 
-### Live previews
+### Previews
 
-Each card shows a live, scaled-down iframe of its page (rendered at a 1440×900 viewport).
-To keep the gallery light, previews are driven by visibility:
-
-- an iframe is only created when its card is within ~1 screen of the viewport,
-- loads are queued (max 3 at a time) so fast scrolling doesn't start dozens of pages,
-- iframes that scroll far away are destroyed after a short grace period,
-- all thumbnails are torn down while a page is open full-screen.
-
-Previews can be switched off with the **Live previews** toggle (remembered per browser, and off by default when the browser requests data saving).
+Each card shows a static snapshot of its page (rendered at a 1440×900 viewport), so the
+gallery itself runs no page code while idle. Hovering a card (or focusing it with the
+keyboard) swaps in a live iframe of the page; only one live preview exists at a time and
+it is destroyed when the pointer leaves. On touch devices a tap opens the page directly.
 
 ### Shortcuts
 
